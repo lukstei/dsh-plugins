@@ -226,7 +226,7 @@ test("orders plain and managed branches by tip committer time with alphabetical 
 				cwd,
 				encoding: "utf8",
 				env: {
-					...process.env,
+					...gitEnv(),
 					GIT_AUTHOR_DATE: "2000-01-01T00:00:00Z",
 					GIT_COMMITTER_DATE: date,
 				},
@@ -269,7 +269,7 @@ test("excludes branches older than 7 days from repository branches", async () =>
 				cwd,
 				encoding: "utf8",
 				env: {
-					...process.env,
+					...gitEnv(),
 					GIT_AUTHOR_DATE: "2000-01-01T00:00:00Z",
 					GIT_COMMITTER_DATE: date,
 				},
