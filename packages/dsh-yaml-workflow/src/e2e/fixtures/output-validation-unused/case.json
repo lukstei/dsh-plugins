@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Output 'unused_var' declared at step 1 is never used in the workflow. All outputs must be used at least once."
+	},
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Output validation error in workflow 'workflow.yaml': Unknown output '{{outputs.nonexistent_data}}' referenced at step 1."
+	}
+}

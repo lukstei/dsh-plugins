@@ -1,0 +1,3 @@
+name: Missing Session ID
+steps:
+  - print: "Will fail on session"

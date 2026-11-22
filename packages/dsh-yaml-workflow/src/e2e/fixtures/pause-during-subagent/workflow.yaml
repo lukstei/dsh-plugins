@@ -1,0 +1,8 @@
+name: "Security Audit Subagent"
+description: "Workflow paused when subagent execution is cancelled"
+steps:
+  - name: "Run Security Audit"
+    prompt: "Scan repository for vulnerabilities"
+    subagent: true
+    output: audit_out
+  - print: "Audit complete: {{outputs.audit_out}}"

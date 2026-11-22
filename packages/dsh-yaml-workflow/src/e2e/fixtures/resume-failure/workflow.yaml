@@ -1,0 +1,5 @@
+name: Resume Failure
+steps:
+  - prompt: "Step 1"
+    gate: "Check gate"
+  - prompt: "Step 2"

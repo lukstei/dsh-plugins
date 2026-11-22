@@ -1,0 +1,12 @@
+name: "Output Shorthand Subagents"
+steps:
+  - name: "Subagent 1"
+    prompt: "Run subagent 1"
+    subagent: true
+    output: out1
+  - name: "Subagent 2"
+    prompt: "Run subagent 2"
+    subagent: true
+    output: out2
+  - name: "Print step"
+    print: "Sub1: {{outputs.out1}}, Sub2: {{outputs.out2}}"

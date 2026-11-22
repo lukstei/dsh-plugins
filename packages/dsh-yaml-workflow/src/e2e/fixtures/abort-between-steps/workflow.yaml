@@ -1,0 +1,4 @@
+name: "Abort Between Steps"
+steps:
+  - prompt: "P1"
+  - prompt: "P2"

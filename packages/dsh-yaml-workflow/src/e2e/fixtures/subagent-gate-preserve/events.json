@@ -1,0 +1,164 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Gated Subagent",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Gated Subagent\",\"args\":{},\"steps\":[{\"kind\":\"subagent\",\"name\":\"Audit\",\"prompt\":\"Run audit\",\"config\":{\"provider\":\"spawn\"},\"gate\":\"Review audit findings\",\"output\":\"audit_findings\"},{\"kind\":\"prompt\",\"name\":\"Fix\",\"prompt\":\"Apply fixes based on {{outputs.audit_findings}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Audit\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"audit_findings\",\"value\":\"Audit findings preserved\",\"outputType\":\"string\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":0,\"status\":\"paused\",\"pauseReason\":\"gate\",\"outputs\":{\"audit_findings\":\"Audit findings preserved\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-0-gate\",\"stepIndex\":0,\"label\":\"Paused at gate: Review audit findings\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-9",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"audit_findings\":\"Audit findings preserved\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-1\",\"stepIndex\":1,\"label\":\"Step 2 of 2: Fix\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-13",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-15",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"audit_findings\":\"Audit findings preserved\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-15",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

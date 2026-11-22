@@ -1,0 +1,5 @@
+name: Resume With Instructions
+steps:
+  - prompt: "Pre-gate step"
+    gate: "Wait for manual check"
+  - prompt: "Post-gate step"

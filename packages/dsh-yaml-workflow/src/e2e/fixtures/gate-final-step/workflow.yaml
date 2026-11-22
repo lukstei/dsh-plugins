@@ -1,0 +1,4 @@
+name: Final Gate
+steps:
+  - prompt: "Only step"
+    gate: "Final approval gate"

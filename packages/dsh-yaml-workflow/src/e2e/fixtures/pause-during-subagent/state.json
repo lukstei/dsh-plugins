@@ -1,0 +1,40 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Security Audit Subagent",
+			"description": "Workflow paused when subagent execution is cancelled",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Run Security Audit",
+					"prompt": "Scan repository for vulnerabilities",
+					"config": {
+						"provider": "spawn"
+					},
+					"output": "audit_out"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Audit complete: {{outputs.audit_out}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "paused",
+			"pauseReason": "interrupted"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow paused at step 1/2. Resume with /wf-resume"
+	}
+}

@@ -1,0 +1,7 @@
+name: "Code Review and Build"
+description: "Workflow interrupted by user stop pauses and resumes current step"
+steps:
+  - name: "Run Tests"
+    prompt: "Run the test suite and verify coverage"
+  - name: "Build"
+    print: "Build completed successfully"

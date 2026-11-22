@@ -1,0 +1,23 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"promptInterruption": {
+			"stepIndex": 0,
+			"error": "inactive context during fiber unload"
+		}
+	},
+	"expectedState": {
+		"status": "paused",
+		"stepIndex": 0,
+		"pauseReason": "interrupted"
+	},
+	"expectedResult": {
+		"kind": "success",
+		"textPattern": "paused"
+	}
+}

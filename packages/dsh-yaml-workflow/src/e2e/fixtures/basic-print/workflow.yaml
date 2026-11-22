@@ -1,0 +1,4 @@
+name: "Basic Print Pipeline"
+steps:
+  - print: "Starting deployment"
+  - print: "Deploy complete"

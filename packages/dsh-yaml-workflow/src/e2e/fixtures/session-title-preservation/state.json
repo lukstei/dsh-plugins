@@ -1,0 +1,29 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "New Title Should Not Overwrite",
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Title check"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (1 steps)"
+	}
+}

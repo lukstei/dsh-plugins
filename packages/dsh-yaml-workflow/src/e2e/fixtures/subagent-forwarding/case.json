@@ -1,0 +1,24 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"outputs": {
+				"Step 1 of 2: Security Review": "Found 0 critical CVEs"
+			}
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 6
+	}
+}

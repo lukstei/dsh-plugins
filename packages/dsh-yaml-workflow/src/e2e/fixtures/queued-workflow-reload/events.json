@@ -1,0 +1,278 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Active Review",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Active Review\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Step 1\",\"prompt\":\"Prepare changes\",\"gate\":\"Approve changes\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-queue-reload-run\"},\"runId\":\"e2e-queue-reload-run\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-queue-reload-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 1: Step 1\",\"kind\":\"success\",\"runId\":\"e2e-queue-reload-run\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":0,\"status\":\"paused\",\"pauseReason\":\"gate\",\"runId\":\"e2e-queue-reload-run\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-5",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-queue-reload-run-0-gate\",\"stepIndex\":0,\"label\":\"Paused at gate: Approve changes\",\"kind\":\"success\",\"runId\":\"e2e-queue-reload-run\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-7",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "first",
+			"name": "wf",
+			"args": "first.yaml",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-request-10",
+			"name": "wf-event",
+			"args": "{\"action\":\"request\",\"rawInput\":\"first.yaml\",\"runId\":\"first\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-request-10",
+			"kind": "success",
+			"text": "Workflow action 'request' recorded"
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "first",
+			"kind": "success",
+			"text": "Workflow queued"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "second",
+			"name": "wf",
+			"args": "second.yaml",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-request-14",
+			"name": "wf-event",
+			"args": "{\"action\":\"request\",\"rawInput\":\"second.yaml\",\"runId\":\"second\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-request-14",
+			"kind": "success",
+			"text": "Workflow action 'request' recorded"
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "second",
+			"kind": "success",
+			"text": "Workflow queued"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-17",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"completed\",\"runId\":\"e2e-queue-reload-run\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-17",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-request-failed-19",
+			"name": "wf-event",
+			"args": "{\"action\":\"request-failed\",\"runId\":\"first\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-request-failed-19",
+			"kind": "success",
+			"text": "Workflow action 'request-failed' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-21",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-request-first-failed\",\"stepIndex\":0,\"label\":\"Queued workflow failed: Failed to parse workflow 'first.yaml': Invalid workflow schema: steps: Workflow must contain at least one step\",\"kind\":\"error\",\"runId\":\"first\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-21",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-23",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"args\":{},\"steps\":[{\"kind\":\"print\",\"name\":\"Step 1\",\"text\":\"Updated second\"}]},\"invocation\":{\"targetPath\":\"second.yaml\",\"rawInput\":\"second.yaml\",\"resolvedArgs\":{},\"runId\":\"second\"},\"runId\":\"second\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-23",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-25",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-second-0\",\"text\":\"Updated second\",\"runId\":\"second\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-25",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-27",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"completed\",\"runId\":\"second\",\"sessionId\":\"e2e-queue-reload\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-27",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

@@ -1,0 +1,5 @@
+name: Terminal Subagent
+steps:
+  - name: Final Audit
+    prompt: "Audit alone"
+    subagent: true

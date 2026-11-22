@@ -1,0 +1,62 @@
+{
+	"paused": {
+		"workflow": {
+			"name": "Production Release Gate",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Prepare release candidate",
+					"gate": "Release manager approval"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Release candidate published"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "e2e-gate-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "paused",
+			"pauseReason": "gate"
+		}
+	},
+	"completed": {
+		"workflow": {
+			"name": "Production Release Gate",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Prepare release candidate",
+					"gate": "Release manager approval"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Release candidate published"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "e2e-gate-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"pauseReason": "gate"
+		}
+	}
+}

@@ -1,0 +1,38 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Abort During Subagent",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Subagent 1",
+					"prompt": "Subagent task",
+					"config": {
+						"provider": "spawn"
+					},
+					"output": "sub_out"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "After subagent {{outputs.sub_out}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow aborted at step 1/2"
+	}
+}

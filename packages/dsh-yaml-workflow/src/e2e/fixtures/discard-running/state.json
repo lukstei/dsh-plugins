@@ -1,0 +1,21 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Running Flow",
+			"steps": []
+		},
+		"invocation": {
+			"targetPath": "flow.yaml",
+			"resolvedArgs": {},
+			"runId": "running-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "running"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Cannot discard an actively running workflow; stop execution first"
+	}
+}

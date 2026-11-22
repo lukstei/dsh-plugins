@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Template validation error in workflow 'workflow.yaml': Unresolved workflow argument: {{args.missingVar}}"
+	}
+}

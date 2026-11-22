@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml unexpected implicit text"
+		}
+	],
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Unexpected implicit instructions"
+	}
+}

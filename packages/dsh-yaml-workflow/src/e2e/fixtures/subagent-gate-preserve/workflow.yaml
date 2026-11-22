@@ -1,0 +1,9 @@
+name: Gated Subagent
+steps:
+  - name: Audit
+    prompt: "Run audit"
+    subagent: true
+    gate: "Review audit findings"
+    output: audit_findings
+  - name: Fix
+    prompt: "Apply fixes based on {{outputs.audit_findings}}"

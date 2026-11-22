@@ -1,0 +1,20 @@
+name: "Subagent Code Review"
+description: "Subagent writes workspace output and pauses at human gate"
+steps:
+  - name: "Prepare Review Spec"
+    prompt: "Generate review specification"
+    outputs:
+      spec_notes:
+        type: file
+        path: SPEC.md
+        base: workspace
+  - name: "Run Subagent Review"
+    prompt: "Perform automated review using {{outputs.spec_notes}}"
+    subagent: true
+    outputs:
+      review_notes:
+        type: file
+        path: REVIEW.md
+        base: workspace
+    gate: "Sign off on code review"
+  - print: "Review notes finalized at {{outputs.review_notes}}"

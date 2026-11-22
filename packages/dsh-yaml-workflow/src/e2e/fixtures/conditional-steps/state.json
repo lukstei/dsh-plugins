@@ -1,0 +1,154 @@
+{
+	"workflow": {
+		"name": "Conditional Steps Workflow",
+		"description": "Verifies bool args and step if condition evaluation",
+		"args": {
+			"bool_def_false": {
+				"type": "bool",
+				"default": "false",
+				"required": false
+			},
+			"bool_def_true": {
+				"type": "bool",
+				"default": "true",
+				"required": false
+			},
+			"flag_true": {
+				"type": "bool",
+				"required": true
+			},
+			"flag_false": {
+				"type": "bool",
+				"required": true
+			},
+			"env": {
+				"type": "choice",
+				"choices": ["staging", "production"],
+				"default": "production",
+				"required": false
+			},
+			"empty_cond": {
+				"type": "string",
+				"default": "",
+				"required": false
+			},
+			"str_other": {
+				"type": "string",
+				"default": "custom",
+				"required": false
+			}
+		},
+		"steps": [
+			{
+				"kind": "print",
+				"name": "Initial Skip",
+				"text": "Should not print",
+				"if": "{{args.bool_def_false}}"
+			},
+			{
+				"kind": "prompt",
+				"name": "Generate Report Output",
+				"prompt": "Generate deployment status",
+				"outputs": {
+					"status_msg": {
+						"type": "string",
+						"description": "Deployment status message"
+					}
+				}
+			},
+			{
+				"kind": "print",
+				"name": "Skip With Outputs",
+				"text": "Should not print",
+				"if": "{{args.flag_false}}"
+			},
+			{
+				"kind": "print",
+				"name": "Empty Condition Skip",
+				"text": "Should not print",
+				"if": "{{args.empty_cond}}"
+			},
+			{
+				"kind": "print",
+				"name": "Direct True Match",
+				"text": "Status: {{outputs.status_msg}}",
+				"if": "{{args.flag_true}}"
+			},
+			{
+				"kind": "print",
+				"name": "Direct False Skipped",
+				"text": "Should not print",
+				"if": "{{args.bool_def_false}}"
+			},
+			{
+				"kind": "print",
+				"name": "Direct Other String Skipped",
+				"text": "Should not print",
+				"if": "{{args.str_other}}"
+			},
+			{
+				"kind": "print",
+				"name": "Cmp Eq Match",
+				"text": "Prod environment",
+				"if": "{{args.env}} == \"production\""
+			},
+			{
+				"kind": "print",
+				"name": "Cmp Eq Mismatch Skipped",
+				"text": "Should not print",
+				"if": "{{args.env}} == \"staging\""
+			},
+			{
+				"kind": "print",
+				"name": "Cmp Neq Match",
+				"text": "Not staging",
+				"if": "{{args.env}} != \"staging\""
+			},
+			{
+				"kind": "print",
+				"name": "Cmp Neq Mismatch Skipped",
+				"text": "Should not print",
+				"if": "{{args.env}} != \"production\""
+			},
+			{
+				"kind": "print",
+				"name": "Negated False Match",
+				"text": "Negated false ran",
+				"if": "!{{args.flag_false}}"
+			},
+			{
+				"kind": "print",
+				"name": "Negated True Skipped",
+				"text": "Should not print",
+				"if": "!{{args.flag_true}}"
+			},
+			{
+				"kind": "print",
+				"name": "Final Step Skipped",
+				"text": "Should not print",
+				"if": "{{args.flag_false}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml flag_true=true flag_false=false",
+		"resolvedArgs": {
+			"bool_def_false": "false",
+			"bool_def_true": "true",
+			"flag_true": "true",
+			"flag_false": "false",
+			"env": "production",
+			"empty_cond": "",
+			"str_other": "custom"
+		},
+		"runId": "e2e-conditional-steps-run"
+	},
+	"state": {
+		"stepIndex": 14,
+		"status": "completed",
+		"outputs": {
+			"status_msg": "all systems green"
+		}
+	}
+}

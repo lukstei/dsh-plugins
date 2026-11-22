@@ -1,0 +1,126 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Smells Scan Workflow",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Smells Scan Workflow\",\"args\":{},\"steps\":[{\"kind\":\"subagent\",\"name\":\"Scan\",\"prompt\":\"Scan codebase\",\"config\":{\"provider\":\"spawn\"},\"outputs\":{\"findings\":{\"type\":\"string\",\"description\":\"Antipattern findings\"}}},{\"kind\":\"print\",\"name\":\"Step 2\",\"text\":\"Triage findings: {{outputs.findings}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Scan\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"findings\",\"value\":\"F1 [AP1] index.ts:10 - Derivable state\",\"outputType\":\"string\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"findings\":\"F1 [AP1] index.ts:10 - Derivable state\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-test-session-run-1\",\"text\":\"Triage findings: F1 [AP1] index.ts:10 - Derivable state\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-9",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"findings\":\"F1 [AP1] index.ts:10 - Derivable state\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

@@ -1,0 +1,145 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Multi-Output Mixed Step",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Multi-Output Mixed Step\",\"description\":\"Step produces both a workspace file and a string output\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Generate Report & Metric\",\"prompt\":\"Generate the audit report and return security rating\",\"outputs\":{\"report_file\":{\"type\":\"file\",\"path\":\"report.md\",\"base\":\"workspace\"},\"security_score\":{\"type\":\"string\",\"description\":\"Calculated security score\"}}},{\"kind\":\"print\",\"name\":\"Step 2\",\"text\":\"Audit finished: {{outputs.report_file}} with score {{outputs.security_score}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Generate Report & Metric\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"security_score\",\"value\":\"98/100\",\"outputType\":\"string\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"report_file\",\"value\":\"report.md\",\"outputType\":\"file\",\"base\":\"workspace\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-7",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"report_file\":\"report.md\",\"security_score\":\"98/100\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-9",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-test-session-run-1\",\"text\":\"Audit finished: report.md with score 98/100\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-11",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"report_file\":\"report.md\",\"security_score\":\"98/100\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-13",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

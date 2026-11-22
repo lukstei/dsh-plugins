@@ -1,0 +1,24 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"structured": {
+				"findings": "F1 [AP1] index.ts:10 - Derivable state"
+			}
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"outputs": {
+			"findings": "F1 [AP1] index.ts:10 - Derivable state"
+		}
+	},
+	"expectedResult": {
+		"kind": "success"
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"pauseAtStepIndex": 0
+		}
+	},
+	"expectedState": {
+		"status": "paused",
+		"stepIndex": 0,
+		"pauseReason": "interrupted"
+	},
+	"expectedResult": {
+		"kind": "success",
+		"textPattern": "Workflow paused at step 1/2"
+	}
+}

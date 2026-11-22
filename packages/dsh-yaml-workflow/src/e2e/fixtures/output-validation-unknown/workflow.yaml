@@ -1,0 +1,5 @@
+name: "Unknown Output Reference"
+description: "Step references an output that is never declared anywhere"
+steps:
+  - name: "Step 1"
+    prompt: "Process {{outputs.nonexistent_data}}"

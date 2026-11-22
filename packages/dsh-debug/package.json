@@ -1,0 +1,57 @@
+{
+	"name": "@lukstei/dsh-debug",
+	"version": "0.2.2-rc.5.1",
+	"description": "Debug commands and transcript tools for DSH",
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dsh": {
+		"bundle": {
+			"patch": "./cordis.patch.yml"
+		}
+	},
+	"scripts": {
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "node --test --test-reporter=dot",
+		"verify": "pnpm --silent run check && pnpm --silent run typecheck && pnpm --silent run test"
+	},
+	"peerDependencies": {
+		"@deepseek-ai/cordis": "*",
+		"@deepseek-ai/dsh-commands": "*",
+		"@deepseek-ai/dsh-session": "*",
+		"@deepseek-ai/schemastery": "*"
+	},
+	"devDependencies": {
+		"@deepseek-ai/cordis": "catalog:",
+		"@deepseek-ai/dsh-commands": "catalog:",
+		"@deepseek-ai/dsh-session": "catalog:",
+		"@deepseek-ai/schemastery": "catalog:",
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	},
+	"files": [
+		"src",
+		"README.md",
+		"cordis.patch.yml",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"types": "./src/index.ts",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/dsh-debug"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

@@ -1,0 +1,8 @@
+name: "Two Stage Deployment"
+description: "Workflow paused at gate then paused before resumption begins"
+steps:
+  - name: "Stage 1"
+    prompt: "Deploy to staging"
+    gate: "Manual approval for staging"
+  - name: "Stage 2"
+    print: "Deploy to production"

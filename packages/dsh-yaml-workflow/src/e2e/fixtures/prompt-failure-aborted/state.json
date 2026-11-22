@@ -1,0 +1,29 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Prompt Failure Aborted",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Prompt"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow aborted at step 1/1"
+	}
+}

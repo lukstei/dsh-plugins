@@ -1,0 +1,27 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-output-list-bounds",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"list": {
+					"name": "languages",
+					"value": ["typescript", "rust"]
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2,
+		"outputs": {
+			"languages": ["typescript", "rust"]
+		}
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 6
+	}
+}

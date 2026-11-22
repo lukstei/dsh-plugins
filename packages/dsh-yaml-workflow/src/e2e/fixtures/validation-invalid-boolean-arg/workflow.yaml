@@ -1,0 +1,6 @@
+name: "Boolean Arg Validation"
+args:
+  active:
+    type: bool
+steps:
+  - print: "Active: {{args.active}}"

@@ -1,0 +1,15 @@
+name: "Foreach Subagent Empty List"
+description: "Demonstrates dynamic subagent step gracefully skipping when the input list is empty"
+steps:
+  - name: "Find Pending Items"
+    prompt: "Check for pending items"
+    outputs:
+      pending:
+        type: list
+        description: "Pending items list"
+  - name: "Process Item"
+    subagent: true
+    foreach: "{{outputs.pending}}"
+    prompt: "Process {{item}}"
+    output: processed
+  - print: "Done processing: {{outputs.processed}}"

@@ -1,0 +1,39 @@
+{
+	"workflow": {
+		"name": "List Output Retry Recovery",
+		"description": "Tests recovery when agent provides invalid list output on attempt 1, correcting on attempt 2",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Generate Clusters",
+				"prompt": "Provide at least two cluster identifiers",
+				"outputs": {
+					"clusters": {
+						"type": "list",
+						"description": "List of cluster identifiers",
+						"min": 2
+					}
+				}
+			},
+			{
+				"kind": "print",
+				"name": "Step 2",
+				"text": "Configured clusters:\n{{outputs.clusters}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-output-list-retry-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed",
+		"outputs": {
+			"clusters": ["cluster-east", "cluster-west"]
+		}
+	}
+}

@@ -1,0 +1,5 @@
+name: Discard Paused Flow
+steps:
+  - prompt: "Step 1"
+    gate: "Gate check"
+  - prompt: "Step 2"

@@ -1,0 +1,30 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Prompt Failure",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Prompt error"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted",
+			"error": "Simulated prompt crash"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow execution failed at step 1/1: Simulated prompt crash"
+	}
+}

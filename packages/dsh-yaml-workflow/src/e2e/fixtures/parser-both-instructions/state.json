@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Argument error in workflow 'workflow.yaml': Cannot specify both explicit 'instructions' argument and implicit trailing instructions"
+	}
+}

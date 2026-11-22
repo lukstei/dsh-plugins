@@ -1,0 +1,29 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Busy Agent Queue",
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Ran after busy"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (1 steps)"
+	}
+}

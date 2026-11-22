@@ -1,0 +1,53 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-foreach-multi-out",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"list": {
+					"name": "services",
+					"value": ["gateway", "payment"]
+				}
+			}
+		],
+		"subagent": {
+			"structuredOutputs": {
+				"0": {
+					"status": "passed",
+					"score": "95"
+				},
+				"1": {
+					"status": "warning",
+					"score": "75"
+				}
+			}
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 3,
+		"outputs": {
+			"services": ["gateway", "payment"],
+			"status": ["passed", "warning"],
+			"score": ["95", "75"]
+		}
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"output",
+			"state",
+			"step",
+			"step",
+			"output",
+			"output",
+			"state",
+			"print",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 11
+	}
+}

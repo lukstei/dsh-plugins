@@ -1,0 +1,48 @@
+{
+	"workflow": {
+		"name": "Parametrized Rollout [{{args.env}}]",
+		"args": {
+			"env": {
+				"type": "choice",
+				"choices": ["staging", "production"],
+				"default": "staging",
+				"required": false
+			},
+			"version": {
+				"type": "string",
+				"required": true
+			},
+			"instructions": {
+				"type": "string",
+				"default": "standard rollout",
+				"required": false
+			}
+		},
+		"steps": [
+			{
+				"kind": "print",
+				"name": "Announce",
+				"text": "Deploying {{args.version}} to {{args.env}}"
+			},
+			{
+				"kind": "prompt",
+				"name": "Execute",
+				"prompt": "Run release for {{args.version}}: {{args.instructions}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml version=v2.0.0 env=production run DB migrations first",
+		"resolvedArgs": {
+			"env": "production",
+			"version": "v2.0.0",
+			"instructions": "run DB migrations first"
+		},
+		"runId": "e2e-parameterized-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed"
+	}
+}

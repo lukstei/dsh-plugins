@@ -1,0 +1,14 @@
+name: "Multi Output Subagent Failure"
+steps:
+  - name: "Analyze"
+    prompt: "Analyze"
+    subagent: true
+    outputs:
+      summary:
+        type: string
+      report:
+        type: file
+        path: "expected.md"
+        base: workspace
+  - name: "Consume"
+    print: "Summary: {{outputs.summary}}, Report: {{outputs.report}}"

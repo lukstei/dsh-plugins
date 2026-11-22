@@ -1,0 +1,35 @@
+name: publish
+on:
+  push:
+    tags: ["v*"]
+concurrency:
+  group: publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run verify
+      - name: Publish to npm
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # pre-release versions (contain "-") must not land on `latest`
+          case "$TAG" in *-*) DIST_TAG=next ;; *) DIST_TAG=latest ;; esac
+          pnpm -r publish --access public --provenance --no-git-checks --tag "$DIST_TAG"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --generate-notes --title "$TAG" --prerelease

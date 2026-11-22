@@ -1,0 +1,116 @@
+{
+	"paused": {
+		"workflow": {
+			"name": "Subagent Code Review",
+			"description": "Subagent writes workspace output and pauses at human gate",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Prepare Review Spec",
+					"prompt": "Generate review specification",
+					"outputs": {
+						"spec_notes": {
+							"type": "file",
+							"path": "SPEC.md",
+							"base": "workspace"
+						}
+					}
+				},
+				{
+					"kind": "subagent",
+					"name": "Run Subagent Review",
+					"prompt": "Perform automated review using {{outputs.spec_notes}}",
+					"config": {
+						"provider": "spawn"
+					},
+					"gate": "Sign off on code review",
+					"outputs": {
+						"review_notes": {
+							"type": "file",
+							"path": "REVIEW.md",
+							"base": "workspace"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Step 3",
+					"text": "Review notes finalized at {{outputs.review_notes}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "e2e-subagent-gate-out-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "paused",
+			"outputs": {
+				"spec_notes": "SPEC.md",
+				"review_notes": "REVIEW.md"
+			},
+			"pauseReason": "gate"
+		}
+	},
+	"completed": {
+		"workflow": {
+			"name": "Subagent Code Review",
+			"description": "Subagent writes workspace output and pauses at human gate",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Prepare Review Spec",
+					"prompt": "Generate review specification",
+					"outputs": {
+						"spec_notes": {
+							"type": "file",
+							"path": "SPEC.md",
+							"base": "workspace"
+						}
+					}
+				},
+				{
+					"kind": "subagent",
+					"name": "Run Subagent Review",
+					"prompt": "Perform automated review using {{outputs.spec_notes}}",
+					"config": {
+						"provider": "spawn"
+					},
+					"gate": "Sign off on code review",
+					"outputs": {
+						"review_notes": {
+							"type": "file",
+							"path": "REVIEW.md",
+							"base": "workspace"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Step 3",
+					"text": "Review notes finalized at {{outputs.review_notes}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "e2e-subagent-gate-out-run"
+		},
+		"state": {
+			"stepIndex": 3,
+			"status": "completed",
+			"outputs": {
+				"spec_notes": "SPEC.md",
+				"review_notes": "REVIEW.md"
+			},
+			"pauseReason": "gate"
+		}
+	}
+}

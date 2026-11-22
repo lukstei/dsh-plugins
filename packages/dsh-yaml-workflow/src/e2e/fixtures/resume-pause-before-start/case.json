@@ -1,0 +1,22 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume",
+			"pauseBeforeStart": true
+		}
+	],
+	"expectedState": {
+		"status": "paused",
+		"stepIndex": 1,
+		"pauseReason": "interrupted"
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 5
+	}
+}

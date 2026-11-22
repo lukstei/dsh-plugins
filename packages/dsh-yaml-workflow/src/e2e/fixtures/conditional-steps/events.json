@@ -1,0 +1,411 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Conditional Steps Workflow",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Conditional Steps Workflow\",\"description\":\"Verifies bool args and step if condition evaluation\",\"args\":{\"bool_def_false\":{\"type\":\"bool\",\"default\":\"false\",\"required\":false},\"bool_def_true\":{\"type\":\"bool\",\"default\":\"true\",\"required\":false},\"flag_true\":{\"type\":\"bool\",\"required\":true},\"flag_false\":{\"type\":\"bool\",\"required\":true},\"env\":{\"type\":\"choice\",\"choices\":[\"staging\",\"production\"],\"default\":\"production\",\"required\":false},\"empty_cond\":{\"type\":\"string\",\"default\":\"\",\"required\":false},\"str_other\":{\"type\":\"string\",\"default\":\"custom\",\"required\":false}},\"steps\":[{\"kind\":\"print\",\"name\":\"Initial Skip\",\"text\":\"Should not print\",\"if\":\"{{args.bool_def_false}}\"},{\"kind\":\"prompt\",\"name\":\"Generate Report Output\",\"prompt\":\"Generate deployment status\",\"outputs\":{\"status_msg\":{\"type\":\"string\",\"description\":\"Deployment status message\"}}},{\"kind\":\"print\",\"name\":\"Skip With Outputs\",\"text\":\"Should not print\",\"if\":\"{{args.flag_false}}\"},{\"kind\":\"print\",\"name\":\"Empty Condition Skip\",\"text\":\"Should not print\",\"if\":\"{{args.empty_cond}}\"},{\"kind\":\"print\",\"name\":\"Direct True Match\",\"text\":\"Status: {{outputs.status_msg}}\",\"if\":\"{{args.flag_true}}\"},{\"kind\":\"print\",\"name\":\"Direct False Skipped\",\"text\":\"Should not print\",\"if\":\"{{args.bool_def_false}}\"},{\"kind\":\"print\",\"name\":\"Direct Other String Skipped\",\"text\":\"Should not print\",\"if\":\"{{args.str_other}}\"},{\"kind\":\"print\",\"name\":\"Cmp Eq Match\",\"text\":\"Prod environment\",\"if\":\"{{args.env}} == \\\"production\\\"\"},{\"kind\":\"print\",\"name\":\"Cmp Eq Mismatch Skipped\",\"text\":\"Should not print\",\"if\":\"{{args.env}} == \\\"staging\\\"\"},{\"kind\":\"print\",\"name\":\"Cmp Neq Match\",\"text\":\"Not staging\",\"if\":\"{{args.env}} != \\\"staging\\\"\"},{\"kind\":\"print\",\"name\":\"Cmp Neq Mismatch Skipped\",\"text\":\"Should not print\",\"if\":\"{{args.env}} != \\\"production\\\"\"},{\"kind\":\"print\",\"name\":\"Negated False Match\",\"text\":\"Negated false ran\",\"if\":\"!{{args.flag_false}}\"},{\"kind\":\"print\",\"name\":\"Negated True Skipped\",\"text\":\"Should not print\",\"if\":\"!{{args.flag_true}}\"},{\"kind\":\"print\",\"name\":\"Final Step Skipped\",\"text\":\"Should not print\",\"if\":\"{{args.flag_false}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml flag_true=true flag_false=false\",\"resolvedArgs\":{\"bool_def_false\":\"false\",\"bool_def_true\":\"true\",\"flag_true\":\"true\",\"flag_false\":\"false\",\"env\":\"production\",\"empty_cond\":\"\",\"str_other\":\"custom\"},\"runId\":\"e2e-conditional-steps-run\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-3",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-conditional-steps-run-1\",\"stepIndex\":1,\"label\":\"Step 2 of 14: Generate Report Output\",\"kind\":\"success\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-5",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":1,\"name\":\"status_msg\",\"value\":\"all systems green\",\"outputType\":\"string\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-7",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-9",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":3,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":4,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-13",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-15",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-conditional-steps-run-4\",\"text\":\"Status: all systems green\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-15",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-17",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":5,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-17",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-19",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":6,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-19",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-21",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":7,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-21",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-23",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-conditional-steps-run-7\",\"text\":\"Prod environment\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-23",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-25",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":8,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-25",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-27",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":9,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-27",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-29",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-conditional-steps-run-9\",\"text\":\"Not staging\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-29",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-31",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":10,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-31",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-33",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":11,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-33",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-35",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-conditional-steps-run-11\",\"text\":\"Negated false ran\",\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-35",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-37",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":12,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-37",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-39",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":13,\"status\":\"running\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-39",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-41",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":14,\"status\":\"completed\",\"outputs\":{\"status_msg\":\"all systems green\"},\"runId\":\"e2e-conditional-steps-run\",\"sessionId\":\"e2e-conditional-steps\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-41",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

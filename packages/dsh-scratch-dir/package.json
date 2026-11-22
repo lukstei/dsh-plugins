@@ -1,0 +1,59 @@
+{
+	"name": "@lukstei/dsh-scratch-dir",
+	"version": "0.2.2-rc.5.1",
+	"description": "Scratch directory provisioner for DSH sessions",
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dsh": {
+		"bundle": {
+			"patch": "./cordis.patch.yml"
+		}
+	},
+	"scripts": {
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "node --experimental-test-module-mocks --test --test-reporter=dot",
+		"verify": "pnpm --silent run check && pnpm --silent run typecheck && pnpm --silent run test"
+	},
+	"peerDependencies": {
+		"@deepseek-ai/cordis": "*",
+		"@deepseek-ai/dsh-agent": "*",
+		"@deepseek-ai/dsh-system-prompt": "*",
+		"@deepseek-ai/dsh-working-directory": "*"
+	},
+	"devDependencies": {
+		"@deepseek-ai/cordis": "catalog:",
+		"@deepseek-ai/dsh-agent": "catalog:",
+		"@deepseek-ai/dsh-scope": "catalog:",
+		"@deepseek-ai/dsh-session": "catalog:",
+		"@deepseek-ai/dsh-system-prompt": "catalog:",
+		"@deepseek-ai/dsh-working-directory": "catalog:",
+		"@types/node": "catalog:",
+		"typescript": "catalog:"
+	},
+	"files": [
+		"src",
+		"README.md",
+		"cordis.patch.yml",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"types": "./src/index.ts",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/dsh-scratch-dir"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

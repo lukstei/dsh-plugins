@@ -1,0 +1,43 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Gated Subagent",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Audit",
+					"prompt": "Run audit",
+					"config": {
+						"provider": "spawn"
+					},
+					"gate": "Review audit findings",
+					"output": "audit_findings"
+				},
+				{
+					"kind": "prompt",
+					"name": "Fix",
+					"prompt": "Apply fixes based on {{outputs.audit_findings}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"audit_findings": "Audit findings preserved"
+			},
+			"pauseReason": "gate"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"workflow": {
+		"name": "Code Audit & Scratch Report",
+		"description": "Generates code audit in scratch directory and consumes path in next step",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Generate Audit Report",
+				"prompt": "Scan codebase and generate report",
+				"outputs": {
+					"audit_report": {
+						"type": "file",
+						"path": "audit.md",
+						"base": "scratch"
+					}
+				}
+			},
+			{
+				"kind": "prompt",
+				"name": "Publish Audit",
+				"prompt": "Publish findings from {{outputs.audit_report}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-output-scratch-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed",
+		"outputs": {
+			"audit_report": ".agents/scratch/e2e-output-scratch/audit.md"
+		}
+	}
+}

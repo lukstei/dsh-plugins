@@ -1,0 +1,4 @@
+- insert:
+    - id: dsh-workflow-runner
+      name: '@lukstei/dsh-yaml-workflow'
+      config: {}

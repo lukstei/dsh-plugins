@@ -1,0 +1,10 @@
+name: "Smells Scan Workflow"
+steps:
+  - name: "Scan"
+    prompt: "Scan codebase"
+    subagent: true
+    outputs:
+      findings:
+        type: string
+        description: "Antipattern findings"
+  - print: "Triage findings: {{outputs.findings}}"

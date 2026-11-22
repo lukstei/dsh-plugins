@@ -1,0 +1,40 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"file": {
+					"path": "report.md",
+					"content": "# Audit Report\nZero critical findings.\n",
+					"base": "workspace"
+				}
+			},
+			{
+				"stepIndex": 0,
+				"string": {
+					"name": "security_score",
+					"value": "98/100"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2,
+		"outputs": {
+			"report_file": "report.md",
+			"security_score": "98/100"
+		}
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "output", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 7
+	}
+}

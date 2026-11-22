@@ -1,0 +1,14 @@
+name: "Duplicate Output Workflow"
+description: "Workflow declaring identical output names across steps"
+steps:
+  - name: "Step A"
+    prompt: "Do A"
+    outputs:
+      token:
+        type: string
+  - name: "Step B"
+    prompt: "Do B"
+    outputs:
+      token:
+        type: file
+        path: token.txt

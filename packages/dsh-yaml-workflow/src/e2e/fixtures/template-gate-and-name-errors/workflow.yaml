@@ -1,0 +1,4 @@
+name: "Workflow {{args.badNameVar}}"
+steps:
+  - prompt: "Step"
+    gate: "Gate {{args.badGateVar}}"

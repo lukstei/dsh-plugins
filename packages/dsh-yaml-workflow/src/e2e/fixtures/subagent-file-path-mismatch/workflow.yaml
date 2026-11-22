@@ -1,0 +1,12 @@
+name: "File Path Mismatch"
+steps:
+  - name: "Generate"
+    prompt: "Generate report"
+    subagent: true
+    outputs:
+      report:
+        type: file
+        path: "REPORT.md"
+        base: workspace
+  - name: "Consume"
+    print: "Report: {{outputs.report}}"

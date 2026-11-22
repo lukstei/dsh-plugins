@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "print", "state"],
+		"noErrors": true,
+		"commandCount": 3
+	}
+}

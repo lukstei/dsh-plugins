@@ -1,0 +1,4 @@
+name: Active Review
+steps:
+  - prompt: Prepare changes
+    gate: Approve changes

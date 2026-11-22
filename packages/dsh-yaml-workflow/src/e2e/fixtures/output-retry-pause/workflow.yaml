@@ -1,0 +1,12 @@
+name: "Generate Release Notes"
+description: "Workflow interrupted during output retry pauses on current step"
+steps:
+  - name: "Write Release Notes"
+    prompt: "Generate the release notes file"
+    outputs:
+      release_notes:
+        type: file
+        path: RELEASE_NOTES.md
+        base: scratch
+  - name: "Consume"
+    print: "Notes: {{outputs.release_notes}}"

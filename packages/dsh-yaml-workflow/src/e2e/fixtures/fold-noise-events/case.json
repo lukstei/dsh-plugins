@@ -1,0 +1,77 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"initialEvents": [
+			{
+				"type": "command/run"
+			},
+			{
+				"type": "command/run",
+				"data": 42
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf",
+					"args": " review"
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": 123
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": "{\"action\":\"state\"}"
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": "{\"action\":\"init\"}"
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "other-plugin",
+					"args": "{}"
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": "invalid-json {"
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": "{\"action\":\"other-action\"}"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "print", "state"],
+		"noErrors": true,
+		"commandCount": 3
+	}
+}

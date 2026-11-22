@@ -1,0 +1,107 @@
+{
+	"name": "@lukstei/dsh-schedule-script",
+	"version": "0.2.2-rc.5.1",
+	"description": "Background script executor and prompt loop for DSH",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./dist/index.js"
+		},
+		"./client": "./dist/client.js",
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"src",
+		"dist",
+		"README.md",
+		"cordis.patch.yml",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"scripts": {
+		"build": "tsdown --config tsdown.config.ts --logLevel error",
+		"dev": "tsdown --config tsdown.config.ts --watch",
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run --reporter=minimal",
+		"ladle": "ladle serve",
+		"ladle:build": "mkdir -p build && ladle build",
+		"verify": "pnpm --silent run check && pnpm --silent run build && pnpm --silent run typecheck && pnpm --silent run test",
+		"prepack": "pnpm run build"
+	},
+	"dsh": {
+		"bundle": {
+			"patch": "./cordis.patch.yml"
+		},
+		"client": {
+			"platform": "web",
+			"immediately": true,
+			"inject": [
+				"@deepseek-ai/dsh-client-ui-slots",
+				"@deepseek-ai/dsh-client-ui-conversation",
+				"@deepseek-ai/dsh-client-ui-chat",
+				"@deepseek-ai/dsh-api-remotes"
+			]
+		}
+	},
+	"peerDependencies": {
+		"@deepseek-ai/cordis": "*",
+		"@deepseek-ai/dsh-agent": "*",
+		"@deepseek-ai/dsh-api-remotes": "*",
+		"@deepseek-ai/dsh-client-ui-chat": "*",
+		"@deepseek-ai/dsh-client-ui-conversation": "*",
+		"@deepseek-ai/dsh-client-ui-primitives": "*",
+		"@deepseek-ai/dsh-client-ui-renderer": "*",
+		"@deepseek-ai/dsh-commands": "*",
+		"@deepseek-ai/dsh-schedule": "*",
+		"@deepseek-ai/dsh-session": "*",
+		"@deepseek-ai/dsh-session-projection": "*",
+		"@deepseek-ai/dsh-tools": "*",
+		"react": "*",
+		"react-dom": "*",
+		"zod": "*"
+	},
+	"devDependencies": {
+		"@deepseek-ai/cordis": "catalog:",
+		"@deepseek-ai/dsh-agent": "catalog:",
+		"@deepseek-ai/dsh-api-remotes": "catalog:",
+		"@deepseek-ai/dsh-client-ui-chat": "catalog:",
+		"@deepseek-ai/dsh-client-ui-conversation": "catalog:",
+		"@deepseek-ai/dsh-client-ui-primitives": "catalog:",
+		"@deepseek-ai/dsh-client-ui-renderer": "catalog:",
+		"@deepseek-ai/dsh-client-ui-slots": "catalog:",
+		"@deepseek-ai/dsh-commands": "catalog:",
+		"@deepseek-ai/dsh-schedule": "catalog:",
+		"@deepseek-ai/dsh-session": "catalog:",
+		"@deepseek-ai/dsh-session-projection": "catalog:",
+		"@deepseek-ai/dsh-tools": "catalog:",
+		"@ladle/react": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"happy-dom": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"zod": "catalog:"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/dsh-schedule-script"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

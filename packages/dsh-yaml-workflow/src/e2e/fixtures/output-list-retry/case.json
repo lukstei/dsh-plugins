@@ -1,0 +1,36 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-output-list-retry",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"attempt": 1,
+				"list": {
+					"name": "clusters",
+					"value": ["single-cluster"]
+				}
+			},
+			{
+				"stepIndex": 0,
+				"attempt": 2,
+				"list": {
+					"name": "clusters",
+					"value": ["cluster-east", "cluster-west"]
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2,
+		"outputs": {
+			"clusters": ["cluster-east", "cluster-west"]
+		}
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "output", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 7
+	}
+}

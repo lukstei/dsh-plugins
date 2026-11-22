@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml env=invalid"
+		}
+	],
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Invalid value 'invalid' for argument 'env'"
+	}
+}

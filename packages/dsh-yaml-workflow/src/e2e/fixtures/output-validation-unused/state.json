@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Output validation error in workflow 'workflow.yaml': Output 'unused_var' declared at step 1 is never used in the workflow. All outputs must be used at least once."
+	}
+}

@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Output validation error in workflow 'workflow.yaml': Output '{{outputs.invalid}}' referenced in workflow name before any step execution."
+	}
+}

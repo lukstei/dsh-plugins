@@ -1,0 +1,7 @@
+name: Optional Arg Flow
+args:
+  optionalArg:
+    type: string
+    required: false
+steps:
+  - print: "Done"

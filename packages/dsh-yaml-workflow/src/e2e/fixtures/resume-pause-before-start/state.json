@@ -1,0 +1,37 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Two Stage Deployment",
+			"description": "Workflow paused at gate then paused before resumption begins",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Stage 1",
+					"prompt": "Deploy to staging",
+					"gate": "Manual approval for staging"
+				},
+				{
+					"kind": "print",
+					"name": "Stage 2",
+					"text": "Deploy to production"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "paused",
+			"pauseReason": "interrupted"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow paused at step 2/2. Resume with /wf-resume"
+	}
+}

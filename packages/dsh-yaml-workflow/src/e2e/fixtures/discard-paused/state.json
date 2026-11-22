@@ -1,0 +1,36 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Discard Paused Flow",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Step 1",
+					"gate": "Gate check"
+				},
+				{
+					"kind": "prompt",
+					"name": "Step 2",
+					"prompt": "Step 2"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted",
+			"pauseReason": "gate"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow discarded at step 1/2"
+	}
+}

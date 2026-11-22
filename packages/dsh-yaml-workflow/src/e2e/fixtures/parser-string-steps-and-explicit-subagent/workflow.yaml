@@ -1,0 +1,12 @@
+name: String Step Flow
+description: "Demonstrates string steps and subagents"
+steps:
+  - "Simple prompt string"
+  - name: Configured Subagent
+    prompt: "Scan repo"
+    subagent:
+      provider: fork
+      preset: reviewer
+      model: fast
+    output: scan_out
+  - gate: "Gate alone step {{outputs.scan_out}}"

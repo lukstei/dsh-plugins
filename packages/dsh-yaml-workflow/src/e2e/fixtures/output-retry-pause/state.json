@@ -1,0 +1,43 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Generate Release Notes",
+			"description": "Workflow interrupted during output retry pauses on current step",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Write Release Notes",
+					"prompt": "Generate the release notes file",
+					"outputs": {
+						"release_notes": {
+							"type": "file",
+							"path": "RELEASE_NOTES.md",
+							"base": "scratch"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Consume",
+					"text": "Notes: {{outputs.release_notes}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "paused",
+			"pauseReason": "interrupted"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow paused at step 1/2. Resume with /wf-resume"
+	}
+}

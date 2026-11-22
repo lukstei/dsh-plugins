@@ -1,0 +1,19 @@
+- insert:
+    - id: client-pwa
+      name: '@lukstei/dsh-client-pwa'
+      config:
+        auth:
+          userHeader: 'tailscale-user-login'
+          trustedCidrs:
+            - '127.0.0.1'
+            - '::1'
+            - '100.64.0.0/10'
+            - 'fd7a:115c:a1e0::/48'
+          authRoutes:
+            - '/login'
+            - '/auth/tailscale'
+            - '/auto-login'
+          loginRedirectPath: '/login'
+        pwa:
+          pathPrefixes:
+            - '/tsctl'

@@ -1,0 +1,49 @@
+{
+	"workflow": {
+		"name": "Foreach Subagent Empty List",
+		"description": "Demonstrates dynamic subagent step gracefully skipping when the input list is empty",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Find Pending Items",
+				"prompt": "Check for pending items",
+				"outputs": {
+					"pending": {
+						"type": "list",
+						"description": "Pending items list"
+					}
+				}
+			},
+			{
+				"kind": "subagent",
+				"name": "Process Item",
+				"prompt": "Process {{item}}",
+				"config": {
+					"provider": "spawn"
+				},
+				"foreach": "{{outputs.pending}}",
+				"output": "processed"
+			},
+			{
+				"kind": "print",
+				"name": "Step 3",
+				"text": "Done processing: {{outputs.processed}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-foreach-empty-run"
+	},
+	"state": {
+		"stepIndex": 3,
+		"status": "completed",
+		"outputs": {
+			"pending": [],
+			"processed": []
+		}
+	}
+}

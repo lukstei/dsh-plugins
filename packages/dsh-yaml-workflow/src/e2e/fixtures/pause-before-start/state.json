@@ -1,0 +1,31 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Deploy Pipeline",
+			"description": "Workflow paused before execution begins",
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Build Artifact",
+					"text": "Building application artifact"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "paused",
+			"pauseReason": "interrupted"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow paused at step 1/1. Resume with /wf-resume"
+	}
+}

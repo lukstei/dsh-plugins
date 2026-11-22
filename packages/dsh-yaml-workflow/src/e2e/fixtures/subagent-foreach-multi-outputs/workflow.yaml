@@ -1,0 +1,21 @@
+name: "Foreach Subagent Multi Outputs"
+description: "Demonstrates dynamic subagents spawned via foreach with structured outputs lifted into lists"
+steps:
+  - name: "Identify Services"
+    prompt: "List candidate microservices"
+    outputs:
+      services:
+        type: list
+        description: "Discovered microservices"
+  - name: "Audit Service"
+    subagent: true
+    foreach: "{{outputs.services}}"
+    prompt: "Audit security and performance of {{item}}"
+    outputs:
+      status:
+        type: string
+        description: "Audit status"
+      score:
+        type: string
+        description: "Audit numerical score"
+  - print: "Audit results for {{outputs.services}}:\nStatuses:\n{{outputs.status}}\nScores:\n{{outputs.score}}"

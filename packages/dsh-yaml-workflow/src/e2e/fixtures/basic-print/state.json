@@ -1,0 +1,28 @@
+{
+	"workflow": {
+		"name": "Basic Print Pipeline",
+		"args": {},
+		"steps": [
+			{
+				"kind": "print",
+				"name": "Step 1",
+				"text": "Starting deployment"
+			},
+			{
+				"kind": "print",
+				"name": "Step 2",
+				"text": "Deploy complete"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-basic-print-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed"
+	}
+}

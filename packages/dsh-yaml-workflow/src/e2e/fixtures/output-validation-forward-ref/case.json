@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "referenced at step 1 before it is declared at step 2"
+	}
+}

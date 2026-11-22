@@ -1,0 +1,10 @@
+name: "Failing Output Generation"
+description: "Agent fails to provide required string output across all 3 retry attempts"
+steps:
+  - name: "Required Signature"
+    prompt: "Sign security payload"
+    outputs:
+      signature:
+        type: string
+  - name: "Consume"
+    print: "Signature: {{outputs.signature}}"

@@ -1,0 +1,29 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Completed Flow",
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Done"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow has already completed"
+	}
+}

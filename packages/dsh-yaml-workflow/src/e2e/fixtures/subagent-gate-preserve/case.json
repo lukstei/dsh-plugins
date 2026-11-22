@@ -1,0 +1,36 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"outputs": {
+				"Step 1 of 2: Audit": "Audit findings preserved"
+			}
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"output",
+			"state",
+			"step",
+			"state",
+			"step",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 8
+	}
+}

@@ -1,0 +1,5 @@
+name: "Production Release Gate"
+steps:
+  - prompt: "Prepare release candidate"
+    gate: "Release manager approval"
+  - print: "Release candidate published"

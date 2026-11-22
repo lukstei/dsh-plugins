@@ -1,0 +1,112 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders expanded Markdown result: empty workflow list 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="completed"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-list</span></div><span class="dsh-wf-badge-success">Done</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="dsh-wf-markdown-body"><div data-markdown=""></div></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "### Local Workflows
+*(No workflows found)*",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders expanded Markdown result: missing target 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="aborted"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-validate</span></div><span class="dsh-wf-badge-aborted">Failed</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="dsh-wf-markdown-body"><div data-markdown=""></div></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "    Usage: /wf-validate <workflow.yaml> [key=value ...]",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders expanded Markdown result: pending command 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="running"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-validate</span><span class="dsh-wf-args" title=" ./deploy.yaml"> ./deploy.yaml</span></div><span class="dsh-wf-badge-running">Running…</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div></div>",
+  "markdown": [],
+}
+`;
+
+exports[`renders expanded Markdown result: validation diagnostics retain literal Y… 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="aborted"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-validate</span><span class="dsh-wf-args" title=" ./broken.yaml"> ./broken.yaml</span></div><span class="dsh-wf-badge-aborted">Failed</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="dsh-wf-markdown-body"><div data-markdown=""></div></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "    Failed to parse workflow './broken.yaml':
+      2 | - print: *bad
+        |          ^
+    \`\`\`
+    <unexpected>",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders expanded Markdown result: validation success 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="completed"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-validate</span><span class="dsh-wf-args" title=" ./deploy.yaml env=staging"> ./deploy.yaml env=staging</span></div><span class="dsh-wf-badge-success">Done</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="dsh-wf-markdown-body"><div data-markdown=""></div></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "### Workflow Validation: \`./deploy.yaml\`
+- **Status:** Valid
+- **Steps:** 1
+  1. [print] Deploy",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders expanded Markdown result: workflow list failure 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="aborted"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-list</span></div><span class="dsh-wf-badge-aborted">Failed</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="dsh-wf-markdown-body"><div data-markdown=""></div></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "    Failed to list workflows: permission denied",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders expanded Markdown result: workflow list including unnamed workflo… 1`] = `
+{
+  "html": "<div class="dsh-wf-card" data-state="completed"><div class="dsh-wf-header"><div class="dsh-wf-title-group"><span class="dsh-wf-command-badge">/wf-list</span></div><span class="dsh-wf-badge-success">Done</span><button type="button" class="dsh-wf-copy-btn" title="Copy command" aria-label="Copy command"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button></div><div class="dsh-wf-markdown-body"><div data-markdown=""></div></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "### Local Workflows (.agents/wf)
+- **Deploy** (\`deploy.yaml\`): Deploy service
+  - \`env\` (choice, required): Target environment
+- \`unnamed.yaml\`
+
+### Common Workflows
+*(No workflows found)*",
+      },
+    ],
+  ],
+}
+`;

@@ -1,0 +1,16 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-gate",
+	"resume": {
+		"instructions": "Approved by Release Manager"
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state", "step", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 7
+	}
+}

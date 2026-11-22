@@ -1,0 +1,20 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "discard"
+		}
+	],
+	"expectedState": {
+		"status": "aborted",
+		"stepIndex": 0
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state", "step", "state", "step"],
+		"noErrors": true,
+		"commandCount": 6
+	}
+}

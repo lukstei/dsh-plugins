@@ -1,0 +1,5 @@
+name: "Deploy Pipeline"
+description: "Workflow paused before execution begins"
+steps:
+  - name: "Build Artifact"
+    print: "Building application artifact"

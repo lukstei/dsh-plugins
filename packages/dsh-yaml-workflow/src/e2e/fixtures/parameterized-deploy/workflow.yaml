@@ -1,0 +1,16 @@
+name: "Parametrized Rollout [{{args.env}}]"
+args:
+  env:
+    type: choice
+    choices: [staging, production]
+    default: staging
+  version:
+    type: string
+  instructions:
+    type: string
+    default: "standard rollout"
+steps:
+  - name: "Announce"
+    print: "Deploying {{args.version}} to {{args.env}}"
+  - name: "Execute"
+    prompt: "Run release for {{args.version}}: {{args.instructions}}"

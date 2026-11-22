@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Unknown output '{{outputs.nonexistent_data}}' referenced at step 1."
+	},
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	}
+}

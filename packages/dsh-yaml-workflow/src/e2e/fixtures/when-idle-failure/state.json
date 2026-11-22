@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow discard failed: Agent connection dropped"
+	}
+}

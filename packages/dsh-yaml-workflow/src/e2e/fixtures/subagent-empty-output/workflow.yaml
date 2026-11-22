@@ -1,0 +1,8 @@
+name: Empty Subagent
+steps:
+  - name: Silent Check
+    prompt: "Silent run"
+    subagent: true
+    output: silent_out
+  - name: Followup
+    prompt: "Next step: {{outputs.silent_out}}"

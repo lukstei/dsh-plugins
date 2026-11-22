@@ -1,0 +1,4 @@
+name: Resume Aborted
+steps:
+  - prompt: "Step to resume"
+  - print: "Completed after resume"

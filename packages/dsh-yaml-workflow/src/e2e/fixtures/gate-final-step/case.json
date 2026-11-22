@@ -1,0 +1,20 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume"
+		}
+	],
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 5
+	}
+}

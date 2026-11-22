@@ -1,0 +1,45 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-foreach-single-out",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"list": {
+					"name": "targets",
+					"value": ["auth-service", "billing-service"]
+				}
+			}
+		],
+		"subagent": {
+			"outputs": {
+				"Step 2 (1/2): Inspect Component [auth-service]": "auth-service: secure",
+				"Step 2 (2/2): Inspect Component [billing-service]": "billing-service: compliant"
+			}
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 3,
+		"outputs": {
+			"targets": ["auth-service", "billing-service"],
+			"summaries": ["auth-service: secure", "billing-service: compliant"]
+		}
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"output",
+			"state",
+			"step",
+			"step",
+			"output",
+			"state",
+			"print",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 10
+	}
+}

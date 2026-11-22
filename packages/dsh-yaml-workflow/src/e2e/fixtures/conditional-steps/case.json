@@ -1,0 +1,22 @@
+{
+	"targetPath": "workflow.yaml flag_true=true flag_false=false",
+	"sessionId": "e2e-conditional-steps",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 1,
+				"string": {
+					"name": "status_msg",
+					"value": "all systems green"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 14,
+		"outputs": {
+			"status_msg": "all systems green"
+		}
+	}
+}

@@ -1,0 +1,6 @@
+name: Both Instructions
+args:
+  instructions:
+    type: string
+steps:
+  - print: "{{args.instructions}}"

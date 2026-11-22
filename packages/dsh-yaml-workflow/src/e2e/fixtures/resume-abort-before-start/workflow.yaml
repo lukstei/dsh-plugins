@@ -1,0 +1,5 @@
+name: "Resume Abort Before Start"
+steps:
+  - prompt: "Step 1"
+    gate: "Gate 1"
+  - print: "Step 2"

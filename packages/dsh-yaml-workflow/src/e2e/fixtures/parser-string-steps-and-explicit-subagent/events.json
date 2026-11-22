@@ -1,0 +1,183 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "String Step Flow",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"String Step Flow\",\"description\":\"Demonstrates string steps and subagents\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Step 1\",\"prompt\":\"Simple prompt string\"},{\"kind\":\"subagent\",\"name\":\"Configured Subagent\",\"prompt\":\"Scan repo\",\"config\":{\"provider\":\"fork\",\"preset\":\"reviewer\",\"model\":\"fast\"},\"output\":\"scan_out\"},{\"kind\":\"prompt\",\"name\":\"Step 3\",\"prompt\":\"Gate alone step {{outputs.scan_out}}\",\"isSoloGate\":true,\"gate\":\"Gate alone step {{outputs.scan_out}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 3: Step 1\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-5",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-1\",\"stepIndex\":1,\"label\":\"Step 2 of 3: Configured Subagent\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-7",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":1,\"name\":\"scan_out\",\"value\":\"Mock subagent output for Step 2 of 3: Configured Subagent\",\"outputType\":\"string\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-9",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"running\",\"outputs\":{\"scan_out\":\"Mock subagent output for Step 2 of 3: Configured Subagent\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-2\",\"stepIndex\":2,\"label\":\"Step 3 of 3: Step 3\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-13",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-15",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"paused\",\"outputs\":{\"scan_out\":\"Mock subagent output for Step 2 of 3: Configured Subagent\"},\"pauseReason\":\"gate\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-15",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-17",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-2-gate\",\"stepIndex\":2,\"label\":\"Paused at gate: Gate alone step Mock subagent output for Step 2 of 3: Configured Subagent\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-17",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	}
+]

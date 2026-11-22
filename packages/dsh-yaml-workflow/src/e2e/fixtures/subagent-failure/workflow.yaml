@@ -1,0 +1,7 @@
+name: Subagent Failure
+steps:
+  - name: Failing Subagent
+    prompt: "Subagent error"
+    subagent: true
+    output: fail_out
+  - print: "After failure: {{outputs.fail_out}}"

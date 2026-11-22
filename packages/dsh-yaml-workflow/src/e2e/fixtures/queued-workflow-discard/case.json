@@ -1,0 +1,13 @@
+{
+	"sessionId": "e2e-queue-discard",
+	"files": { "next.yaml": "steps:\n  - print: Next workflow\n" },
+	"actions": [
+		{ "type": "execute", "targetPath": "workflow.yaml" },
+		{ "type": "request", "targetPath": "missing.yaml", "runId": "invalid" },
+		{ "type": "request", "targetPath": "next.yaml", "runId": "next" },
+		{ "type": "discard" },
+		{ "type": "drain" }
+	],
+	"expectedState": { "status": "completed", "stepIndex": 1 },
+	"expectedResult": { "kind": "success" }
+}

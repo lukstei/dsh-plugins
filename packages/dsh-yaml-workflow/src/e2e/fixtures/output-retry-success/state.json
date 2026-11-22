@@ -1,0 +1,39 @@
+{
+	"workflow": {
+		"name": "Artifact Generation With Retry",
+		"description": "Agent misses output on initial attempt but provides it on retry attempt 2",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Export Metrics",
+				"prompt": "Export system metrics to JSON",
+				"outputs": {
+					"metrics_file": {
+						"type": "file",
+						"path": "metrics.json",
+						"base": "scratch"
+					}
+				}
+			},
+			{
+				"kind": "print",
+				"name": "Step 2",
+				"text": "Exported metrics at {{outputs.metrics_file}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-output-retry-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed",
+		"outputs": {
+			"metrics_file": ".agents/scratch/e2e-output-retry/metrics.json"
+		}
+	}
+}

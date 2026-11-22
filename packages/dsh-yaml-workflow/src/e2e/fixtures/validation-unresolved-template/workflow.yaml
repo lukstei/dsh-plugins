@@ -1,0 +1,3 @@
+name: Bad Template
+steps:
+  - print: "Value {{args.missingVar}}"

@@ -1,0 +1,27 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-output-string",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"string": {
+					"name": "release_tag",
+					"value": "v1.2.3"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2,
+		"outputs": {
+			"release_tag": "v1.2.3"
+		}
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 6
+	}
+}

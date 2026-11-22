@@ -1,0 +1,28 @@
+{
+	"latestRun": {
+		"workflow": {
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Updated second"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "second.yaml",
+			"rawInput": "second.yaml",
+			"resolvedArgs": {},
+			"runId": "second"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (1 steps)"
+	}
+}

@@ -1,0 +1,4 @@
+- insert:
+    - id: debug
+      name: '@lukstei/dsh-debug'
+      config: {}

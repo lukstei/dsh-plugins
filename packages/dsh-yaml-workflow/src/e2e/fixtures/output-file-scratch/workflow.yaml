@@ -1,0 +1,12 @@
+name: "Code Audit & Scratch Report"
+description: "Generates code audit in scratch directory and consumes path in next step"
+steps:
+  - name: "Generate Audit Report"
+    prompt: "Scan codebase and generate report"
+    outputs:
+      audit_report:
+        type: file
+        path: audit.md
+        base: scratch
+  - name: "Publish Audit"
+    prompt: "Publish findings from {{outputs.audit_report}}"

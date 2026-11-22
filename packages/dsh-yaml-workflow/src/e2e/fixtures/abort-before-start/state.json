@@ -1,0 +1,29 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Abort Before Start",
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Will not run"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow aborted at step 1/1"
+	}
+}

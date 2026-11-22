@@ -1,0 +1,69 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Multi Output Subagent Failure",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Multi Output Subagent Failure\",\"args\":{},\"steps\":[{\"kind\":\"subagent\",\"name\":\"Analyze\",\"prompt\":\"Analyze\",\"config\":{\"provider\":\"spawn\"},\"outputs\":{\"summary\":{\"type\":\"string\"},\"report\":{\"type\":\"file\",\"path\":\"expected.md\",\"base\":\"workspace\"}}},{\"kind\":\"print\",\"name\":\"Consume\",\"text\":\"Summary: {{outputs.summary}}, Report: {{outputs.report}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-test-session-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Analyze\",\"kind\":\"success\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":0,\"status\":\"aborted\",\"error\":\"Step 1 subagent file output 'report' returned path 'wrong-path.md', expected 'expected.md'\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-5",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

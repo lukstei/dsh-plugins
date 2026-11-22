@@ -1,0 +1,11 @@
+name: "Artifact Generation With Retry"
+description: "Agent misses output on initial attempt but provides it on retry attempt 2"
+steps:
+  - name: "Export Metrics"
+    prompt: "Export system metrics to JSON"
+    outputs:
+      metrics_file:
+        type: file
+        path: metrics.json
+        base: scratch
+  - print: "Exported metrics at {{outputs.metrics_file}}"

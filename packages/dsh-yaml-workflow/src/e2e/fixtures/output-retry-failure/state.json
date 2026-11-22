@@ -1,0 +1,41 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Failing Output Generation",
+			"description": "Agent fails to provide required string output across all 3 retry attempts",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Required Signature",
+					"prompt": "Sign security payload",
+					"outputs": {
+						"signature": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Consume",
+					"text": "Signature: {{outputs.signature}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted",
+			"error": "Step 1 output verification failed after 3 attempts"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow execution failed at step 1/2: Step 1 output verification failed after 3 attempts"
+	}
+}

@@ -1,0 +1,88 @@
+{
+	"name": "@lukstei/dsh-session-handoff",
+	"version": "0.2.2-rc.5.1",
+	"description": "Session handoff brief command for DSH",
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./client": "./dist/client.js",
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"src",
+		"dist",
+		"README.md",
+		"cordis.patch.yml",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"dsh": {
+		"bundle": {
+			"patch": "./cordis.patch.yml"
+		},
+		"client": {
+			"platform": "web",
+			"immediately": true,
+			"inject": [
+				"@deepseek-ai/dsh-api-session-controller",
+				"@lukstei/dsh-client-split-view"
+			]
+		}
+	},
+	"scripts": {
+		"build": "tsdown --config tsdown.config.ts --logLevel error",
+		"dev": "tsdown --config tsdown.config.ts --watch",
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "node --experimental-test-module-mocks --test --test-reporter=dot",
+		"verify": "pnpm --silent run check && pnpm --silent run build && pnpm --silent run typecheck && pnpm --silent run test",
+		"prepack": "pnpm run build"
+	},
+	"dependencies": {
+		"@lukstei/dsh-scratch-dir": "workspace:*"
+	},
+	"peerDependencies": {
+		"@deepseek-ai/cordis": "*",
+		"@deepseek-ai/dsh-agent": "*",
+		"@deepseek-ai/dsh-api-session-controller": "*",
+		"@deepseek-ai/dsh-commands": "*",
+		"@deepseek-ai/dsh-llm": "*",
+		"@deepseek-ai/dsh-session": "*",
+		"@deepseek-ai/dsh-session-query": "*",
+		"@deepseek-ai/dsh-session-title": "*",
+		"@deepseek-ai/dsh-working-directory": "*",
+		"@deepseek-ai/dsh-workspace": "*"
+	},
+	"devDependencies": {
+		"@deepseek-ai/cordis": "catalog:",
+		"@deepseek-ai/dsh-agent": "catalog:",
+		"@deepseek-ai/dsh-api-session-controller": "catalog:",
+		"@deepseek-ai/dsh-commands": "catalog:",
+		"@deepseek-ai/dsh-llm": "catalog:",
+		"@deepseek-ai/dsh-session": "catalog:",
+		"@deepseek-ai/dsh-session-query": "catalog:",
+		"@deepseek-ai/dsh-session-title": "catalog:",
+		"@deepseek-ai/dsh-working-directory": "catalog:",
+		"@deepseek-ai/dsh-workspace": "catalog:",
+		"@lukstei/dsh-client-split-view": "workspace:*",
+		"@types/node": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/dsh-session-handoff"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

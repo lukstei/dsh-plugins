@@ -1,0 +1,126 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Code Audit & Scratch Report",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Code Audit & Scratch Report\",\"description\":\"Generates code audit in scratch directory and consumes path in next step\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Generate Audit Report\",\"prompt\":\"Scan codebase and generate report\",\"outputs\":{\"audit_report\":{\"type\":\"file\",\"path\":\"audit.md\",\"base\":\"scratch\"}}},{\"kind\":\"prompt\",\"name\":\"Publish Audit\",\"prompt\":\"Publish findings from {{outputs.audit_report}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-output-scratch-run\"},\"runId\":\"e2e-output-scratch-run\",\"sessionId\":\"e2e-output-scratch\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-output-scratch-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Generate Audit Report\",\"kind\":\"success\",\"runId\":\"e2e-output-scratch-run\",\"sessionId\":\"e2e-output-scratch\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"audit_report\",\"value\":\".agents/scratch/e2e-output-scratch/audit.md\",\"outputType\":\"file\",\"base\":\"scratch\",\"runId\":\"e2e-output-scratch-run\",\"sessionId\":\"e2e-output-scratch\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"audit_report\":\".agents/scratch/e2e-output-scratch/audit.md\"},\"runId\":\"e2e-output-scratch-run\",\"sessionId\":\"e2e-output-scratch\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-output-scratch-run-1\",\"stepIndex\":1,\"label\":\"Step 2 of 2: Publish Audit\",\"kind\":\"success\",\"runId\":\"e2e-output-scratch-run\",\"sessionId\":\"e2e-output-scratch\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-9",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"audit_report\":\".agents/scratch/e2e-output-scratch/audit.md\"},\"runId\":\"e2e-output-scratch-run\",\"sessionId\":\"e2e-output-scratch\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

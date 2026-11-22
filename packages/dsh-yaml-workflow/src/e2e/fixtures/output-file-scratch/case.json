@@ -1,0 +1,28 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-output-scratch",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"file": {
+					"path": "audit.md",
+					"content": "# Audit Findings\n- No vulnerabilities found.\n",
+					"base": "scratch"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2,
+		"outputs": {
+			"audit_report": ".agents/scratch/e2e-output-scratch/audit.md"
+		}
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 6
+	}
+}

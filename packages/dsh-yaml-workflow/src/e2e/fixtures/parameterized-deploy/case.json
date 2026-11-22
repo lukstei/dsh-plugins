@@ -1,0 +1,13 @@
+{
+	"targetPath": "workflow.yaml version=v2.0.0 env=production run DB migrations first",
+	"sessionId": "e2e-parameterized",
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": ["init", "print", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 5
+	}
+}

@@ -1,0 +1,7 @@
+- insert:
+  - id: file-log
+    name: '@lukstei/dsh-log'
+    config:
+      outputs:
+        - target: stdout
+          levels: { default: 2 }

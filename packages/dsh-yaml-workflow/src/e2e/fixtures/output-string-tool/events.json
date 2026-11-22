@@ -1,0 +1,126 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Generate Release Version",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Generate Release Version\",\"description\":\"Agent calculates release tag string and logs via save_output tool\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Calculate Semantic Tag\",\"prompt\":\"Determine next semver tag\",\"outputs\":{\"release_tag\":{\"type\":\"string\",\"description\":\"Calculated semantic version string\"}}},{\"kind\":\"print\",\"name\":\"Step 2\",\"text\":\"Next release version is {{outputs.release_tag}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-output-string-run\"},\"runId\":\"e2e-output-string-run\",\"sessionId\":\"e2e-output-string\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-output-string-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Calculate Semantic Tag\",\"kind\":\"success\",\"runId\":\"e2e-output-string-run\",\"sessionId\":\"e2e-output-string\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"release_tag\",\"value\":\"v1.2.3\",\"outputType\":\"string\",\"runId\":\"e2e-output-string-run\",\"sessionId\":\"e2e-output-string\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"release_tag\":\"v1.2.3\"},\"runId\":\"e2e-output-string-run\",\"sessionId\":\"e2e-output-string\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-output-string-run-1\",\"text\":\"Next release version is v1.2.3\",\"runId\":\"e2e-output-string-run\",\"sessionId\":\"e2e-output-string\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-9",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"release_tag\":\"v1.2.3\"},\"runId\":\"e2e-output-string-run\",\"sessionId\":\"e2e-output-string\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

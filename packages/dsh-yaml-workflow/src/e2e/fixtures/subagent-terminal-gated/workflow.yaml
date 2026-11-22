@@ -1,0 +1,8 @@
+name: Terminal Gated Subagent
+steps:
+  - name: Terminal Gate
+    prompt: "Subagent"
+    subagent: true
+    gate: "Confirm gate"
+    output: gated_out
+  - print: "Done: {{outputs.gated_out}}"

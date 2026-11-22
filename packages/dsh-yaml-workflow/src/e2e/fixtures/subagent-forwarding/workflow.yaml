@@ -1,0 +1,8 @@
+name: Subagent Forwarding Flow
+steps:
+  - name: Security Review
+    prompt: "Scan security"
+    subagent: true
+    output: sec_report
+  - name: Triage
+    prompt: "Triage results: {{outputs.sec_report}}"

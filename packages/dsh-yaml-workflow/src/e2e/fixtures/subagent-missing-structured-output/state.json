@@ -1,0 +1,43 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Missing Structured Prop",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Scan",
+					"prompt": "Scan",
+					"config": {
+						"provider": "spawn"
+					},
+					"outputs": {
+						"findings": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Consume",
+					"text": "Findings: {{outputs.findings}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted",
+			"error": "Step 1 subagent structured output 'findings' is missing or empty"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow execution failed at step 1/2: Step 1 subagent structured output 'findings' is missing or empty"
+	}
+}

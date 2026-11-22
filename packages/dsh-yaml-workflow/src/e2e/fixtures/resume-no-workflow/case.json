@@ -1,0 +1,16 @@
+{
+	"actions": [
+		{
+			"type": "resume"
+		}
+	],
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "No interrupted workflow found to resume"
+	}
+}

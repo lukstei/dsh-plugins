@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Missing required argument 'cluster'"
+	}
+}

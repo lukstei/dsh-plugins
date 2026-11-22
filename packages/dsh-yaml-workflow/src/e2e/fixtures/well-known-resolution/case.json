@@ -1,0 +1,20 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "resolved-flow"
+		}
+	],
+	"files": {
+		".agents/wf/resolved-flow.yaml": "name: Well Known Local\nsteps:\n  - print: \"Well known success\""
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "print", "state"],
+		"noErrors": true,
+		"commandCount": 3
+	}
+}

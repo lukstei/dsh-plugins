@@ -1,0 +1,5 @@
+name: "Workflow with {{outputs.invalid}}"
+description: "Output reference in workflow name"
+steps:
+  - name: "Step 1"
+    prompt: "Do something"

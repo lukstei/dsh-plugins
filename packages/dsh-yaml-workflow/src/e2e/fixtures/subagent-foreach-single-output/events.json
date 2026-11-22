@@ -1,0 +1,202 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Foreach Subagent Single Output",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Foreach Subagent Single Output\",\"description\":\"Demonstrates dynamic subagents spawned via foreach over a list output with single output lifting\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Generate Targets\",\"prompt\":\"Generate a list of target components\",\"outputs\":{\"targets\":{\"type\":\"list\",\"description\":\"List of component names to inspect\"}}},{\"kind\":\"subagent\",\"name\":\"Inspect Component\",\"prompt\":\"Inspect target {{item}} and provide a status summary\",\"config\":{\"provider\":\"spawn\"},\"foreach\":\"{{outputs.targets}}\",\"output\":\"summaries\"},{\"kind\":\"print\",\"name\":\"Step 3\",\"text\":\"Summaries:\\n{{outputs.summaries}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-foreach-single-out-run\"},\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-foreach-single-out-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 3: Generate Targets\",\"kind\":\"success\",\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"targets\",\"value\":\"[\\\"auth-service\\\",\\\"billing-service\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"targets\":[\"auth-service\",\"billing-service\"]},\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-foreach-single-out-run-1-0\",\"stepIndex\":1,\"label\":\"Step 2 (1/2): Inspect Component [auth-service]\",\"kind\":\"success\",\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-9",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-foreach-single-out-run-1-1\",\"stepIndex\":1,\"label\":\"Step 2 (2/2): Inspect Component [billing-service]\",\"kind\":\"success\",\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-11",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":1,\"name\":\"summaries\",\"value\":\"[\\\"auth-service: secure\\\",\\\"billing-service: compliant\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-13",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-15",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"running\",\"outputs\":{\"targets\":[\"auth-service\",\"billing-service\"],\"summaries\":[\"auth-service: secure\",\"billing-service: compliant\"]},\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-15",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-17",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-foreach-single-out-run-2\",\"text\":\"Summaries:\\n- auth-service: secure\\n- billing-service: compliant\",\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-17",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-19",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":3,\"status\":\"completed\",\"outputs\":{\"targets\":[\"auth-service\",\"billing-service\"],\"summaries\":[\"auth-service: secure\",\"billing-service: compliant\"]},\"runId\":\"e2e-foreach-single-out-run\",\"sessionId\":\"e2e-foreach-single-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-19",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

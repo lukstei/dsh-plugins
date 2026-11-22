@@ -1,0 +1,221 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Foreach Subagent Multi Outputs",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Foreach Subagent Multi Outputs\",\"description\":\"Demonstrates dynamic subagents spawned via foreach with structured outputs lifted into lists\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Identify Services\",\"prompt\":\"List candidate microservices\",\"outputs\":{\"services\":{\"type\":\"list\",\"description\":\"Discovered microservices\"}}},{\"kind\":\"subagent\",\"name\":\"Audit Service\",\"prompt\":\"Audit security and performance of {{item}}\",\"config\":{\"provider\":\"spawn\"},\"foreach\":\"{{outputs.services}}\",\"outputs\":{\"status\":{\"type\":\"string\",\"description\":\"Audit status\"},\"score\":{\"type\":\"string\",\"description\":\"Audit numerical score\"}}},{\"kind\":\"print\",\"name\":\"Step 3\",\"text\":\"Audit results for {{outputs.services}}:\\nStatuses:\\n{{outputs.status}}\\nScores:\\n{{outputs.score}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-foreach-multi-out-run\"},\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-foreach-multi-out-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 3: Identify Services\",\"kind\":\"success\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"services\",\"value\":\"[\\\"gateway\\\",\\\"payment\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"services\":[\"gateway\",\"payment\"]},\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-foreach-multi-out-run-1-0\",\"stepIndex\":1,\"label\":\"Step 2 (1/2): Audit Service [gateway]\",\"kind\":\"success\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-9",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-foreach-multi-out-run-1-1\",\"stepIndex\":1,\"label\":\"Step 2 (2/2): Audit Service [payment]\",\"kind\":\"success\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-11",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":1,\"name\":\"status\",\"value\":\"[\\\"passed\\\",\\\"warning\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-13",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-15",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":1,\"name\":\"score\",\"value\":\"[\\\"95\\\",\\\"75\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-15",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-17",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"running\",\"outputs\":{\"services\":[\"gateway\",\"payment\"],\"status\":[\"passed\",\"warning\"],\"score\":[\"95\",\"75\"]},\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-17",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-19",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-foreach-multi-out-run-2\",\"text\":\"Audit results for - gateway\\n- payment:\\nStatuses:\\n- passed\\n- warning\\nScores:\\n- 95\\n- 75\",\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-19",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-21",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":3,\"status\":\"completed\",\"outputs\":{\"services\":[\"gateway\",\"payment\"],\"status\":[\"passed\",\"warning\"],\"score\":[\"95\",\"75\"]},\"runId\":\"e2e-foreach-multi-out-run\",\"sessionId\":\"e2e-foreach-multi-out\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-21",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

@@ -1,0 +1,12 @@
+name: "Output Retry Abort"
+description: "Workflow is aborted during output retry prompt"
+steps:
+  - name: "Generate Report"
+    prompt: "Generate the audit report"
+    outputs:
+      audit_report:
+        type: file
+        path: report.txt
+        base: workspace
+  - name: "Consume Report"
+    print: "Report: {{outputs.audit_report}}"

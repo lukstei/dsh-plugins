@@ -1,0 +1,11 @@
+name: "List Output Retry Recovery"
+description: "Tests recovery when agent provides invalid list output on attempt 1, correcting on attempt 2"
+steps:
+  - name: "Generate Clusters"
+    prompt: "Provide at least two cluster identifiers"
+    outputs:
+      clusters:
+        type: list
+        min: 2
+        description: "List of cluster identifiers"
+  - print: "Configured clusters:\n{{outputs.clusters}}"

@@ -1,0 +1,107 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Parametrized Rollout [production]",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Parametrized Rollout [{{args.env}}]\",\"args\":{\"env\":{\"type\":\"choice\",\"choices\":[\"staging\",\"production\"],\"default\":\"staging\",\"required\":false},\"version\":{\"type\":\"string\",\"required\":true},\"instructions\":{\"type\":\"string\",\"default\":\"standard rollout\",\"required\":false}},\"steps\":[{\"kind\":\"print\",\"name\":\"Announce\",\"text\":\"Deploying {{args.version}} to {{args.env}}\"},{\"kind\":\"prompt\",\"name\":\"Execute\",\"prompt\":\"Run release for {{args.version}}: {{args.instructions}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml version=v2.0.0 env=production run DB migrations first\",\"resolvedArgs\":{\"env\":\"production\",\"version\":\"v2.0.0\",\"instructions\":\"run DB migrations first\"},\"runId\":\"e2e-parameterized-run\"},\"runId\":\"e2e-parameterized-run\",\"sessionId\":\"e2e-parameterized\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-parameterized-run-0\",\"text\":\"Deploying v2.0.0 to production\",\"runId\":\"e2e-parameterized-run\",\"sessionId\":\"e2e-parameterized\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-3",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"runId\":\"e2e-parameterized-run\",\"sessionId\":\"e2e-parameterized\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-5",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-parameterized-run-1\",\"stepIndex\":1,\"label\":\"Step 2 of 2: Execute\",\"kind\":\"success\",\"runId\":\"e2e-parameterized-run\",\"sessionId\":\"e2e-parameterized\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-7",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"runId\":\"e2e-parameterized-run\",\"sessionId\":\"e2e-parameterized\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-9",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

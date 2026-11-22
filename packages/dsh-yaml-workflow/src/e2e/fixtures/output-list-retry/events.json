@@ -1,0 +1,145 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "List Output Retry Recovery",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"List Output Retry Recovery\",\"description\":\"Tests recovery when agent provides invalid list output on attempt 1, correcting on attempt 2\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Generate Clusters\",\"prompt\":\"Provide at least two cluster identifiers\",\"outputs\":{\"clusters\":{\"type\":\"list\",\"description\":\"List of cluster identifiers\",\"min\":2}}},{\"kind\":\"print\",\"name\":\"Step 2\",\"text\":\"Configured clusters:\\n{{outputs.clusters}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-output-list-retry-run\"},\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-output-list-retry-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Generate Clusters\",\"kind\":\"success\",\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"clusters\",\"value\":\"[\\\"single-cluster\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"clusters\",\"value\":\"[\\\"cluster-east\\\",\\\"cluster-west\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-7",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"clusters\":[\"cluster-east\",\"cluster-west\"]},\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-9",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-output-list-retry-run-1\",\"text\":\"Configured clusters:\\n- cluster-east\\n- cluster-west\",\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-11",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"clusters\":[\"cluster-east\",\"cluster-west\"]},\"runId\":\"e2e-output-list-retry-run\",\"sessionId\":\"e2e-output-list-retry\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-13",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

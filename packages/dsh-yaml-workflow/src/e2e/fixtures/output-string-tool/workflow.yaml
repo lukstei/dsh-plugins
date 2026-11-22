@@ -1,0 +1,10 @@
+name: "Generate Release Version"
+description: "Agent calculates release tag string and logs via save_output tool"
+steps:
+  - name: "Calculate Semantic Tag"
+    prompt: "Determine next semver tag"
+    outputs:
+      release_tag:
+        type: string
+        description: "Calculated semantic version string"
+  - print: "Next release version is {{outputs.release_tag}}"

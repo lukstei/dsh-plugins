@@ -1,0 +1,37 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Resume Failure",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Step 1",
+					"gate": "Check gate"
+				},
+				{
+					"kind": "prompt",
+					"name": "Step 2",
+					"prompt": "Step 2"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "aborted",
+			"pauseReason": "gate",
+			"error": "Resume prompt failed"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow resume failed at step 2/2: Resume prompt failed"
+	}
+}

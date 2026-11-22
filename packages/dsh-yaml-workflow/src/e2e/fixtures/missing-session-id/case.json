@@ -1,0 +1,26 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume"
+		},
+		{
+			"type": "discard"
+		}
+	],
+	"behavior": {
+		"missingSessionId": true
+	},
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "agent session ID is required"
+	}
+}

@@ -1,0 +1,12 @@
+name: "List Output Bounds Validation"
+description: "Validates list outputs enforcing min and max item constraints"
+steps:
+  - name: "Select Tech Stack"
+    prompt: "Choose 2 to 3 backend languages"
+    outputs:
+      languages:
+        type: list
+        min: 2
+        max: 3
+        description: "Selected languages list"
+  - print: "Selected languages:\n{{outputs.languages}}"

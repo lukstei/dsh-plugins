@@ -1,0 +1,257 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders queued workflows and removes only the request settled by command-error 1`] = `
+{
+  "pending": [
+    {
+      "runId": "first",
+      "sessionId": "queued-ui-command-error",
+      "text": "Workflow queued:
+
+    /wf first.yaml env=prod",
+    },
+    {
+      "runId": "second",
+      "sessionId": "queued-ui-command-error",
+      "text": "Workflow queued:
+
+    /wf second.yaml
+    extra instructions",
+    },
+  ],
+  "settled": [
+    {
+      "runId": "second",
+      "sessionId": "queued-ui-command-error",
+      "text": "Workflow queued:
+
+    /wf second.yaml
+    extra instructions",
+    },
+  ],
+}
+`;
+
+exports[`renders queued workflows and removes only the request settled by init 1`] = `
+{
+  "pending": [
+    {
+      "runId": "first",
+      "sessionId": "queued-ui-init",
+      "text": "Workflow queued:
+
+    /wf first.yaml env=prod",
+    },
+    {
+      "runId": "second",
+      "sessionId": "queued-ui-init",
+      "text": "Workflow queued:
+
+    /wf second.yaml
+    extra instructions",
+    },
+  ],
+  "settled": [
+    {
+      "runId": "second",
+      "sessionId": "queued-ui-init",
+      "text": "Workflow queued:
+
+    /wf second.yaml
+    extra instructions",
+    },
+  ],
+}
+`;
+
+exports[`renders queued workflows and removes only the request settled by request-failed 1`] = `
+{
+  "pending": [
+    {
+      "runId": "first",
+      "sessionId": "queued-ui-request-failed",
+      "text": "Workflow queued:
+
+    /wf first.yaml env=prod",
+    },
+    {
+      "runId": "second",
+      "sessionId": "queued-ui-request-failed",
+      "text": "Workflow queued:
+
+    /wf second.yaml
+    extra instructions",
+    },
+  ],
+  "settled": [
+    {
+      "runId": "second",
+      "sessionId": "queued-ui-request-failed",
+      "text": "Workflow queued:
+
+    /wf second.yaml
+    extra instructions",
+    },
+  ],
+}
+`;
+
+exports[`shows /wf-list before a model turn: ### Local Workflows
+*(No workflows foun… 1`] = `
+{
+  "pending": {
+    "nodes": [
+      {
+        "anchorSeq": 1,
+        "data": {
+          "args": "",
+          "name": "wf-list",
+          "outcome": null,
+        },
+        "groupTree": "process",
+        "id": "list-1",
+        "key": "7:wf-listlist-1",
+        "kind": "wf-list",
+        "location": {
+          "kind": "session",
+        },
+        "target": "chat",
+        "visibility": "visible",
+      },
+    ],
+    "phase": "active",
+  },
+  "settled": {
+    "nodes": [
+      {
+        "anchorSeq": 1,
+        "data": {
+          "args": "",
+          "name": "wf-list",
+          "outcome": {
+            "kind": "success",
+            "text": "### Local Workflows
+*(No workflows found)*",
+          },
+        },
+        "groupTree": "process",
+        "id": "list-1",
+        "key": "7:wf-listlist-1",
+        "kind": "wf-list",
+        "location": {
+          "kind": "session",
+        },
+        "target": "chat",
+        "visibility": "visible",
+      },
+    ],
+    "phase": "active",
+  },
+}
+`;
+
+exports[`shows /wf-list before a model turn: ### Local Workflows
+- **Deploy** (\`depl… 1`] = `
+{
+  "pending": {
+    "nodes": [
+      {
+        "anchorSeq": 1,
+        "data": {
+          "args": "",
+          "name": "wf-list",
+          "outcome": null,
+        },
+        "groupTree": "process",
+        "id": "list-1",
+        "key": "7:wf-listlist-1",
+        "kind": "wf-list",
+        "location": {
+          "kind": "session",
+        },
+        "target": "chat",
+        "visibility": "visible",
+      },
+    ],
+    "phase": "active",
+  },
+  "settled": {
+    "nodes": [
+      {
+        "anchorSeq": 1,
+        "data": {
+          "args": "",
+          "name": "wf-list",
+          "outcome": {
+            "kind": "success",
+            "text": "### Local Workflows
+- **Deploy** (\`deploy.yaml\`)",
+          },
+        },
+        "groupTree": "process",
+        "id": "list-1",
+        "key": "7:wf-listlist-1",
+        "kind": "wf-list",
+        "location": {
+          "kind": "session",
+        },
+        "target": "chat",
+        "visibility": "visible",
+      },
+    ],
+    "phase": "active",
+  },
+}
+`;
+
+exports[`shows /wf-list before a model turn: Permission denied 1`] = `
+{
+  "pending": {
+    "nodes": [
+      {
+        "anchorSeq": 1,
+        "data": {
+          "args": "",
+          "name": "wf-list",
+          "outcome": null,
+        },
+        "groupTree": "process",
+        "id": "list-1",
+        "key": "7:wf-listlist-1",
+        "kind": "wf-list",
+        "location": {
+          "kind": "session",
+        },
+        "target": "chat",
+        "visibility": "visible",
+      },
+    ],
+    "phase": "active",
+  },
+  "settled": {
+    "nodes": [
+      {
+        "anchorSeq": 1,
+        "data": {
+          "args": "",
+          "name": "wf-list",
+          "outcome": {
+            "kind": "error",
+            "text": "Permission denied",
+          },
+        },
+        "groupTree": "process",
+        "id": "list-1",
+        "key": "7:wf-listlist-1",
+        "kind": "wf-list",
+        "location": {
+          "kind": "session",
+        },
+        "target": "chat",
+        "visibility": "visible",
+      },
+    ],
+    "phase": "active",
+  },
+}
+`;

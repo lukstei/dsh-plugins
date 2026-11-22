@@ -1,0 +1,9 @@
+name: "Unused Output Validation"
+description: "Workflow declares an output that is never referenced"
+steps:
+  - name: "Step 1"
+    subagent: true
+    prompt: "Generate output"
+    output: unused_var
+  - name: "Step 2"
+    prompt: "Another step without using output"

@@ -1,0 +1,4 @@
+steps:
+  - prompt: Say hello world!
+    gate: Check results
+  

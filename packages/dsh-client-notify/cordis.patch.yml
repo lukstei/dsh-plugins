@@ -1,0 +1,3 @@
+- insert:
+    - id: client-notify
+      name: '@lukstei/dsh-client-notify'

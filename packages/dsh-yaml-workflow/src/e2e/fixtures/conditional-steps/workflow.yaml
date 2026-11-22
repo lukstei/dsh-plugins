@@ -1,0 +1,69 @@
+name: "Conditional Steps Workflow"
+description: "Verifies bool args and step if condition evaluation"
+args:
+  bool_def_false:
+    type: bool
+    default: false
+  bool_def_true:
+    type: bool
+    default: true
+  flag_true:
+    type: bool
+  flag_false:
+    type: bool
+  env:
+    type: choice
+    choices: [staging, production]
+    default: production
+  empty_cond:
+    type: string
+    default: ""
+  str_other:
+    type: string
+    default: "custom"
+steps:
+  - name: "Initial Skip"
+    if: "{{args.bool_def_false}}"
+    print: "Should not print"
+  - name: "Generate Report Output"
+    prompt: "Generate deployment status"
+    outputs:
+      status_msg:
+        type: string
+        description: "Deployment status message"
+  - name: "Skip With Outputs"
+    if: "{{args.flag_false}}"
+    print: "Should not print"
+  - name: "Empty Condition Skip"
+    if: "{{args.empty_cond}}"
+    print: "Should not print"
+  - name: "Direct True Match"
+    if: "{{args.flag_true}}"
+    print: "Status: {{outputs.status_msg}}"
+  - name: "Direct False Skipped"
+    if: "{{args.bool_def_false}}"
+    print: "Should not print"
+  - name: "Direct Other String Skipped"
+    if: "{{args.str_other}}"
+    print: "Should not print"
+  - name: "Cmp Eq Match"
+    if: '{{args.env}} == "production"'
+    print: "Prod environment"
+  - name: "Cmp Eq Mismatch Skipped"
+    if: '{{args.env}} == "staging"'
+    print: "Should not print"
+  - name: "Cmp Neq Match"
+    if: '{{args.env}} != "staging"'
+    print: "Not staging"
+  - name: "Cmp Neq Mismatch Skipped"
+    if: '{{args.env}} != "production"'
+    print: "Should not print"
+  - name: "Negated False Match"
+    if: "!{{args.flag_false}}"
+    print: "Negated false ran"
+  - name: "Negated True Skipped"
+    if: "!{{args.flag_true}}"
+    print: "Should not print"
+  - name: "Final Step Skipped"
+    if: "{{args.flag_false}}"
+    print: "Should not print"

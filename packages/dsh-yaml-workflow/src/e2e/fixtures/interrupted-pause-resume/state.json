@@ -1,0 +1,36 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Code Review and Build",
+			"description": "Workflow interrupted by user stop pauses and resumes current step",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Run Tests",
+					"prompt": "Run the test suite and verify coverage"
+				},
+				{
+					"kind": "print",
+					"name": "Build",
+					"text": "Build completed successfully"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"pauseReason": "interrupted"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

@@ -1,0 +1,52 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "String Step Flow",
+			"description": "Demonstrates string steps and subagents",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Simple prompt string"
+				},
+				{
+					"kind": "subagent",
+					"name": "Configured Subagent",
+					"prompt": "Scan repo",
+					"config": {
+						"provider": "fork",
+						"preset": "reviewer",
+						"model": "fast"
+					},
+					"output": "scan_out"
+				},
+				{
+					"kind": "prompt",
+					"name": "Step 3",
+					"prompt": "Gate alone step {{outputs.scan_out}}",
+					"isSoloGate": true,
+					"gate": "Gate alone step {{outputs.scan_out}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "paused",
+			"outputs": {
+				"scan_out": "Mock subagent output for Step 2 of 3: Configured Subagent"
+			},
+			"pauseReason": "gate"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow paused at gate: \"Gate alone step Mock subagent output for Step 2 of 3: Configured Subagent\". Resume with /wf-resume"
+	}
+}

@@ -1,0 +1,145 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Production Release Gate",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Production Release Gate\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Step 1\",\"prompt\":\"Prepare release candidate\",\"gate\":\"Release manager approval\"},{\"kind\":\"print\",\"name\":\"Step 2\",\"text\":\"Release candidate published\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-gate-run\"},\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-gate-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Step 1\",\"kind\":\"success\",\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":0,\"status\":\"paused\",\"pauseReason\":\"gate\",\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-5",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-gate-run-0-gate\",\"stepIndex\":0,\"label\":\"Paused at gate: Release manager approval\",\"kind\":\"success\",\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-7",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-9",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-gate-run-1\",\"text\":\"Release candidate published\",\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-11",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-13",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"runId\":\"e2e-gate-run\",\"sessionId\":\"e2e-gate\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-13",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

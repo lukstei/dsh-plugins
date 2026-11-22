@@ -1,0 +1,29 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"file": {
+					"path": "result.txt",
+					"content": "output data",
+					"base": "workspace"
+				}
+			}
+		],
+		"abortBeforeComplete": true
+	},
+	"expectedState": {
+		"status": "aborted",
+		"stepIndex": 1
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Workflow aborted at step 2/2"
+	}
+}

@@ -1,0 +1,41 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Subagent Forwarding Flow",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Security Review",
+					"prompt": "Scan security",
+					"config": {
+						"provider": "spawn"
+					},
+					"output": "sec_report"
+				},
+				{
+					"kind": "prompt",
+					"name": "Triage",
+					"prompt": "Triage results: {{outputs.sec_report}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"sec_report": "Found 0 critical CVEs"
+			}
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

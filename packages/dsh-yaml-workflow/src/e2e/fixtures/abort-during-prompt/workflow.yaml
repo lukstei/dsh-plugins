@@ -1,0 +1,4 @@
+name: Abort During Prompt
+steps:
+  - prompt: "Step 1"
+  - print: "Step 2"

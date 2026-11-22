@@ -1,0 +1,31 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Final Gate",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Only step",
+					"gate": "Final approval gate"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed",
+			"pauseReason": "gate"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (1 steps)"
+	}
+}

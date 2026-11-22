@@ -1,0 +1,3 @@
+- insert:
+    - id: split-view
+      name: '@lukstei/dsh-client-split-view'

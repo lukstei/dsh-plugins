@@ -1,0 +1,10 @@
+{
+	"extends": "../../tsconfig.client.json",
+	"include": [
+		"src/**/*",
+		"scripts/**/*.ts",
+		"vitest.config.ts",
+		"test/**/*",
+		".ladle/**/*"
+	]
+}

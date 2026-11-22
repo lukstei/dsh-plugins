@@ -1,0 +1,45 @@
+{
+	"workflow": {
+		"name": "Output Shorthand Subagents",
+		"args": {},
+		"steps": [
+			{
+				"kind": "subagent",
+				"name": "Subagent 1",
+				"prompt": "Run subagent 1",
+				"config": {
+					"provider": "spawn"
+				},
+				"output": "out1"
+			},
+			{
+				"kind": "subagent",
+				"name": "Subagent 2",
+				"prompt": "Run subagent 2",
+				"config": {
+					"provider": "spawn"
+				},
+				"output": "out2"
+			},
+			{
+				"kind": "print",
+				"name": "Print step",
+				"text": "Sub1: {{outputs.out1}}, Sub2: {{outputs.out2}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-output-shorthand-run"
+	},
+	"state": {
+		"stepIndex": 3,
+		"status": "completed",
+		"outputs": {
+			"out1": "First subagent output",
+			"out2": "Second subagent output"
+		}
+	}
+}

@@ -1,0 +1,6 @@
+name: "Code Audit Workflow"
+steps:
+  - prompt: "Review architecture rules"
+    subagent: "@security-auditor/deepseek-coder"
+    output: review_out
+  - print: "Review completed successfully: {{outputs.review_out}}"

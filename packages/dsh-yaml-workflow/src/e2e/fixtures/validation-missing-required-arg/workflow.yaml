@@ -1,0 +1,6 @@
+name: Arg Validation
+args:
+  cluster:
+    type: string
+steps:
+  - print: "Deploying to {{args.cluster}}"

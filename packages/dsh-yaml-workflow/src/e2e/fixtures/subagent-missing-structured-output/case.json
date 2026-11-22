@@ -1,0 +1,19 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"structured": {
+				"other": "value"
+			}
+		}
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "subagent structured output 'findings' is missing or empty"
+	}
+}

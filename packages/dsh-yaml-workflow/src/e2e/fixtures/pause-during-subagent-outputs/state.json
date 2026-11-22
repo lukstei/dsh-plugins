@@ -1,0 +1,43 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Subagent Pause With Outputs",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Scan",
+					"prompt": "Scan",
+					"config": {
+						"provider": "spawn"
+					},
+					"outputs": {
+						"findings": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Consume",
+					"text": "Findings: {{outputs.findings}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "paused",
+			"pauseReason": "interrupted"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Workflow paused at step 1/2. Resume with /wf-resume"
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"attempt": 1,
+				"file": {
+					"path": "bundle.js",
+					"content": "console.log('bundle');\n",
+					"base": "workspace"
+				}
+			},
+			{
+				"stepIndex": 0,
+				"attempt": 2,
+				"string": {
+					"name": "tag",
+					"value": "v2.0.0"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2,
+		"outputs": {
+			"bundle_file": "bundle.js",
+			"tag": "v2.0.0"
+		}
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "output", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 7
+	}
+}

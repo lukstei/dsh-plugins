@@ -1,0 +1,55 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-subagent-gate-out",
+	"resume": {
+		"instructions": "LGTM"
+	},
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"file": {
+					"path": "SPEC.md",
+					"content": "Spec definitions.\n",
+					"base": "workspace"
+				}
+			},
+			{
+				"stepIndex": 1,
+				"file": {
+					"path": "REVIEW.md",
+					"content": "All checks passed.\n",
+					"base": "workspace"
+				}
+			}
+		],
+		"subagent": {
+			"defaultOutput": "Automated checks completed."
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 3,
+		"outputs": {
+			"spec_notes": "SPEC.md",
+			"review_notes": "REVIEW.md"
+		}
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"output",
+			"state",
+			"step",
+			"output",
+			"state",
+			"step",
+			"state",
+			"print",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 11
+	}
+}

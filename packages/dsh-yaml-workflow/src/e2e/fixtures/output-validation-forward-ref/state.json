@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Output validation error in workflow 'workflow.yaml': Output '{{outputs.build_path}}' referenced at step 1 before it is declared at step 2."
+	}
+}

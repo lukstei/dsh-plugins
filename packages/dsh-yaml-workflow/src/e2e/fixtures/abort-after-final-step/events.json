@@ -1,0 +1,59 @@
+[
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-0",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"args\":{},\"steps\":[{\"kind\":\"print\",\"name\":\"Step 1\",\"text\":\"Step 1\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-0",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-2",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-test-session-run-0\",\"text\":\"Step 1\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-2",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-4",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"completed\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-4",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

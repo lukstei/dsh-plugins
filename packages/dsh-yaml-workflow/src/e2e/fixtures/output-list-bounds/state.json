@@ -1,0 +1,40 @@
+{
+	"workflow": {
+		"name": "List Output Bounds Validation",
+		"description": "Validates list outputs enforcing min and max item constraints",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Select Tech Stack",
+				"prompt": "Choose 2 to 3 backend languages",
+				"outputs": {
+					"languages": {
+						"type": "list",
+						"description": "Selected languages list",
+						"min": 2,
+						"max": 3
+					}
+				}
+			},
+			{
+				"kind": "print",
+				"name": "Step 2",
+				"text": "Selected languages:\n{{outputs.languages}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-output-list-bounds-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed",
+		"outputs": {
+			"languages": ["typescript", "rust"]
+		}
+	}
+}

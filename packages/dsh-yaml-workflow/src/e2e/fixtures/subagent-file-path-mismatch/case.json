@@ -1,0 +1,19 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"structured": {
+				"report": "/totally/wrong/path.md"
+			}
+		}
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "subagent file output 'report' returned path '/totally/wrong/path.md'"
+	}
+}

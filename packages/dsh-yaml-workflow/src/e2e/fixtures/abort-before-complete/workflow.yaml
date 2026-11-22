@@ -1,0 +1,11 @@
+name: "Abort Before Complete"
+steps:
+  - name: "Produce"
+    prompt: "Produce"
+    outputs:
+      result:
+        type: file
+        path: "result.txt"
+        base: workspace
+  - name: "Consume"
+    print: "Result: {{outputs.result}}"

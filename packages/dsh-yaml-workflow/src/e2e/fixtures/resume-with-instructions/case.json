@@ -1,0 +1,21 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume",
+			"instructions": "apply emergency fix"
+		}
+	],
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state", "step", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 7
+	}
+}

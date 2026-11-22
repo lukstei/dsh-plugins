@@ -1,0 +1,25 @@
+{
+	"name": "dsh-plugins",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"verify": "pnpm --silent run check && pnpm --silent run typecheck && pnpm --silent run build && pnpm --silent run test",
+		"build": "pnpm -r --loglevel warn run build",
+		"check": "biome check --reporter=concise .",
+		"check:write": "biome check --reporter=concise --write .",
+		"test": "NODE_NO_WARNINGS=1 pnpm -r --loglevel warn --no-bail run test",
+		"typecheck": "tsc -p scripts/tsconfig.json --noEmit && pnpm -r --loglevel warn run typecheck"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "catalog:",
+		"@deepseek-ai/cordis": "catalog:",
+		"@types/node": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"zod": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"version": "0.2.2-rc.5.1"
+}

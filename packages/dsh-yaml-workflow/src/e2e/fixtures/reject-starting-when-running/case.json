@@ -1,0 +1,39 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"initialEvents": [
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Running Flow\",\"steps\":[]},\"invocation\":{\"targetPath\":\"flow.yaml\",\"resolvedArgs\":{},\"runId\":\"running-run\"},\"runId\":\"running-run\",\"sessionId\":\"test-session\"}"
+				}
+			},
+			{
+				"type": "command/run",
+				"data": {
+					"name": "wf-event",
+					"args": "{\"action\":\"state\",\"status\":\"running\",\"stepIndex\":0,\"runId\":\"running-run\",\"sessionId\":\"test-session\"}"
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "running",
+		"stepIndex": 0
+	},
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Cannot start workflow: 'Running Flow' is already running"
+	}
+}

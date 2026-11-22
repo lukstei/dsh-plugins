@@ -1,0 +1,24 @@
+{
+	"actions": [
+		{
+			"type": "resume"
+		},
+		{
+			"type": "discard"
+		}
+	],
+	"behavior": {
+		"agent": {
+			"whenIdleError": "Agent connection dropped"
+		}
+	},
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Agent connection dropped"
+	}
+}

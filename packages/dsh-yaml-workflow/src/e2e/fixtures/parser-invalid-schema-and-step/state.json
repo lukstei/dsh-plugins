@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Failed to parse workflow 'workflow.yaml': Invalid workflow schema: steps.0: Invalid input"
+	}
+}

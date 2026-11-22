@@ -1,0 +1,36 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Resume Abort Before Start",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Step 1",
+					"prompt": "Step 1",
+					"gate": "Gate 1"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Step 2"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "aborted",
+			"pauseReason": "gate"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow aborted at step 2/2"
+	}
+}

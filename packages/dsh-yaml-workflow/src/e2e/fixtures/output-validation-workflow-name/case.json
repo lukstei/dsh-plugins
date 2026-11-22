@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Output '{{outputs.invalid}}' referenced in workflow name before any step execution."
+	},
+	"expectedEvents": {
+		"actions": [],
+		"noErrors": true,
+		"commandCount": 0
+	}
+}

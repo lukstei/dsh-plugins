@@ -1,0 +1,125 @@
+[
+	{
+		"type": "command/run"
+	},
+	{
+		"type": "command/run",
+		"data": 42
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "wf",
+			"args": " review"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "wf-event",
+			"args": 123
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "wf-event",
+			"args": "{\"action\":\"state\"}"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "wf-event",
+			"args": "{\"action\":\"init\"}"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "other-plugin",
+			"args": "{}"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "wf-event",
+			"args": "invalid-json {"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"name": "wf-event",
+			"args": "{\"action\":\"other-action\"}"
+		}
+	},
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Fold Noise",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-10",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Fold Noise\",\"args\":{},\"steps\":[{\"kind\":\"print\",\"name\":\"Step 1\",\"text\":\"Noise handled cleanly\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"test-session-run\"},\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-10",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-12",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-test-session-run-0\",\"text\":\"Noise handled cleanly\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-12",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-14",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"completed\",\"runId\":\"test-session-run\",\"sessionId\":\"test-session\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-14",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

@@ -1,0 +1,14 @@
+name: "Multi-Output Mixed Step"
+description: "Step produces both a workspace file and a string output"
+steps:
+  - name: "Generate Report & Metric"
+    prompt: "Generate the audit report and return security rating"
+    outputs:
+      report_file:
+        type: file
+        path: report.md
+        base: workspace
+      security_score:
+        type: string
+        description: "Calculated security score"
+  - print: "Audit finished: {{outputs.report_file}} with score {{outputs.security_score}}"

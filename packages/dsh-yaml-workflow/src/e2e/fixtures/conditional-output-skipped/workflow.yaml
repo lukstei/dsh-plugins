@@ -1,0 +1,14 @@
+name: "Conditional Output Skipped"
+description: "Minimal reproducing example of disabling a step with an output and referencing that output downstream"
+args:
+  smells:
+    type: bool
+    default: true
+steps:
+  - name: "Antipattern Scan"
+    if: "{{args.smells}}"
+    prompt: "Scan code for antipatterns"
+    subagent: true
+    output: smell_findings
+  - name: "Triage"
+    print: "Triage findings: {{outputs.smell_findings}}"

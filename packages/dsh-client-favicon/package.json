@@ -1,0 +1,78 @@
+{
+	"name": "@lukstei/dsh-client-favicon",
+	"version": "0.2.2-rc.5.1",
+	"description": "Browser favicon status badges for DeepSeek Harness",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./dist/index.js"
+		},
+		"./client": "./dist/client.js",
+		"./package.json": "./package.json",
+		"./client-contract": "./src/client/contract.ts"
+	},
+	"files": [
+		"src",
+		"dist",
+		"README.md",
+		"cordis.patch.yml",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"scripts": {
+		"build": "tsdown --config tsdown.config.ts --logLevel error",
+		"dev": "tsdown --config tsdown.config.ts --watch",
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run --reporter=minimal",
+		"test:watch": "vitest",
+		"test:update": "vitest run -u",
+		"verify": "pnpm --silent run check && pnpm --silent run build && pnpm --silent run typecheck && pnpm --silent run test",
+		"prepack": "pnpm run build"
+	},
+	"dsh": {
+		"bundle": {
+			"patch": "./cordis.patch.yml"
+		},
+		"client": {
+			"platform": "web",
+			"immediately": true,
+			"inject": [
+				"@deepseek-ai/dsh-api-session-controller",
+				"@deepseek-ai/dsh-client-ui-session"
+			]
+		}
+	},
+	"devDependencies": {
+		"@deepseek-ai/cordis": "catalog:",
+		"@deepseek-ai/dsh-api-session-controller": "catalog:",
+		"@deepseek-ai/dsh-client-ui-session": "catalog:",
+		"@deepseek-ai/dsh-session": "catalog:",
+		"@types/node": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	},
+	"peerDependencies": {
+		"@deepseek-ai/cordis": "*",
+		"@deepseek-ai/dsh-api-session-controller": "*",
+		"@deepseek-ai/dsh-client-ui-session": "*"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/dsh-client-favicon"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

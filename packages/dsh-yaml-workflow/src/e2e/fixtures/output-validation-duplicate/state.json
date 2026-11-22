@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Validation errors in workflow 'workflow.yaml':\n- Duplicate output name 'token' declared at step 2. Output names must be globally unique.\n- Output 'token' declared at step 1 is never used in the workflow. All outputs must be used at least once."
+	}
+}

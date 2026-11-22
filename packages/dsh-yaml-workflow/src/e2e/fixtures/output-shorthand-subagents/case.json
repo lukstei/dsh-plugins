@@ -1,0 +1,23 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-output-shorthand",
+	"behavior": {
+		"subagent": {
+			"outputs": {
+				"Step 1 of 3: Subagent 1": "First subagent output",
+				"Step 2 of 3: Subagent 2": "Second subagent output"
+			}
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 3,
+		"outputs": {
+			"out1": "First subagent output",
+			"out2": "Second subagent output"
+		}
+	},
+	"expectedEvents": {
+		"noErrors": true
+	}
+}

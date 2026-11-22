@@ -1,0 +1,50 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Multi-Output Mixed Step",
+			"description": "Step produces both a workspace file and a string output",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Generate Report & Metric",
+					"prompt": "Generate the audit report and return security rating",
+					"outputs": {
+						"report_file": {
+							"type": "file",
+							"path": "report.md",
+							"base": "workspace"
+						},
+						"security_score": {
+							"type": "string",
+							"description": "Calculated security score"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Audit finished: {{outputs.report_file}} with score {{outputs.security_score}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"report_file": "report.md",
+				"security_score": "98/100"
+			}
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

@@ -1,0 +1,59 @@
+{
+	"workflow": {
+		"name": "Foreach Subagent Multi Outputs",
+		"description": "Demonstrates dynamic subagents spawned via foreach with structured outputs lifted into lists",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Identify Services",
+				"prompt": "List candidate microservices",
+				"outputs": {
+					"services": {
+						"type": "list",
+						"description": "Discovered microservices"
+					}
+				}
+			},
+			{
+				"kind": "subagent",
+				"name": "Audit Service",
+				"prompt": "Audit security and performance of {{item}}",
+				"config": {
+					"provider": "spawn"
+				},
+				"foreach": "{{outputs.services}}",
+				"outputs": {
+					"status": {
+						"type": "string",
+						"description": "Audit status"
+					},
+					"score": {
+						"type": "string",
+						"description": "Audit numerical score"
+					}
+				}
+			},
+			{
+				"kind": "print",
+				"name": "Step 3",
+				"text": "Audit results for {{outputs.services}}:\nStatuses:\n{{outputs.status}}\nScores:\n{{outputs.score}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-foreach-multi-out-run"
+	},
+	"state": {
+		"stepIndex": 3,
+		"status": "completed",
+		"outputs": {
+			"services": ["gateway", "payment"],
+			"status": ["passed", "warning"],
+			"score": ["95", "75"]
+		}
+	}
+}

@@ -1,0 +1,45 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "File Path Mismatch",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Generate",
+					"prompt": "Generate report",
+					"config": {
+						"provider": "spawn"
+					},
+					"outputs": {
+						"report": {
+							"type": "file",
+							"path": "REPORT.md",
+							"base": "workspace"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Consume",
+					"text": "Report: {{outputs.report}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted",
+			"error": "Step 1 subagent file output 'report' returned path '/totally/wrong/path.md', expected 'REPORT.md'"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow execution failed at step 1/2: Step 1 subagent file output 'report' returned path '/totally/wrong/path.md', expected 'REPORT.md'"
+	}
+}

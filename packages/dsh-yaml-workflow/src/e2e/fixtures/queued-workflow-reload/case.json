@@ -1,0 +1,22 @@
+{
+	"sessionId": "e2e-queue-reload",
+	"files": {
+		"first.yaml": "steps:\n  - print: Original first\n",
+		"second.yaml": "steps:\n  - print: Original second\n"
+	},
+	"actions": [
+		{ "type": "execute", "targetPath": "workflow.yaml" },
+		{ "type": "request", "targetPath": "first.yaml", "runId": "first" },
+		{ "type": "request", "targetPath": "second.yaml", "runId": "second" },
+		{ "type": "write", "targetPath": "first.yaml", "content": "steps: []" },
+		{
+			"type": "write",
+			"targetPath": "second.yaml",
+			"content": "steps:\n  - print: Updated second\n"
+		},
+		{ "type": "resume" },
+		{ "type": "drain" }
+	],
+	"expectedState": { "status": "completed", "stepIndex": 1 },
+	"expectedResult": { "kind": "success" }
+}

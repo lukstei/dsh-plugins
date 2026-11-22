@@ -1,0 +1,14 @@
+name: "Multi-Output Partial Retry"
+description: "Step produces file on attempt 1, but misses string until retry attempt 2"
+steps:
+  - name: "Generate Bundle & Tag"
+    prompt: "Create bundle and compute semantic tag"
+    outputs:
+      bundle_file:
+        type: file
+        path: bundle.js
+        base: workspace
+      tag:
+        type: string
+        description: "Semantic release tag"
+  - print: "Release {{outputs.tag}} generated at {{outputs.bundle_file}}"

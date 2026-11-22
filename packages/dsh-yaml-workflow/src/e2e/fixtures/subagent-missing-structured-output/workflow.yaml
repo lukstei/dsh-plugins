@@ -1,0 +1,10 @@
+name: "Missing Structured Prop"
+steps:
+  - name: "Scan"
+    prompt: "Scan"
+    subagent: true
+    outputs:
+      findings:
+        type: string
+  - name: "Consume"
+    print: "Findings: {{outputs.findings}}"

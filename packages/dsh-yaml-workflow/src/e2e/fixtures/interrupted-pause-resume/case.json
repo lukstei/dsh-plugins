@@ -1,0 +1,35 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume"
+		}
+	],
+	"behavior": {
+		"promptInterruption": {
+			"stepIndex": 0,
+			"pause": true
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"state",
+			"state",
+			"step",
+			"state",
+			"print",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 8
+	}
+}

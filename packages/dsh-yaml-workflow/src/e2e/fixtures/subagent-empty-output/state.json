@@ -1,0 +1,41 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Empty Subagent",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Silent Check",
+					"prompt": "Silent run",
+					"config": {
+						"provider": "spawn"
+					},
+					"output": "silent_out"
+				},
+				{
+					"kind": "prompt",
+					"name": "Followup",
+					"prompt": "Next step: {{outputs.silent_out}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"silent_out": "   "
+			}
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

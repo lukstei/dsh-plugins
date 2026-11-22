@@ -1,0 +1,43 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Terminal Gated Subagent",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Terminal Gate",
+					"prompt": "Subagent",
+					"config": {
+						"provider": "spawn"
+					},
+					"gate": "Confirm gate",
+					"output": "gated_out"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Done: {{outputs.gated_out}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"gated_out": "Preserved unconsumed terminal finding"
+			},
+			"pauseReason": "gate"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

@@ -1,0 +1,50 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Multi-Output Partial Retry",
+			"description": "Step produces file on attempt 1, but misses string until retry attempt 2",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Generate Bundle & Tag",
+					"prompt": "Create bundle and compute semantic tag",
+					"outputs": {
+						"bundle_file": {
+							"type": "file",
+							"path": "bundle.js",
+							"base": "workspace"
+						},
+						"tag": {
+							"type": "string",
+							"description": "Semantic release tag"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Release {{outputs.tag}} generated at {{outputs.bundle_file}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"bundle_file": "bundle.js",
+				"tag": "v2.0.0"
+			}
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

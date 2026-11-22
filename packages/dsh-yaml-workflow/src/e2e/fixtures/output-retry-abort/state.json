@@ -1,0 +1,42 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Output Retry Abort",
+			"description": "Workflow is aborted during output retry prompt",
+			"args": {},
+			"steps": [
+				{
+					"kind": "prompt",
+					"name": "Generate Report",
+					"prompt": "Generate the audit report",
+					"outputs": {
+						"audit_report": {
+							"type": "file",
+							"path": "report.txt",
+							"base": "workspace"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Consume Report",
+					"text": "Report: {{outputs.audit_report}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow aborted at step 1/2"
+	}
+}

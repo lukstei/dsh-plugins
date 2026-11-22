@@ -1,0 +1,22 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"agent": {
+			"preExistingTitle": "Untouched Title"
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "print", "state"],
+		"noErrors": true,
+		"commandCount": 3
+	}
+}

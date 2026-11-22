@@ -1,0 +1,19 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"structured": {
+				"report": "REPORT.md"
+			}
+		}
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "subagent output verification failed: declared outputs were missing or unwritten"
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-subagent",
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "output", "state", "print", "state"],
+		"noErrors": true,
+		"commandCount": 6
+	}
+}

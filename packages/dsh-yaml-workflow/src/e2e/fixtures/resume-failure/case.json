@@ -1,0 +1,30 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume"
+		}
+	],
+	"behavior": {
+		"promptInterruption": {
+			"stepIndex": 1,
+			"error": "Resume prompt failed"
+		}
+	},
+	"expectedState": {
+		"status": "aborted",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state", "step", "state", "step", "state"],
+		"noErrors": true,
+		"commandCount": 7
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Resume prompt failed"
+	}
+}

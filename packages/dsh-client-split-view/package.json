@@ -1,0 +1,118 @@
+{
+	"name": "@lukstei/dsh-client-split-view",
+	"version": "0.2.2-rc.5.1",
+	"description": "Concurrent multi-session split view and overlay layout plugin for DeepSeek Harness",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./dist/index.js"
+		},
+		"./client": "./dist/client.js",
+		"./package.json": "./package.json",
+		"./client-contract": {
+			"types": "./src/client/contract.ts"
+		}
+	},
+	"files": [
+		"src",
+		"dist",
+		"README.md",
+		"cordis.patch.yml",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"scripts": {
+		"build": "tsdown --config tsdown.config.ts --logLevel error",
+		"dev": "tsdown --config tsdown.config.ts --watch",
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run --reporter=minimal",
+		"test:watch": "vitest",
+		"test:update": "vitest run -u",
+		"verify": "pnpm --silent run check && pnpm --silent run build && pnpm --silent run typecheck && pnpm --silent run test",
+		"prepack": "pnpm run build"
+	},
+	"dsh": {
+		"bundle": {
+			"patch": "./cordis.patch.yml"
+		},
+		"client": {
+			"platform": "web",
+			"immediately": true,
+			"inject": [
+				"@deepseek-ai/dsh-api-gateway",
+				"@deepseek-ai/dsh-api-session-controller",
+				"@deepseek-ai/dsh-api-workspace-files",
+				"@deepseek-ai/dsh-client-ui-slots",
+				"@deepseek-ai/dsh-client-ui-workspace",
+				"@deepseek-ai/dsh-client-ui-layout",
+				"@deepseek-ai/dsh-client-ui-session",
+				"@deepseek-ai/dsh-client-ui-sidebar-right",
+				"@deepseek-ai/dsh-client-ui-conversation"
+			]
+		}
+	},
+	"devDependencies": {
+		"@deepseek-ai/cordis": "catalog:",
+		"@deepseek-ai/dsh-api-gateway": "catalog:",
+		"@deepseek-ai/dsh-api-session-controller": "catalog:",
+		"@deepseek-ai/dsh-api-workspace-controller": "catalog:",
+		"@deepseek-ai/dsh-api-workspace-files": "catalog:",
+		"@deepseek-ai/dsh-client-store": "catalog:",
+		"@deepseek-ai/dsh-client-ui-chat": "catalog:",
+		"@deepseek-ai/dsh-client-ui-conversation": "catalog:",
+		"@deepseek-ai/dsh-client-ui-layout": "catalog:",
+		"@deepseek-ai/dsh-client-ui-primitives": "catalog:",
+		"@deepseek-ai/dsh-client-ui-renderer": "catalog:",
+		"@deepseek-ai/dsh-client-ui-session": "catalog:",
+		"@deepseek-ai/dsh-client-ui-sidebar": "catalog:",
+		"@deepseek-ai/dsh-client-ui-sidebar-right": "catalog:",
+		"@deepseek-ai/dsh-client-ui-slots": "catalog:",
+		"@deepseek-ai/dsh-client-ui-workspace": "catalog:",
+		"@deepseek-ai/dsh-session": "catalog:",
+		"@deepseek-ai/dsh-typert-protocol": "catalog:",
+		"@deepseek-ai/dsh-util-workspace-path": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"react": "catalog:",
+		"tsdown": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"zod": "catalog:"
+	},
+	"peerDependencies": {
+		"@deepseek-ai/cordis": "*",
+		"@deepseek-ai/dsh-api-gateway": "*",
+		"@deepseek-ai/dsh-api-session-controller": "*",
+		"@deepseek-ai/dsh-api-workspace-controller": "*",
+		"@deepseek-ai/dsh-api-workspace-files": "*",
+		"@deepseek-ai/dsh-client-ui-conversation": "*",
+		"@deepseek-ai/dsh-client-ui-primitives": "*",
+		"@deepseek-ai/dsh-client-ui-slots": "*",
+		"@deepseek-ai/dsh-session": "*",
+		"@deepseek-ai/dsh-typert-protocol": "*",
+		"@deepseek-ai/dsh-util-workspace-path": "*",
+		"react": "*"
+	},
+	"dependencies": {
+		"@lukstei/util-review-ui": "workspace:*"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/dsh-client-split-view"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

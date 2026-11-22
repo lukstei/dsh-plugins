@@ -1,0 +1,12 @@
+name: "Forward Reference Workflow"
+description: "Step 1 refers to output declared in step 2"
+steps:
+  - name: "Step 1"
+    prompt: "Deploying build from {{outputs.build_path}}"
+  - name: "Step 2"
+    prompt: "Compile project"
+    outputs:
+      build_path:
+        type: file
+        path: dist/bundle.js
+        base: workspace

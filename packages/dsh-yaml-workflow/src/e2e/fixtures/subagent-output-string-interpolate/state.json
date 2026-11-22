@@ -1,0 +1,46 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Smells Scan Workflow",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Scan",
+					"prompt": "Scan codebase",
+					"config": {
+						"provider": "spawn"
+					},
+					"outputs": {
+						"findings": {
+							"type": "string",
+							"description": "Antipattern findings"
+						}
+					}
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "Triage findings: {{outputs.findings}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 2,
+			"status": "completed",
+			"outputs": {
+				"findings": "F1 [AP1] index.ts:10 - Derivable state"
+			}
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (2 steps)"
+	}
+}

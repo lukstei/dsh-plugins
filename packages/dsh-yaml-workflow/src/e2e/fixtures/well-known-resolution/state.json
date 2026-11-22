@@ -1,0 +1,29 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Well Known Local",
+			"args": {},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Well known success"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "resolved-flow",
+			"rawInput": "resolved-flow",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (1 steps)"
+	}
+}

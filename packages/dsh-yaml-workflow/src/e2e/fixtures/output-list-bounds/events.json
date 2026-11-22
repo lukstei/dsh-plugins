@@ -1,0 +1,126 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "List Output Bounds Validation",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"List Output Bounds Validation\",\"description\":\"Validates list outputs enforcing min and max item constraints\",\"args\":{},\"steps\":[{\"kind\":\"prompt\",\"name\":\"Select Tech Stack\",\"prompt\":\"Choose 2 to 3 backend languages\",\"outputs\":{\"languages\":{\"type\":\"list\",\"description\":\"Selected languages list\",\"min\":2,\"max\":3}}},{\"kind\":\"print\",\"name\":\"Step 2\",\"text\":\"Selected languages:\\n{{outputs.languages}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml\",\"resolvedArgs\":{},\"runId\":\"e2e-output-list-bounds-run\"},\"runId\":\"e2e-output-list-bounds-run\",\"sessionId\":\"e2e-output-list-bounds\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-step-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"step\",\"id\":\"wf-step-e2e-output-list-bounds-run-0\",\"stepIndex\":0,\"label\":\"Step 1 of 2: Select Tech Stack\",\"kind\":\"success\",\"runId\":\"e2e-output-list-bounds-run\",\"sessionId\":\"e2e-output-list-bounds\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-step-3",
+			"kind": "success",
+			"text": "Workflow action 'step' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-output-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"output\",\"stepIndex\":0,\"name\":\"languages\",\"value\":\"[\\\"typescript\\\",\\\"rust\\\"]\",\"outputType\":\"list\",\"runId\":\"e2e-output-list-bounds-run\",\"sessionId\":\"e2e-output-list-bounds\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-output-5",
+			"kind": "success",
+			"text": "Workflow action 'output' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"outputs\":{\"languages\":[\"typescript\",\"rust\"]},\"runId\":\"e2e-output-list-bounds-run\",\"sessionId\":\"e2e-output-list-bounds\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-9",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-output-list-bounds-run-1\",\"text\":\"Selected languages:\\n- typescript\\n- rust\",\"runId\":\"e2e-output-list-bounds-run\",\"sessionId\":\"e2e-output-list-bounds\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-9",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-11",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"outputs\":{\"languages\":[\"typescript\",\"rust\"]},\"runId\":\"e2e-output-list-bounds-run\",\"sessionId\":\"e2e-output-list-bounds\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-11",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

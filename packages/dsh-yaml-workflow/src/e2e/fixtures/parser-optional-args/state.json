@@ -1,0 +1,34 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Optional Arg Flow",
+			"args": {
+				"optionalArg": {
+					"type": "string",
+					"required": false
+				}
+			},
+			"steps": [
+				{
+					"kind": "print",
+					"name": "Step 1",
+					"text": "Done"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 1,
+			"status": "completed"
+		}
+	},
+	"lastResult": {
+		"kind": "success",
+		"text": "Completed workflow (1 steps)"
+	}
+}

@@ -1,0 +1,20 @@
+name: "Parametrized Deployment Workflow"
+args:
+  environment:
+    type: choice
+    choices: [staging, production]
+    default: staging
+    description: "Deployment target environment"
+  version:
+    type: string
+    description: "Semantic version tag to deploy"
+  instructions:
+    type: string
+    description: "Additional operational notes"
+    default: "Run smoke tests before proceeding"
+
+steps:
+  - name: "Announce target"
+    print: "Preparing deployment of version {{args.version}} to {{args.environment}}"
+  - name: "Deployment execution"
+    prompt: "Deploy {{args.version}} to {{args.environment}}. Operational notes: {{args.instructions}}"

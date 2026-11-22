@@ -1,0 +1,39 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Subagent Failure",
+			"args": {},
+			"steps": [
+				{
+					"kind": "subagent",
+					"name": "Failing Subagent",
+					"prompt": "Subagent error",
+					"config": {
+						"provider": "spawn"
+					},
+					"output": "fail_out"
+				},
+				{
+					"kind": "print",
+					"name": "Step 2",
+					"text": "After failure: {{outputs.fail_out}}"
+				}
+			]
+		},
+		"invocation": {
+			"targetPath": "workflow.yaml",
+			"rawInput": "workflow.yaml",
+			"resolvedArgs": {},
+			"runId": "test-session-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "aborted",
+			"error": "Subagent failed unexpectedly"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Workflow execution failed at step 1/2: Subagent failed unexpectedly"
+	}
+}

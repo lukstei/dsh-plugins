@@ -1,0 +1,4 @@
+{
+	"extends": "../../tsconfig.client.json",
+	"include": ["src/**/*", "tsdown.config.ts", "vitest.config.ts", ".ladle/**/*"]
+}

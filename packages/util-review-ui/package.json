@@ -1,0 +1,62 @@
+{
+	"name": "@lukstei/util-review-ui",
+	"version": "0.2.2-rc.5.1",
+	"type": "module",
+	"exports": {
+		".": "./src/types.ts",
+		"./types": "./src/types.ts",
+		"./review": "./src/review.ts",
+		"./client/*": "./src/client/*",
+		"./pane-css": "./scripts/pane-css.ts"
+	},
+	"scripts": {
+		"check": "biome check --reporter=concise .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run --reporter=minimal",
+		"verify": "pnpm --silent run check && pnpm --silent run typecheck && pnpm --silent run test"
+	},
+	"dependencies": {
+		"@deepseek-ai/dsh-typert-protocol": "catalog:",
+		"lightningcss": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@deepseek-ai/dsh-client-ui-conversation": "catalog:",
+		"@deepseek-ai/dsh-client-ui-primitives": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"happy-dom": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	},
+	"peerDependencies": {
+		"@deepseek-ai/dsh-client-ui-conversation": "*",
+		"@deepseek-ai/dsh-client-ui-primitives": "*",
+		"react": "*"
+	},
+	"description": "Shared review UI components, types and styles for DSH review and split-view plugins",
+	"files": [
+		"src",
+		"scripts",
+		"README.md",
+		"!src/**/*.spec.*",
+		"!src/**/*.test.*",
+		"!src/**/*.stories.*",
+		"!src/**/stories",
+		"!src/**/*.e2e.*",
+		"!src/**/__snapshots__",
+		"!src/**/fixtures"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukstei/dsh-plugins.git",
+		"directory": "packages/util-review-ui"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

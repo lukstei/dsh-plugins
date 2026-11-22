@@ -1,0 +1,21 @@
+{
+	"latestRun": {
+		"workflow": {
+			"name": "Running Flow",
+			"steps": []
+		},
+		"invocation": {
+			"targetPath": "flow.yaml",
+			"resolvedArgs": {},
+			"runId": "running-run"
+		},
+		"state": {
+			"stepIndex": 0,
+			"status": "running"
+		}
+	},
+	"lastResult": {
+		"kind": "error",
+		"text": "Cannot start workflow: 'Running Flow' is already running"
+	}
+}

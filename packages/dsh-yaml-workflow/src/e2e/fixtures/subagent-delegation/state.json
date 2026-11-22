@@ -1,0 +1,37 @@
+{
+	"workflow": {
+		"name": "Code Audit Workflow",
+		"args": {},
+		"steps": [
+			{
+				"kind": "subagent",
+				"name": "Step 1",
+				"prompt": "Review architecture rules",
+				"config": {
+					"provider": "spawn",
+					"preset": "security-auditor",
+					"model": "deepseek-coder"
+				},
+				"output": "review_out"
+			},
+			{
+				"kind": "print",
+				"name": "Step 2",
+				"text": "Review completed successfully: {{outputs.review_out}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-subagent-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed",
+		"outputs": {
+			"review_out": "Mock subagent output for Step 1 of 2: Step 1"
+		}
+	}
+}

@@ -1,0 +1,4 @@
+name: "Abort During Print"
+steps:
+  - print: "P1"
+  - prompt: "P2"

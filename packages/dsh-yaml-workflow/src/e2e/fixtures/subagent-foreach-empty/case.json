@@ -1,0 +1,37 @@
+{
+	"targetPath": "workflow.yaml",
+	"sessionId": "e2e-foreach-empty",
+	"behavior": {
+		"outputs": [
+			{
+				"stepIndex": 0,
+				"list": {
+					"name": "pending",
+					"value": []
+				}
+			}
+		]
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 3,
+		"outputs": {
+			"pending": [],
+			"processed": []
+		}
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"output",
+			"state",
+			"output",
+			"state",
+			"print",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 8
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"expectedState": {
+		"status": "paused",
+		"stepIndex": 2,
+		"pendingSubagentResults": [
+			{
+				"stepIndex": 1,
+				"stepName": "Step 2 of 3: Configured Subagent",
+				"text": "Mock subagent output for Step 2 of 3: Configured Subagent"
+			}
+		]
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"state",
+			"step",
+			"output",
+			"state",
+			"step",
+			"state",
+			"step"
+		],
+		"noErrors": true,
+		"commandCount": 9
+	}
+}

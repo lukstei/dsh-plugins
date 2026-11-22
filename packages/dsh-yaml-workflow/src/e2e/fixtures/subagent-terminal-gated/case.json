@@ -1,0 +1,34 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		},
+		{
+			"type": "resume"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"defaultOutput": "Preserved unconsumed terminal finding"
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	},
+	"expectedEvents": {
+		"actions": [
+			"init",
+			"step",
+			"output",
+			"state",
+			"step",
+			"state",
+			"print",
+			"state"
+		],
+		"noErrors": true,
+		"commandCount": 8
+	}
+}

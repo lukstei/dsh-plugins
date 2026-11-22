@@ -1,0 +1,7 @@
+name: Abort During Subagent
+steps:
+  - name: Subagent 1
+    prompt: "Subagent task"
+    subagent: true
+    output: sub_out
+  - print: "After subagent {{outputs.sub_out}}"

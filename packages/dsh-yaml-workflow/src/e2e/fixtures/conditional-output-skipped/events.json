@@ -1,0 +1,88 @@
+[
+	{
+		"type": "session/title",
+		"data": {
+			"title": "Conditional Output Skipped",
+			"messageSeqs": [],
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-init-1",
+			"name": "wf-event",
+			"args": "{\"action\":\"init\",\"workflow\":{\"name\":\"Conditional Output Skipped\",\"description\":\"Minimal reproducing example of disabling a step with an output and referencing that output downstream\",\"args\":{\"smells\":{\"type\":\"bool\",\"default\":\"true\",\"required\":false}},\"steps\":[{\"kind\":\"subagent\",\"name\":\"Antipattern Scan\",\"prompt\":\"Scan code for antipatterns\",\"config\":{\"provider\":\"spawn\"},\"output\":\"smell_findings\",\"if\":\"{{args.smells}}\"},{\"kind\":\"print\",\"name\":\"Triage\",\"text\":\"Triage findings: {{outputs.smell_findings}}\"}]},\"invocation\":{\"targetPath\":\"workflow.yaml\",\"rawInput\":\"workflow.yaml smells=false\",\"resolvedArgs\":{\"smells\":\"false\"},\"runId\":\"e2e-conditional-output-skipped-run\"},\"runId\":\"e2e-conditional-output-skipped-run\",\"sessionId\":\"e2e-conditional-output-skipped\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-init-1",
+			"kind": "success",
+			"text": "Workflow action 'init' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-3",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":1,\"status\":\"running\",\"runId\":\"e2e-conditional-output-skipped-run\",\"sessionId\":\"e2e-conditional-output-skipped\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-3",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-print-5",
+			"name": "wf-event",
+			"args": "{\"action\":\"print\",\"id\":\"wf-print-e2e-conditional-output-skipped-run-1\",\"text\":\"Triage findings: undefined\",\"runId\":\"e2e-conditional-output-skipped-run\",\"sessionId\":\"e2e-conditional-output-skipped\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-print-5",
+			"kind": "success",
+			"text": "Workflow action 'print' recorded"
+		}
+	},
+	{
+		"type": "command/run",
+		"data": {
+			"commandId": "wf-state-7",
+			"name": "wf-event",
+			"args": "{\"action\":\"state\",\"stepIndex\":2,\"status\":\"completed\",\"runId\":\"e2e-conditional-output-skipped-run\",\"sessionId\":\"e2e-conditional-output-skipped\"}",
+			"source": {
+				"kind": "user"
+			}
+		}
+	},
+	{
+		"type": "command/done",
+		"data": {
+			"commandId": "wf-state-7",
+			"kind": "success",
+			"text": "Workflow action 'state' recorded"
+		}
+	}
+]

@@ -1,0 +1,8 @@
+{
+	"targetPath": "workflow.yaml smells=false",
+	"sessionId": "e2e-conditional-output-skipped",
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 2
+	}
+}

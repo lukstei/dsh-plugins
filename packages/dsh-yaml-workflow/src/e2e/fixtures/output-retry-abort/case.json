@@ -1,0 +1,27 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"promptInterruption": {
+			"stepIndex": 1,
+			"abort": true
+		}
+	},
+	"expectedState": {
+		"status": "aborted",
+		"stepIndex": 0
+	},
+	"expectedEvents": {
+		"actions": ["init", "step", "state"],
+		"noErrors": true,
+		"commandCount": 3
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "Workflow aborted at step 1/2"
+	}
+}

@@ -1,0 +1,15 @@
+name: "Foreach Subagent Single Output"
+description: "Demonstrates dynamic subagents spawned via foreach over a list output with single output lifting"
+steps:
+  - name: "Generate Targets"
+    prompt: "Generate a list of target components"
+    outputs:
+      targets:
+        type: list
+        description: "List of component names to inspect"
+  - name: "Inspect Component"
+    subagent: true
+    foreach: "{{outputs.targets}}"
+    prompt: "Inspect target {{item}} and provide a status summary"
+    output: summaries
+  - print: "Summaries:\n{{outputs.summaries}}"

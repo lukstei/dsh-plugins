@@ -1,0 +1,7 @@
+{
+	"latestRun": null,
+	"lastResult": {
+		"kind": "error",
+		"text": "Argument error in workflow 'workflow.yaml': Invalid value 'notabool' for bool argument 'active'. Allowed values: true, false"
+	}
+}

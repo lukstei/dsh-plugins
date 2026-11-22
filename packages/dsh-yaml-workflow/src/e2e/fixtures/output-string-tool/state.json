@@ -1,0 +1,38 @@
+{
+	"workflow": {
+		"name": "Generate Release Version",
+		"description": "Agent calculates release tag string and logs via save_output tool",
+		"args": {},
+		"steps": [
+			{
+				"kind": "prompt",
+				"name": "Calculate Semantic Tag",
+				"prompt": "Determine next semver tag",
+				"outputs": {
+					"release_tag": {
+						"type": "string",
+						"description": "Calculated semantic version string"
+					}
+				}
+			},
+			{
+				"kind": "print",
+				"name": "Step 2",
+				"text": "Next release version is {{outputs.release_tag}}"
+			}
+		]
+	},
+	"invocation": {
+		"targetPath": "workflow.yaml",
+		"rawInput": "workflow.yaml",
+		"resolvedArgs": {},
+		"runId": "e2e-output-string-run"
+	},
+	"state": {
+		"stepIndex": 2,
+		"status": "completed",
+		"outputs": {
+			"release_tag": "v1.2.3"
+		}
+	}
+}

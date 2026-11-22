@@ -1,0 +1,23 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"promptInterruption": {
+			"stepIndex": 0,
+			"abort": true
+		}
+	},
+	"expectedState": {
+		"status": "completed",
+		"stepIndex": 1
+	},
+	"expectedEvents": {
+		"actions": ["init", "print", "state"],
+		"noErrors": true,
+		"commandCount": 3
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"actions": [
+		{
+			"type": "execute",
+			"targetPath": "workflow.yaml"
+		}
+	],
+	"behavior": {
+		"subagent": {
+			"structured": null
+		}
+	},
+	"expectedResult": {
+		"kind": "error",
+		"textPattern": "subagent failed to produce required structured outputs"
+	}
+}

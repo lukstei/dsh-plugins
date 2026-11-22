@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`workflow command copy > renders Copy availability with recorded input: false 1`] = `"<button type="button" class="dsh-wf-copy-btn" data-copied="false" disabled="" title="Original command was not recorded" aria-label="Copy command">"`;
+
+exports[`workflow command copy > renders Copy availability with recorded input: true 1`] = `"<button type="button" class="dsh-wf-copy-btn" data-copied="false" title="Copy command" aria-label="Copy command">"`;

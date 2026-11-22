@@ -1,0 +1,68 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders print step with markdown factory: fenced markdown code block 1`] = `
+{
+  "html": "<div class="dsh-wf-print-step"><div data-markdown=""></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "\`\`\`yaml
+version: 1
+env: production
+\`\`\`",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders print step with markdown factory: markdown bullet list and inline code 1`] = `
+{
+  "html": "<div class="dsh-wf-print-step"><div data-markdown=""></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "Selected services:
+- \`auth-service\`: v1.2
+- \`billing\`: v2.0",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders print step with markdown factory: queued workflow invocation 1`] = `
+{
+  "html": "<div class="dsh-wf-print-step"><div data-markdown=""></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "Workflow queued:
+
+    /wf first.yaml env=prod",
+      },
+    ],
+  ],
+}
+`;
+
+exports[`renders print step with markdown factory: single line print 1`] = `
+{
+  "html": "<div class="dsh-wf-print-step"><div data-markdown=""></div></div>",
+  "markdown": [
+    [
+      "conversation.chat.reasoning.content",
+      {
+        "running": false,
+        "text": "Starting deployment",
+      },
+    ],
+  ],
+}
+`;
