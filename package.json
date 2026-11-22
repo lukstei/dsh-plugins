@@ -1,6 +1,7 @@
 {
 	"name": "dsh-plugins",
 	"private": true,
+	"packageManager": "pnpm@12.21.0",
 	"type": "module",
 	"scripts": {
 		"verify": "pnpm --silent run check && pnpm --silent run typecheck && pnpm --silent run build && pnpm --silent run test",
