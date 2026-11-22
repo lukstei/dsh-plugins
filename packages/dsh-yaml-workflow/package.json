@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-yaml-workflow",
-	"version": "0.2.2-rc.5.1",
+	"version": "0.2.2-rc.5.2",
 	"description": "Execute sequential prompt workflows from YAML",
 	"type": "module",
 	"main": "./dist/index.js",

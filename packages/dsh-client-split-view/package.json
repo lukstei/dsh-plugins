@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-client-split-view",
-	"version": "0.2.2-rc.5.1",
+	"version": "0.2.2-rc.5.2",
 	"description": "Concurrent multi-session split view and overlay layout plugin for DeepSeek Harness",
 	"type": "module",
 	"main": "./dist/index.js",

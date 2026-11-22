@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-resilient-persistence",
-	"version": "0.2.2-rc.5.1",
+	"version": "0.2.2-rc.5.2",
 	"description": "Corrupt session protection for DSH session persistence",
 	"type": "module",
 	"main": "./src/index.ts",

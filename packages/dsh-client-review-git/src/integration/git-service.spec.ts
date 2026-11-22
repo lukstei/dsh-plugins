@@ -1087,7 +1087,7 @@ test("resolves a branch hidden by the review list's age filter", async () => {
 	git("add", ".");
 	execFileSync("git", ["commit", "-m", "Legacy"], {
 		cwd,
-		env: { ...process.env, GIT_COMMITTER_DATE: "2020-01-01T00:00:00" },
+		env: { ...gitEnv(), GIT_COMMITTER_DATE: "2020-01-01T00:00:00" },
 	});
 	git("checkout", "-q", "main");
 	remoteHead(git);
