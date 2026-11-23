@@ -499,6 +499,21 @@ describe("Kanban Event Folding", () => {
 		},
 	);
 
+	it("hides a subagent session that inherited its parent's kanban init", () => {
+		const record = toKanbanRecord(
+			foldKanbanState(header, [kanbanCmd({ action: "init", createdAt: 2000 })]),
+		);
+		assert(record);
+		expect({
+			subagent: isSessionVisibleInKanban(
+				record,
+				{ blank: false, origin: "subagent" },
+				3000,
+			),
+			root: isSessionVisibleInKanban(record, { blank: false }, 3000),
+		}).toEqual({ subagent: false, root: true });
+	});
+
 	it("moves an unheld blank draft to review and clears that placement on a user message", () => {
 		const draft = foldKanbanState(header, [
 			kanbanCmd({ action: "init", createdAt: 2000 }),

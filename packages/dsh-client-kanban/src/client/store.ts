@@ -18,16 +18,18 @@ import { type KanbanLane, type KanbanRecord, ONE_WEEK_MS } from "../types.ts";
 /**
  * Purpose: Determine whether a session belongs to the Kanban board and has not expired.
  * Contract:
- * - Inputs: KanbanRecord or null/undefined, optional session summary with blank status, and reference timestamp (defaults to Date.now()).
+ * - Inputs: KanbanRecord or null/undefined, optional session summary with blank status and origin, and reference timestamp (defaults to Date.now()).
  * - Outputs: True if session is initialized, not expired in Done (> 7 days), and not an unstarted empty session.
  * - Throws / Errors: Never throws.
  */
 export function isSessionVisibleInKanban(
 	record: KanbanRecord | null | undefined,
-	session?: Pick<SessionSummary, "blank">,
+	session?: Pick<SessionSummary, "blank" | "origin">,
 	now: number = Date.now(),
 ): boolean {
 	if (!record) return false;
+	// edge case: a forked subagent inherits its parent's kanban events, but is never a board session
+	if (session?.origin === "subagent") return false;
 	if (
 		record.doneAt !== undefined &&
 		record.pinnedAt === undefined &&

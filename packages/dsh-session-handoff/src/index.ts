@@ -10,7 +10,10 @@ import type {
 import { createUserMessage } from "@deepseek-ai/dsh-llm";
 import type {} from "@deepseek-ai/dsh-session";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
-import type { SessionRecord } from "@deepseek-ai/dsh-session-query";
+import type {
+	SessionLogSnapshot,
+	SessionRecord,
+} from "@deepseek-ai/dsh-session-query";
 import type {} from "@deepseek-ai/dsh-session-title";
 import type {} from "@deepseek-ai/dsh-working-directory";
 import type { Workspace } from "@deepseek-ai/dsh-workspace";
@@ -116,6 +119,7 @@ async function handoff(
 				agent,
 				targetId,
 				rendered.markdown,
+				snapshot,
 				invocation.signal,
 			);
 			return {
@@ -188,6 +192,28 @@ function workspaceOf(
 	return undefined;
 }
 
+function kanbanLinkArgs(snapshot: SessionLogSnapshot): string[] {
+	const all: string[] = [];
+	for (const event of snapshot.events) {
+		if (event.type !== "command/run" || event.data.name !== "kanban") continue;
+		const args = event.data.args;
+		if (args === undefined) continue;
+		try {
+			const parsed: unknown = JSON.parse(args);
+			if (
+				typeof parsed === "object" &&
+				parsed !== null &&
+				"action" in parsed &&
+				parsed.action === "add-link"
+			)
+				all.push(args);
+		} catch {
+			// edge case: non-JSON kanban args carry no link
+		}
+	}
+	return all;
+}
+
 function shortId(id: string): string {
 	return id.slice(0, SHORT_ID_LENGTH);
 }
@@ -200,6 +226,7 @@ function shortId(id: string): string {
  * @param source - Session the command runs in.
  * @param targetId - Durable id of the handed-off session.
  * @param markdown - Rendered brief.
+ * @param snapshot - Source session log, the origin of the kanban links to copy.
  * @param signal - Cancellation signal of the invoking command.
  * @returns the created session identity.
  */
@@ -208,6 +235,7 @@ async function createBeside(
 	source: Agent,
 	targetId: string,
 	markdown: string,
+	snapshot: SessionLogSnapshot,
 	signal: AbortSignal,
 ): Promise<SessionCreateValue> {
 	const selection = source.model.current();
@@ -247,6 +275,12 @@ async function createBeside(
 		[],
 		signal,
 	);
+
+	// Replaying the source's add-link commands in order reproduces its link set,
+	// since the kanban fold dedupes by url.
+	for (const args of kanbanLinkArgs(snapshot)) {
+		await ctx.commands.execute(agent, `/kanban ${args}`, [], signal);
+	}
 
 	await deliver(ctx, agent, targetId, markdown);
 	return created;

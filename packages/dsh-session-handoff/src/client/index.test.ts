@@ -19,6 +19,10 @@ interface Change {
 interface Harness {
 	/** Sessions added as their own pane, in call order. */
 	readonly panes: SessionId[];
+	/** Sessions closed as panes, in call order. */
+	readonly removed: SessionId[];
+	/** Raw command lines sent per session. */
+	readonly commands: { id: string; line: string }[];
 	/** Hold or drop client scopes for `ids`, exactly as the object layer does. */
 	readonly retain: (ids: readonly string[]) => void;
 	readonly release: (id: string) => void;
@@ -27,6 +31,8 @@ interface Harness {
 
 function setup(): Harness {
 	const panes: SessionId[] = [];
+	const removed: SessionId[] = [];
+	const commands: { id: string; line: string }[] = [];
 	const listeners = new Map<string, Set<Listener>>();
 	const changes = new Map<string, Change>();
 	const listListeners = new Set<Listener>();
@@ -37,8 +43,26 @@ function setup(): Harness {
 		toggleSession: (target: SessionId) => {
 			panes.push(target);
 		},
+		removeSession: (target: SessionId) => {
+			removed.push(target);
+		},
 	});
 	ctx.provide("sessions", {
+		using: async (
+			id: string,
+			_options: unknown,
+			run: (reference: unknown) => Promise<void>,
+		) => {
+			await run({
+				binding: {
+					session: {
+						command: async (line: string) => {
+							commands.push({ id, line });
+						},
+					},
+				},
+			});
+		},
 		list: {
 			getSnapshot: () => ({ ids, byId: {} }),
 			subscribe: (listener: Listener) => {
@@ -94,7 +118,7 @@ function setup(): Harness {
 		for (const listener of set) listener();
 	};
 
-	return { panes, retain, release, emit };
+	return { panes, removed, commands, retain, release, emit };
 }
 
 const launchedEvent = (id: string): SessionEvent =>
@@ -116,6 +140,22 @@ test("launch adds the created session as its own split pane", () => {
 	harness.emit(SOURCE, launchedEvent(LAUNCHED));
 
 	assert.deepEqual(harness.panes, [LAUNCHED]);
+});
+
+test("launch marks the source done in Kanban and closes its pane", async () => {
+	const harness = setup();
+	harness.retain([SOURCE]);
+
+	harness.emit(SOURCE, launchedEvent(LAUNCHED));
+	await new Promise((resolve) => setImmediate(resolve));
+
+	assert.equal(harness.commands.length, 1);
+	assert.equal(harness.commands[0].id, SOURCE);
+	assert.match(
+		harness.commands[0].line,
+		/^\/kanban \{"action":"done","doneAt":\d+\}$/,
+	);
+	assert.deepEqual(harness.removed, [SOURCE]);
 });
 
 test("only an appended launch result adds a pane", () => {

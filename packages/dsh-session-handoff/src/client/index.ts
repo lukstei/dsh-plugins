@@ -23,6 +23,16 @@ export function apply(ctx: Context): void {
 	const sessions = ctx.sessions as unknown as ISessions;
 	const off = new Map<SessionId, () => void>();
 
+	// Same effect as the Kanban Done button: record done, then close the pane.
+	const finish = async (id: SessionId): Promise<void> => {
+		await sessions.using(id, { source: "splitView" }, async (reference) => {
+			await reference.binding.session.command(
+				`/kanban ${JSON.stringify({ action: "done", doneAt: Date.now() })}`,
+			);
+		});
+		ctx.splitView.removeSession(id);
+	};
+
 	const watch = (id: SessionId): void => {
 		const binding = sessions.binding(id);
 		if (binding === undefined) return;
@@ -37,6 +47,7 @@ export function apply(ctx: Context): void {
 				const launched = launchedSessionId(entry.event);
 				if (launched === undefined) continue;
 				ctx.splitView.toggleSession(launched);
+				void finish(id);
 				return;
 			}
 		});

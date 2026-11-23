@@ -548,6 +548,33 @@ test("handoff launch creates the resumed session beside this one", async (t) => 
 	assert.equal(typeof init.createdAt, "number");
 });
 
+test("handoff launch copies kanban links from the source session", async (t) => {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+
+	const link =
+		'{"action":"add-link","label":"PR","url":"https://x.test/1","priority":-1}';
+	const original = snapshot.events;
+	(snapshot as { events: unknown }).events = [
+		...original,
+		{
+			type: "command/run",
+			seq: 99,
+			time: CREATED,
+			data: { name: "kanban", args: link },
+		},
+	];
+	t.after(() => {
+		(snapshot as { events: unknown }).events = original;
+	});
+
+	const harness = await setup(cwd, records);
+	await harness.definition.handler(invocation(harness, ""));
+
+	assert.equal(harness.kanban.length, 2);
+	assert.equal(harness.kanban[1], `/kanban ${link}`);
+});
+
 test("handoff launch names the new session after the source title", async (t) => {
 	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
 	t.after(() => rm(cwd, { recursive: true, force: true }));
