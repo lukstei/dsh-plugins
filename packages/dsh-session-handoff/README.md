@@ -65,12 +65,18 @@ Server-side and client-side entries.
 | `sessionTitle` | Required | @deepseek-ai/dsh-session-title | Plugin stays pending; never applies. |
 | `workspaceRegistry` | Required | @deepseek-ai/dsh-workspace | Plugin stays pending; never applies. |
 
-**Client-side** (`inject`: `sessions`, `splitView`; both required):
+**Client-side** (`inject`: `sessions`, `splitView`, `slots`; all required):
 
 | Plugin / service | Required? | Provided by | Effect without it |
 |---|---|---|---|
 | `sessions` | Required | @deepseek-ai/dsh-api-session-controller | Plugin stays pending; never applies. |
 | `splitView` | Required | [`@lukstei/dsh-client-split-view`](../dsh-client-split-view/README.md) (also in `dsh.client.inject`) | Plugin stays pending; never applies. The client entry (launch into a pane) does not activate; the host `/handoff` command still works. |
+
+| `slots` | Required | @deepseek-ai/dsh-client-ui-renderer | Plugin stays pending; never applies. |
+
+### Handoff ring
+
+A small ring beside the send button marks a session worth handing off: yellow at 70k prompt tokens, red at 100k. After 5 idle minutes the prompt cache is cold and the bars drop to 40k and 70k. Both bars are also capped at 60% and 80% of the model's context window. For ACP agent sessions, which never report usage to DSH, it reads the agent's context usage from `@zaimokuza/dsh-acp-adapter` once per finished turn. The adapter is an optional peer dependency: without it the ring only covers regular DSH sessions. Display only; run `/handoff` yourself. Thresholds live in `src/client/level.ts`.
 
 Code import (no mount): [`@lukstei/dsh-scratch-dir`](../dsh-scratch-dir/README.md) (`scratchDirectory`).
 

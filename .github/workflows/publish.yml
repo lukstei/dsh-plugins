@@ -32,4 +32,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" --generate-notes --title "$TAG" --prerelease
+        run: |
+          # release notes are this tag's CHANGELOG.md section
+          awk '/^## /{p=($2==ENVIRON["TAG"])} p' CHANGELOG.md > notes.md
+          gh release create "$TAG" --notes-file notes.md --title "$TAG" --prerelease

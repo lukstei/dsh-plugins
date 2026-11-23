@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-client-notify",
-	"version": "0.2.2-rc.5.3",
+	"version": "0.2.2-rc.5.4",
 	"description": "Client-side browser desktop notification plugin for DeepSeek Harness",
 	"type": "module",
 	"main": "./dist/index.js",

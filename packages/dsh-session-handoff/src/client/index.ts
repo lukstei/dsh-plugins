@@ -1,10 +1,15 @@
 import type { Context } from "@deepseek-ai/cordis";
 import type { ISessions } from "@deepseek-ai/dsh-api-session-controller/client";
+import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
+import type {} from "@deepseek-ai/dsh-client-ui-renderer/client";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import type {} from "@lukstei/dsh-client-split-view/client-contract";
+import type {} from "@zaimokuza/dsh-acp-adapter/remote";
 import { launchedSessionId } from "../launch.ts";
+import { type AcpUsageReader, setAcpUsageReader } from "./acp-usage.ts";
+import { HandoffRing } from "./ring.ts";
 
-export const inject = ["sessions", "splitView"];
+export const inject = ["sessions", "splitView", "slots"];
 
 /**
  * Open every session the Host reports as launched as a pane of its own. A slash
@@ -65,6 +70,40 @@ export function apply(ctx: Context): void {
 			off.delete(id);
 		}
 	};
+
+	ctx.effect(
+		() =>
+			ctx.slots.inject("conversation.input.right", () =>
+				ctx.slots.register(
+					{
+						name: "conversation.input.right",
+						id: "session-handoff.ring",
+						order: 90,
+						inject: () => ({}),
+					},
+					HandoffRing,
+				),
+			),
+		"session-handoff: handoff ring",
+	);
+
+	// Optional: the ACP adapter's remote exists only while that plugin is mounted. Outside this
+	// scope the reader stays unset and the ring falls back to the DSH `contextPressure`.
+	// `remote` is requested alongside, as the adapter's own client does for its namespace.
+	ctx.inject(["remote", "remote.dshAcp"], (acpCtx) => {
+		const remote = acpCtx.remote.dshAcp;
+		const reader: AcpUsageReader = async (id) => {
+			const result = await remote.agentSessionSnapshot(id);
+			if (!result.ok) {
+				console.warn("session-handoff: ACP usage unavailable", result);
+				return undefined;
+			}
+			const usage = result.value.contextUsage;
+			return usage === null ? undefined : usage;
+		};
+		setAcpUsageReader(reader);
+		return () => setAcpUsageReader(undefined);
+	});
 
 	const dispose = sessions.list.subscribe(sync);
 	sync();

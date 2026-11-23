@@ -39,6 +39,10 @@ function setup(): Harness {
 	let ids: string[] = [];
 
 	const ctx = new Context();
+	ctx.provide("slots", {
+		inject: () => () => {},
+		register: () => () => {},
+	});
 	ctx.provide("splitView", {
 		toggleSession: (target: SessionId) => {
 			panes.push(target);
