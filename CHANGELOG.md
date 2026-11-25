@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2-rc.5.7 - 2026-11-25
+
+- **@lukstei/dsh-session-handoff**
+  - Fixes the published package missing its server-side entry point. `dist/index.js` is now built and shipped, so the plugin's server half loads after install.
+
 ## v0.2.2-rc.5.6 - 2026-11-25
 
 - **@lukstei/dsh-client-review-git**
