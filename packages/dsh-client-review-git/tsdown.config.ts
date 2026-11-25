@@ -1,3 +1,4 @@
+import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { paneCss } from "@lukstei/util-review-ui/pane-css";
 import { defineConfig } from "tsdown";
@@ -20,7 +21,15 @@ export default defineConfig(
 			target: "es2022",
 			dts: false,
 			clean: false,
-			deps: { neverBundle: true },
+			// util-review-ui ships TS only (no build), so inline it into the host bundle
+			deps: {
+				alwaysBundle: (specifier: string) =>
+					specifier.startsWith("@lukstei/util-review-ui"),
+				neverBundle: (specifier: string) =>
+					!specifier.startsWith(".") &&
+					!isAbsolute(specifier) &&
+					!specifier.startsWith("@lukstei/util-review-ui"),
+			},
 			outputOptions: { entryFileNames: "host.js" },
 			plugins: [
 				{

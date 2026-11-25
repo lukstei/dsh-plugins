@@ -41,7 +41,7 @@ export function verifyClientBundlePlugin(id: string) {
 
 export interface ClientBundleOptions {
 	pluginId: string;
-	clientEntry?: string;
+	clientEntry?: string | false;
 	serverEntry?: Record<string, unknown> | false;
 	clientPlugins?: unknown[];
 	codeSplitting?: boolean;
@@ -80,6 +80,8 @@ export function defineClientBundleConfig(
 			serverEntry ? { logLevel: "error", ...serverEntry } : defaultServerEntry,
 		);
 	}
+
+	if (clientEntry === false) return configs;
 
 	configs.push({
 		entry: { client: clientEntry },

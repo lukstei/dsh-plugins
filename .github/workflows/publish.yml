@@ -22,12 +22,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run verify
       - name: Publish to npm
-        env:
-          TAG: ${{ github.ref_name }}
-        run: |
-          # pre-release versions (contain "-") must not land on `latest`
-          case "$TAG" in *-*) DIST_TAG=next ;; *) DIST_TAG=latest ;; esac
-          pnpm -r publish --access public --provenance --no-git-checks --tag "$DIST_TAG"
+        run: pnpm -r publish --access public --provenance --no-git-checks --tag latest
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.2-rc.5.6 - 2026-11-25
+
+- **@lukstei/dsh-client-review-git**
+  - Fixes the git review view failing to load from the published package. Its shared review UI code is now bundled into the plugin.
+- **General**
+  - Pre-release versions are now published to npm's `latest` tag instead of `next`, so `npm install` without a version can pick up a pre-release.
+
 ## v0.2.2-rc.5.5 - 2026-11-25
 
 - **@lukstei/dsh-client-kanban**
