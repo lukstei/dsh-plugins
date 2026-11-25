@@ -127,6 +127,7 @@ export const FullBoard: Story = () => {
 					value: { items: [], hasMore: false },
 				})}
 				searchResultLimit={20}
+				renderPreview={() => null}
 				currentSessionId={selectedSessionId}
 				selectPanel={() => {}}
 				selectSession={(id) => setSelectedSessionId(id)}

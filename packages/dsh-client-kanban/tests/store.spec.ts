@@ -8,7 +8,6 @@ import {
 	compareKanbanSessionPriority,
 	deriveKanbanBoard,
 	extractActiveSubagentParentIds,
-	filterPartitionedSessions,
 	formatKanbanAlertLabel,
 	formatRelativeTime,
 	getKanbanSessionAlert,
@@ -1461,75 +1460,6 @@ describe("getStoredKanbanWorkspace and setStoredKanbanWorkspace", () => {
 		} finally {
 			globalThis.localStorage = originalStorage;
 		}
-	});
-});
-
-describe("filterPartitionedSessions", () => {
-	const s1: SessionSummary = {
-		...mockSession("s1", false, false),
-		displayTitle: "Fix authentication redirect bug",
-		title: "auth-redirect-fix",
-	};
-	const s2: SessionSummary = {
-		...mockSession("s2", true, false),
-		displayTitle: "Implement database migrations",
-		projectionValues: {
-			kanban: {
-				links: [],
-				sessionId: "s2" as SessionId,
-				createdAt: 1000,
-				prompt: "Add postgres migration files",
-			},
-		},
-	};
-	const s3: SessionSummary = {
-		...mockSession("s3", false, false),
-		displayTitle: "Update README and documentation",
-	};
-	const partitioned = {
-		todo: [s1],
-		active: [s2],
-		review: [],
-		done: [s3],
-	};
-
-	it("intersects content hits with visible lanes, preserving lane order", () => {
-		const filtered = filterPartitionedSessions(
-			{ ...partitioned, review: [s3, s1, s2] },
-			new Set([s2.id, s1.id, "outside-workspace" as SessionId]),
-		);
-		expect(
-			Object.fromEntries(
-				Object.entries(filtered).map(([lane, sessions]) => [
-					lane,
-					sessions.map((session: SessionSummary) => session.id),
-				]),
-			),
-		).toMatchInlineSnapshot(`
-			{
-			  "active": [
-			    "s2",
-			  ],
-			  "done": [],
-			  "review": [
-			    "s1",
-			    "s2",
-			  ],
-			  "todo": [
-			    "s1",
-			  ],
-			}
-		`);
-		expect(partitioned.done).toEqual([s3]);
-	});
-
-	it("returns empty lanes without content hits regardless of title or prompt", () => {
-		expect(filterPartitionedSessions(partitioned, new Set())).toEqual({
-			todo: [],
-			active: [],
-			review: [],
-			done: [],
-		});
 	});
 });
 

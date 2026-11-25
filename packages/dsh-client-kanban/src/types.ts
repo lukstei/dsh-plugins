@@ -2,14 +2,29 @@
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import { z } from "zod";
 
+/** Session id of a `dsh://sessions/{id}` link, or `undefined` for any other URL. */
+export function sessionLinkId(value: string): SessionId | undefined {
+	const url = URL.parse(value);
+	if (url === null || url.protocol !== "dsh:" || url.hostname !== "sessions") {
+		return undefined;
+	}
+	const id = url.pathname.slice(1);
+	// edge case: the id is user-authored URL text, so the brand is restored only
+	// for a single non-empty path segment.
+	return id === "" || id.includes("/") ? undefined : (id as SessionId);
+}
+
 export const kanbanLinkSchema = z.object({
 	label: z.string().trim().min(1),
 	url: z.string().refine((value) => {
 		const url = URL.parse(value);
 		return (
-			url !== null && (url.protocol === "http:" || url.protocol === "https:")
+			url !== null &&
+			(url.protocol === "http:" ||
+				url.protocol === "https:" ||
+				sessionLinkId(value) !== undefined)
 		);
-	}, "Expected an absolute HTTP(S) URL"),
+	}, "Expected an absolute HTTP(S) URL or dsh://sessions/{id}"),
 	priority: z.number().default(0),
 });
 

@@ -146,6 +146,7 @@ export const HeaderLayout: Story = () => {
 		openSession: select,
 		toggleSession: select,
 		removeSession: () => {},
+		replaceSession: () => {},
 		setHoveredSession: () => {},
 		resetToSingle: () => {},
 		suspend: () => {},

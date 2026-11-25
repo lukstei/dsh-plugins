@@ -160,7 +160,7 @@ test.each([
 		vi.mocked(useKanban).mockReturnValue(
 			deriveKanbanBoard(list, [], new Map(), 3000),
 		);
-		KanbanPane(props);
+		KanbanPane({ ...props, renderPreview: () => null });
 		const call = ui.jsx.mock.calls.find(([type]) => type === KanbanSection);
 		assert(call);
 		// edge case: captured component identity determines its props

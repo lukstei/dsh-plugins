@@ -1,3 +1,8 @@
+import {
+	Button,
+	IconGaugeOutlineMedium,
+	Tooltip,
+} from "@deepseek-ai/dsh-client-ui-primitives";
 import type {} from "@deepseek-ai/dsh-client-ui-session/client";
 import type { SessionStandardProps } from "@deepseek-ai/dsh-client-ui-slots";
 import type {} from "@deepseek-ai/dsh-token-meter/client";
@@ -16,12 +21,15 @@ import { CACHE_TTL_MS, handoffLevel } from "./level.ts";
 
 const COLOR = { soft: "#d9a400", strong: "#d62839" } as const;
 
-/** Small ring beside the send button once the session is big enough that `/handoff` pays off. */
+/** Gauge icon beside the send button once the session is big enough that `/handoff` pays off. */
 export function HandoffRing({
 	sessionId,
 	useProjection,
 	useSession,
-}: Pick<SessionStandardProps, "sessionId" | "useProjection" | "useSession">) {
+	onHandoff,
+}: Pick<SessionStandardProps, "sessionId" | "useProjection" | "useSession"> & {
+	onHandoff: (sessionId: SessionStandardProps["sessionId"]) => Promise<void>;
+}) {
 	const pressure = useProjection("contextPressure");
 	const running = useSession((session) => session.running);
 	const [acp, setAcp] = useState<AcpUsage | undefined>(undefined);
@@ -69,17 +77,20 @@ export function HandoffRing({
 	const hint = cold
 		? "cache is cold, a fresh session is cheaper now"
 		: "consider a fresh session";
-	return createElement("span", {
-		role: "img",
-		title: `Context ${k}k tokens: ${hint} (/handoff)`,
-		"aria-label": `Handoff ${level === "strong" ? "recommended" : "suggested"}`,
-		style: {
-			width: 14,
-			height: 14,
-			boxSizing: "border-box",
-			borderRadius: "50%",
-			border: `2px solid ${COLOR[level]}`,
-			flex: "none",
-		},
+	const label = `Context ${k}k tokens: ${hint}. Click to hand off (/handoff)`;
+	return createElement(Tooltip, {
+		label,
+		side: "top",
+		portal: true,
+		// biome-ignore lint/correctness/noChildrenProp: Tooltip types `children` as a required prop, which createElement's 3rd argument does not satisfy
+		children: createElement(Button, {
+			variant: "ghost",
+			size: "sm",
+			"aria-label": label,
+			// the icon strokes with currentColor; 28px square instead of the text-button padding
+			style: { color: COLOR[level], padding: 0, width: 28 },
+			icon: createElement(IconGaugeOutlineMedium, { size: 16 }),
+			onClick: () => void onHandoff(sessionId),
+		}),
 	});
 }

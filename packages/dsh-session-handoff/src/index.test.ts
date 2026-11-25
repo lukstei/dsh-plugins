@@ -539,7 +539,13 @@ test("handoff launch creates the resumed session beside this one", async (t) => 
 	assert.equal(harness.followups.length, 1);
 	assert.match(JSON.stringify(harness.followups[0]), /HANDOFF\.md/);
 	assert.match(JSON.stringify(harness.followups[0]), /Goal: /);
-	assert.equal(harness.kanban.length, 1);
+	assert.equal(harness.kanban.length, 2);
+	assert.deepEqual(JSON.parse(harness.kanban[1].slice("/kanban ".length)), {
+		action: "add-link",
+		label: `Resumed from ${CURRENT_ID}`,
+		url: `dsh://sessions/${CURRENT_ID}`,
+		priority: 0,
+	});
 	const init = JSON.parse(harness.kanban[0].slice("/kanban ".length)) as {
 		action: string;
 		createdAt: unknown;
@@ -571,7 +577,7 @@ test("handoff launch copies kanban links from the source session", async (t) => 
 	const harness = await setup(cwd, records);
 	await harness.definition.handler(invocation(harness, ""));
 
-	assert.equal(harness.kanban.length, 2);
+	assert.equal(harness.kanban.length, 3);
 	assert.equal(harness.kanban[1], `/kanban ${link}`);
 });
 
@@ -583,7 +589,22 @@ test("handoff launch names the new session after the source title", async (t) =>
 	await harness.definition.handler(invocation(harness, ""));
 
 	assert.deepEqual(harness.titles, [
-		{ sessionId: LAUNCHED_ID, title: "Fix split panes - Handoff" },
+		{ sessionId: LAUNCHED_ID, title: "Fix split panes" },
+		{ sessionId: CURRENT_ID, title: "Fix split panes (Resumed)" },
+	]);
+});
+
+test("handoff launch does not stack the (Resumed) suffix on the source title", async (t) => {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+
+	const harness = await setup(cwd, records, {
+		sourceTitle: "Fix split panes (Resumed)",
+	});
+	await harness.definition.handler(invocation(harness, ""));
+
+	assert.deepEqual(harness.titles, [
+		{ sessionId: LAUNCHED_ID, title: "Fix split panes (Resumed)" },
 	]);
 });
 

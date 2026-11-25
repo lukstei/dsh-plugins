@@ -28,14 +28,20 @@ export function apply(ctx: Context): void {
 	const sessions = ctx.sessions as unknown as ISessions;
 	const off = new Map<SessionId, () => void>();
 
-	// Same effect as the Kanban Done button: record done, then close the pane.
-	const finish = async (id: SessionId): Promise<void> => {
+	// Same effect as the Kanban Done button: record done.
+	const markDone = async (id: SessionId): Promise<void> => {
 		await sessions.using(id, { source: "splitView" }, async (reference) => {
 			await reference.binding.session.command(
 				`/kanban ${JSON.stringify({ action: "done", doneAt: Date.now() })}`,
 			);
 		});
-		ctx.splitView.removeSession(id);
+	};
+
+	// Same command the user would type; sent directly so the composer draft stays untouched.
+	const handoff = async (id: SessionId): Promise<void> => {
+		await sessions.using(id, { source: "splitView" }, async (reference) => {
+			await reference.binding.session.command("/handoff");
+		});
 	};
 
 	const watch = (id: SessionId): void => {
@@ -51,8 +57,8 @@ export function apply(ctx: Context): void {
 				if (entry.type !== "event") continue;
 				const launched = launchedSessionId(entry.event);
 				if (launched === undefined) continue;
-				ctx.splitView.toggleSession(launched);
-				void finish(id);
+				ctx.splitView.replaceSession(id, launched);
+				void markDone(id);
 				return;
 			}
 		});
@@ -78,8 +84,8 @@ export function apply(ctx: Context): void {
 					{
 						name: "conversation.input.right",
 						id: "session-handoff.ring",
-						order: 90,
-						inject: () => ({}),
+						order: 1000,
+						inject: () => ({ onHandoff: handoff }),
 					},
 					HandoffRing,
 				),

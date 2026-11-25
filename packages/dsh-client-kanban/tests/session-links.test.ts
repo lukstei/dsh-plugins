@@ -6,6 +6,7 @@ import {
 	initialKanbanState,
 	toKanbanRecord,
 } from "../src/fold.ts";
+import { kanbanLinkSchema } from "../src/types.ts";
 
 const header: SessionHeader = {
 	// edge case: fixture IDs use DSH's branded session identity
@@ -169,4 +170,20 @@ test("link writes preserve lifecycle metadata and deleted sessions reject them",
 	expect(
 		foldKanbanEvent(deleted, command({ action: "add-link", ...review })),
 	).toBe(deleted);
+});
+
+test("accepts dsh://sessions/{id} links and rejects other dsh URLs", () => {
+	const accepted = kanbanLinkSchema.safeParse({
+		label: "Resumed from abc",
+		url: "dsh://sessions/abc",
+	});
+	expect(accepted.success).toBe(true);
+	for (const url of [
+		"dsh://sessions/",
+		"dsh://sessions/a/b",
+		"dsh://other/abc",
+		"ftp://sessions/abc",
+	]) {
+		expect(kanbanLinkSchema.safeParse({ label: "x", url }).success).toBe(false);
+	}
 });

@@ -19,6 +19,7 @@ import {
 	KanbanPane,
 	type KanbanPaneInjected,
 } from "../src/client/KanbanPane.tsx";
+import { KanbanSearchResults } from "../src/client/KanbanSearchResults.tsx";
 import { KanbanSection } from "../src/client/KanbanSection.tsx";
 import { deriveKanbanBoard } from "../src/client/store.ts";
 import { useKanban } from "../src/client/use-kanban.ts";
@@ -137,6 +138,8 @@ const props: KanbanPaneInjected = {
 	unpinSession: async () => {},
 };
 
+const renderPreview = vi.fn<(id: SessionId) => null>(() => null);
+
 const effects: {
 	dependencies: DependencyList | undefined;
 	cleanup: ReturnType<EffectCallback>;
@@ -149,7 +152,7 @@ function render(injected: KanbanPaneInjected) {
 		hooks.memoCursor = 0;
 		hooks.jsx.mockClear();
 		vi.mocked(useEffect).mockClear();
-		KanbanPane(injected);
+		KanbanPane({ ...injected, renderPreview });
 		for (const [index, [effect, dependencies]] of vi
 			.mocked(useEffect)
 			.mock.calls.entries()) {
@@ -177,13 +180,20 @@ function changeQuery(value: string) {
 }
 
 function visibleIds() {
-	return hooks.jsx.mock.calls
-		.filter(([type]) => type === KanbanSection)
-		.flatMap(([, value]) => {
-			// edge case: the captured component identity determines its prop type
-			const section = value as ComponentProps<typeof KanbanSection>;
-			return section.sessions.map((item) => item.id);
-		});
+	return hooks.jsx.mock.calls.flatMap(([type, value]) => {
+		// edge case: the captured component identity determines its prop type
+		if (type === KanbanSection) {
+			return (value as ComponentProps<typeof KanbanSection>).sessions.map(
+				(item) => item.id,
+			);
+		}
+		if (type === KanbanSearchResults) {
+			return (value as ComponentProps<typeof KanbanSearchResults>).hits.map(
+				(hit) => hit.session.id,
+			);
+		}
+		return [];
+	});
 }
 
 function statusText() {
@@ -449,6 +459,21 @@ test("membership changes invalidate old results and send only the new board IDs"
 	expect(visibleIds()).toEqual([otherId]);
 });
 
+test("previews the focused result only after focus settles", async () => {
+	search.mockResolvedValue({
+		ok: true,
+		value: { items: [{ sessionId: id, snippet: "match" }], hasMore: false },
+	});
+	renderPreview.mockClear();
+	changeQuery("message");
+	await vi.advanceTimersByTimeAsync(250);
+	render(props);
+	expect(renderPreview).not.toHaveBeenCalled();
+	await vi.advanceTimersByTimeAsync(150);
+	render(props);
+	expect(renderPreview).toHaveBeenCalledWith(id);
+});
+
 test("unrelated snapshots cannot restart the debounce or clear settled hits", async () => {
 	search.mockResolvedValue({
 		ok: true,
@@ -531,7 +556,7 @@ test("reordering and changing lanes preserve requests with identical membership"
 		}),
 	});
 	render(props);
-	expect(visibleIds()).toEqual([otherId, id]);
+	expect(visibleIds()).toEqual([id, otherId]);
 	expect(search.mock.calls[0][1].aborted).toBe(false);
 	expect(search).toHaveBeenCalledTimes(1);
 });

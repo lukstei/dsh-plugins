@@ -95,7 +95,7 @@ The agent saves links with `kanban_add_link`:
 {"label":"Task Ticket: EXAMPLE-1232","url":"https://jira.example/browse/EXAMPLE-1232","priority":-10}
 ```
 
-- Only absolute `http(s)` URLs and non-empty labels are accepted. One call saves one link to the caller's session. The same URL again updates its label and priority.
+- Only absolute `http(s)` URLs, `dsh://sessions/{id}` URLs (opened in the app instead of a browser tab) and non-empty labels are accepted. One call saves one link to the caller's session. The same URL again updates its label and priority.
 - Lower `priority` sorts first (default `0`). Ties keep collection order.
 - The link icon on a card or in-flight row opens the list; a row opens its URL in a new tab. Sessions without links show no icon.
 - Links are stored in `/kanban` command events, so they reload with the session. Adding a link does not change the lane or enroll an unmanaged session. Deleted tasks reject links.
@@ -152,7 +152,7 @@ Tests: [tests/](tests/). Stories: `pnpm run ladle`.
 
 #### What the model sees
 
-Tool description: "Collect a confirmed HTTP(S) URL for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status." followed by `kanban_add_link_tool_instructions`. The default instructions ask for important task-related links, concise unambiguous labels, negative priority for task links, zero or positive for context links, with examples. Parameters: `label` (required), `url` (required), `priority` (number, default 0). Result text: `Saved session link: <label> (<url>)`.
+Tool description: "Collect a confirmed HTTP(S) URL or DSH session link (dsh://sessions/{session-id}) for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status." followed by `kanban_add_link_tool_instructions`. The default instructions ask for important task-related links, concise unambiguous labels, negative priority for task links, zero or positive for context links, with examples. Parameters: `label` (required), `url` (required), `priority` (number, default 0). Result text: `Saved session link: <label> (<url>)`.
 
 The tool is offered only in sessions that are initialized in Kanban and not deleted.
 

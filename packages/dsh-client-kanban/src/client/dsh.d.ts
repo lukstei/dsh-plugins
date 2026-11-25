@@ -26,5 +26,12 @@ declare module "@deepseek-ai/cordis" {
 declare module "@deepseek-ai/dsh-api-session-controller/client" {
 	interface SessionReferenceSourceMap {
 		kanban: unknown;
+		kanbanPreview: unknown;
+	}
+}
+
+declare module "@deepseek-ai/dsh-client-ui-slots" {
+	interface SlotMap {
+		"kanban.preview": { kind: "single"; scope: "session" };
 	}
 }

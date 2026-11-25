@@ -1,9 +1,18 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { mock, test } from "node:test";
 import { Context } from "@deepseek-ai/cordis";
 import type { SessionEvent } from "@deepseek-ai/dsh-session";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
-import * as plugin from "./index.ts";
+
+// smell: the real primitives package imports `.css`, which Node's loader rejects
+mock.module("@deepseek-ai/dsh-client-ui-primitives", {
+	namedExports: {
+		Button: () => null,
+		Tooltip: () => null,
+		IconGaugeOutlineMedium: () => null,
+	},
+});
+const plugin = await import("./index.ts");
 
 const SOURCE = "11111111-2222-3333-4444-555555555555";
 const LAUNCHED = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
@@ -17,10 +26,8 @@ interface Change {
 }
 
 interface Harness {
-	/** Sessions added as their own pane, in call order. */
-	readonly panes: SessionId[];
-	/** Sessions closed as panes, in call order. */
-	readonly removed: SessionId[];
+	/** Sessions replaced as panes, in call order. */
+	readonly replaced: { oldId: SessionId; newId: SessionId }[];
 	/** Raw command lines sent per session. */
 	readonly commands: { id: string; line: string }[];
 	/** Hold or drop client scopes for `ids`, exactly as the object layer does. */
@@ -30,8 +37,7 @@ interface Harness {
 }
 
 function setup(): Harness {
-	const panes: SessionId[] = [];
-	const removed: SessionId[] = [];
+	const replaced: { oldId: SessionId; newId: SessionId }[] = [];
 	const commands: { id: string; line: string }[] = [];
 	const listeners = new Map<string, Set<Listener>>();
 	const changes = new Map<string, Change>();
@@ -44,11 +50,8 @@ function setup(): Harness {
 		register: () => () => {},
 	});
 	ctx.provide("splitView", {
-		toggleSession: (target: SessionId) => {
-			panes.push(target);
-		},
-		removeSession: (target: SessionId) => {
-			removed.push(target);
+		replaceSession: (oldId: SessionId, newId: SessionId) => {
+			replaced.push({ oldId, newId });
 		},
 	});
 	ctx.provide("sessions", {
@@ -122,7 +125,7 @@ function setup(): Harness {
 		for (const listener of set) listener();
 	};
 
-	return { panes, removed, commands, retain, release, emit };
+	return { replaced, commands, retain, release, emit };
 }
 
 const launchedEvent = (id: string): SessionEvent =>
@@ -137,16 +140,16 @@ const launchedEvent = (id: string): SessionEvent =>
 		},
 	}) as unknown as SessionEvent;
 
-test("launch adds the created session as its own split pane", () => {
+test("launch replaces the source session with the launched session in split view", () => {
 	const harness = setup();
 	harness.retain([SOURCE]);
 
 	harness.emit(SOURCE, launchedEvent(LAUNCHED));
 
-	assert.deepEqual(harness.panes, [LAUNCHED]);
+	assert.deepEqual(harness.replaced, [{ oldId: SOURCE, newId: LAUNCHED }]);
 });
 
-test("launch marks the source done in Kanban and closes its pane", async () => {
+test("launch marks the source done in Kanban", async () => {
 	const harness = setup();
 	harness.retain([SOURCE]);
 
@@ -159,10 +162,9 @@ test("launch marks the source done in Kanban and closes its pane", async () => {
 		harness.commands[0].line,
 		/^\/kanban \{"action":"done","doneAt":\d+\}$/,
 	);
-	assert.deepEqual(harness.removed, [SOURCE]);
 });
 
-test("only an appended launch result adds a pane", () => {
+test("only an appended launch result replaces the pane", () => {
 	const harness = setup();
 	// `retain` replays a `replace` change for the freshly opened session.
 	harness.retain([SOURCE]);
@@ -173,11 +175,11 @@ test("only an appended launch result adds a pane", () => {
 		data: {},
 	} as unknown as SessionEvent);
 
-	assert.deepEqual(harness.panes, []);
+	assert.deepEqual(harness.replaced, []);
 
 	harness.emit(SOURCE, launchedEvent(LAUNCHED));
 
-	assert.deepEqual(harness.panes, [LAUNCHED]);
+	assert.deepEqual(harness.replaced, [{ oldId: SOURCE, newId: LAUNCHED }]);
 });
 
 test("a released session stops watching", () => {
@@ -187,5 +189,5 @@ test("a released session stops watching", () => {
 
 	harness.emit(SOURCE, launchedEvent(LAUNCHED));
 
-	assert.deepEqual(harness.panes, []);
+	assert.deepEqual(harness.replaced, []);
 });

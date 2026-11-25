@@ -8,13 +8,14 @@ import type { SessionStatusSnapshot } from "@deepseek-ai/dsh-client-ui-session/c
 import type { InjectFace } from "@deepseek-ai/dsh-client-ui-slots";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import type { TypertRemoteNamespaceMap } from "@deepseek-ai/dsh-typert-protocol";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { searchRequestSchema } from "../search.ts";
 import type { KanbanLane, KanbanRecord } from "../types.ts";
 import { KanbanIcon } from "./KanbanIcon.tsx";
+import { KanbanSearchResults } from "./KanbanSearchResults.tsx";
 import { KanbanSection } from "./KanbanSection.tsx";
 import {
-	filterPartitionedSessions,
 	getStoredKanbanWorkspace,
 	isKanbanTransitionAllowed,
 	isSessionEligibleForHydration,
@@ -48,7 +49,9 @@ export interface KanbanPaneInjected {
 	readonly unpinSession: (id: SessionId) => Promise<void>;
 }
 
-export type KanbanPaneProps = InjectFace<KanbanPaneInjected>;
+export type KanbanPaneProps = InjectFace<KanbanPaneInjected> & {
+	readonly renderPreview: (id: SessionId) => ReactNode;
+};
 
 /**
  * Purpose: Render the full interactive Kanban board container with workspace filtering and 4-column lane layout.
@@ -63,6 +66,7 @@ export function KanbanPane({
 	sessionStatus,
 	searchSessions,
 	searchResultLimit,
+	renderPreview,
 	currentSessionId,
 	refreshProjections,
 	startTask,
@@ -295,15 +299,51 @@ export function KanbanPane({
 			? searchState.result
 			: undefined;
 
-	const displayedPartitioned = useMemo(() => {
-		if (query === "") return partitioned;
-		const matchingIds = new Set(
-			searchResult !== undefined && searchResult.ok
-				? searchResult.value.items.map((item) => item.sessionId)
-				: [],
+	const searchHits = useMemo(() => {
+		if (searchResult === undefined || !searchResult.ok) return [];
+		const byId = new Map(
+			(["todo", "active", "review", "done"] as const).flatMap((lane) =>
+				partitioned[lane].map((session) => [session.id, { session, lane }]),
+			),
 		);
-		return filterPartitionedSessions(partitioned, matchingIds);
-	}, [partitioned, query, searchResult]);
+		// edge case: results keep the host's relevance rank, not lane order
+		return searchResult.value.items.flatMap((item) => {
+			const entry = byId.get(item.sessionId);
+			return entry === undefined ? [] : [{ ...entry, snippet: item.snippet }];
+		});
+	}, [searchResult, partitioned]);
+
+	const [focusedId, setFocusedId] = useState<SessionId | undefined>();
+	const focusedHit =
+		searchHits.find((hit) => hit.session.id === focusedId) ?? searchHits[0];
+	const focusedHitId = focusedHit?.session.id;
+	// edge case: arrowing through results must not open every session, so the preview trails focus
+	const [previewId, setPreviewId] = useState<SessionId | undefined>();
+	useEffect(() => {
+		const timer = setTimeout(() => setPreviewId(focusedHitId), 150);
+		return () => clearTimeout(timer);
+	}, [focusedHitId]);
+
+	const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+		if (query === "") return;
+		if (event.key === "Escape") {
+			setSearchQuery("");
+			return;
+		}
+		if (event.key === "Enter" && focusedHitId !== undefined) {
+			selectSession(focusedHitId);
+			return;
+		}
+		const step =
+			event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+		if (step === 0 || searchHits.length === 0) return;
+		event.preventDefault();
+		const index = searchHits.findIndex(
+			(hit) => hit.session.id === focusedHitId,
+		);
+		const next = Math.min(Math.max(index + step, 0), searchHits.length - 1);
+		setFocusedId(searchHits[next].session.id);
+	};
 
 	let searchMessage = "";
 	if (query !== "") {
@@ -313,11 +353,7 @@ export function KanbanPane({
 			searchMessage = `Search failed: ${searchResult.error.message}`;
 		} else if (searchResult.value.hasMore) {
 			searchMessage = `Search limited to ${searchResultLimit} sessions in this workspace. Narrow your query.`;
-		} else if (
-			Object.values(displayedPartitioned).every(
-				(sessions) => sessions.length === 0,
-			)
-		) {
+		} else if (searchHits.length === 0) {
 			searchMessage = "No matching sessions in this workspace.";
 		}
 	}
@@ -475,6 +511,7 @@ export function KanbanPane({
 						placeholder="Search sessions..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
+						onKeyDown={handleSearchKeyDown}
 						aria-label="Search sessions"
 					/>
 				</div>
@@ -490,61 +527,78 @@ export function KanbanPane({
 				className="dsh-kanban-scroll"
 				aria-busy={query !== "" && searchResult === undefined}
 			>
-				<KanbanSection
-					lane="todo"
-					title="To Do"
-					sessions={displayedPartitioned.todo}
-					selectedSessionId={currentSessionId}
-					isPreparing={isPreparingTask}
-					activeDragSourceLane={activeDragSourceLane}
-					getAlert={board.getAlert}
-					onSelect={selectSession}
-					onDropSession={handleDropSession}
-					onDragStart={handleDragStart}
-					onDragEnd={handleDragEnd}
-					onSubmitPrepare={handlePrepareTask}
-					onCancelPrepare={() => setIsPreparingTask(false)}
-				/>
+				{query !== "" ? (
+					<KanbanSearchResults
+						hits={searchHits}
+						query={query}
+						focusedId={focusedHitId}
+						preview={
+							previewId !== undefined && previewId === focusedHitId
+								? renderPreview(previewId)
+								: null
+						}
+						onFocus={setFocusedId}
+						onOpen={selectSession}
+					/>
+				) : (
+					<div className="dsh-kanban-board">
+						<KanbanSection
+							lane="todo"
+							title="To Do"
+							sessions={partitioned.todo}
+							selectedSessionId={currentSessionId}
+							isPreparing={isPreparingTask}
+							activeDragSourceLane={activeDragSourceLane}
+							getAlert={board.getAlert}
+							onSelect={selectSession}
+							onDropSession={handleDropSession}
+							onDragStart={handleDragStart}
+							onDragEnd={handleDragEnd}
+							onSubmitPrepare={handlePrepareTask}
+							onCancelPrepare={() => setIsPreparingTask(false)}
+						/>
 
-				<KanbanSection
-					lane="active"
-					title="Active"
-					sessions={displayedPartitioned.active}
-					selectedSessionId={currentSessionId}
-					activeDragSourceLane={activeDragSourceLane}
-					getAlert={board.getAlert}
-					onSelect={selectSession}
-					onDropSession={handleDropSession}
-					onDragStart={handleDragStart}
-					onDragEnd={handleDragEnd}
-				/>
+						<KanbanSection
+							lane="active"
+							title="Active"
+							sessions={partitioned.active}
+							selectedSessionId={currentSessionId}
+							activeDragSourceLane={activeDragSourceLane}
+							getAlert={board.getAlert}
+							onSelect={selectSession}
+							onDropSession={handleDropSession}
+							onDragStart={handleDragStart}
+							onDragEnd={handleDragEnd}
+						/>
 
-				<KanbanSection
-					lane="review"
-					title="Review"
-					sessions={displayedPartitioned.review}
-					selectedSessionId={currentSessionId}
-					activeDragSourceLane={activeDragSourceLane}
-					getAlert={board.getAlert}
-					onSelect={selectSession}
-					onDropSession={handleDropSession}
-					onDragStart={handleDragStart}
-					onDragEnd={handleDragEnd}
-				/>
+						<KanbanSection
+							lane="review"
+							title="Review"
+							sessions={partitioned.review}
+							selectedSessionId={currentSessionId}
+							activeDragSourceLane={activeDragSourceLane}
+							getAlert={board.getAlert}
+							onSelect={selectSession}
+							onDropSession={handleDropSession}
+							onDragStart={handleDragStart}
+							onDragEnd={handleDragEnd}
+						/>
 
-				<KanbanSection
-					lane="done"
-					title="Done"
-					sessions={displayedPartitioned.done}
-					selectedSessionId={currentSessionId}
-					activeDragSourceLane={activeDragSourceLane}
-					getAlert={board.getAlert}
-					onSelect={selectSession}
-					onDropSession={handleDropSession}
-					onDragStart={handleDragStart}
-					onDragEnd={handleDragEnd}
-					onTogglePin={handleTogglePin}
-				/>
+						<KanbanSection
+							lane="done"
+							title="Done"
+							sessions={partitioned.done}
+							selectedSessionId={currentSessionId}
+							activeDragSourceLane={activeDragSourceLane}
+							getAlert={board.getAlert}
+							onSelect={selectSession}
+							onDropSession={handleDropSession}
+							onDragStart={handleDragStart}
+							onDragEnd={handleDragEnd}
+							onTogglePin={handleTogglePin}
+						/>
+					</div>
+				)}
 			</div>
 
 			{activeDragSourceLane !== undefined && (

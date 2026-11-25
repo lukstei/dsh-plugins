@@ -439,6 +439,67 @@ export class SplitStore implements ISplitView {
 	};
 
 	/**
+	 * Replace a single session in split view with another session in-place.
+	 */
+	replaceSession = (oldId: SessionId, newId: SessionId): void => {
+		if (this.sessionsProvider === undefined) {
+			throw new Error("SplitStore: ISessions provider not configured");
+		}
+		if (isMobileViewport()) {
+			this.openSession(newId);
+			return;
+		}
+		if (oldId === newId) {
+			if (this.sessionIds.includes(newId)) {
+				this.setFocus(newId);
+			}
+			return;
+		}
+		const index = this.sessionIds.indexOf(oldId);
+		if (index === -1) {
+			if (this.sessionIds.includes(newId)) {
+				this.setFocus(newId);
+			} else {
+				this.toggleSession(newId);
+			}
+			return;
+		}
+
+		const effectiveSessions = this.sessionsProvider();
+		this.retain(newId, effectiveSessions);
+		this.release(oldId);
+		this.releaseOverlay(oldId);
+
+		const next = [...this.sessionIds];
+		const existingNewIndex = next.indexOf(newId);
+		if (existingNewIndex !== -1) {
+			next.splice(existingNewIndex, 1);
+			const targetIndex = next.indexOf(oldId);
+			next[targetIndex] = newId;
+		} else {
+			next[index] = newId;
+		}
+		this.sessionIds = next;
+
+		if (this.hoveredSessionId === oldId) {
+			this.hoveredSessionId = undefined;
+		}
+		if (this.maximizedSessionId === oldId) {
+			this.maximizedSessionId = newId;
+		}
+		if (this.sessionIds.length <= 1) {
+			this.maximizedSessionId = undefined;
+		}
+		this.focusedSessionId = newId;
+		this.suspended = false;
+
+		this.emit();
+		if (this.navCallbacks !== undefined) {
+			this.navCallbacks.selectPanel("split-view");
+		}
+	};
+
+	/**
 	 * Show one pane's session in the native Conversation view while keeping the split.
 	 */
 	suspend = (targetId: SessionId): void => {

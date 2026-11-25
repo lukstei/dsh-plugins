@@ -11,8 +11,9 @@ import type {} from "@lukstei/dsh-client-favicon/client-contract";
 import type {} from "@lukstei/dsh-client-notify/client-contract";
 import { InFlightSidebar } from "./InFlightSidebar.tsx";
 import { KanbanIcon } from "./KanbanIcon.tsx";
-import { KanbanPane } from "./KanbanPane.tsx";
+import { KanbanMain } from "./KanbanMain.tsx";
 import { KanbanPaneStatus } from "./KanbanPaneStatus.tsx";
+import { KanbanSessionPreview } from "./KanbanSessionPreview.tsx";
 import { KanbanStatusDot } from "./KanbanStatusDot.tsx";
 import { KanbanTransitionDropdown } from "./KanbanTransitionDropdown.tsx";
 import { createNavigation } from "./navigation.ts";
@@ -213,6 +214,10 @@ function applyKanban(ctx: ClientContext): void {
 		},
 	});
 
+	// edge case: stable identity, or the preview effect would re-hold the session on every inject
+	const retainSession = (id: SessionId) =>
+		sessions.retain(id, { source: "kanbanPreview" });
+
 	// Factory for KanbanPane injected dependencies
 	const createKanbanProps = (
 		activeSessionId: SessionId | undefined,
@@ -224,6 +229,7 @@ function applyKanban(ctx: ClientContext): void {
 		currentSessionId: activeSessionId ?? getActiveSessionId(),
 		searchSessions,
 		searchResultLimit: SEARCH_RESULT_LIMIT,
+		retainSession,
 		selectPanel: (id: string | null) => ctx.layout.selectPanel(id as never),
 		refreshProjections: (id: SessionId) => sessions.refreshProjections(id),
 		startTask: async (workspaceId?: WorkspaceId) => {
@@ -405,13 +411,22 @@ function applyKanban(ctx: ClientContext): void {
 				{
 					name: "main",
 					key: "kanban",
+					children: { "kanban.preview": { kind: "single", scope: "session" } },
 					inject: () =>
 						createKanbanProps(undefined, navigation.maximizeSession),
 				},
-				KanbanPane,
+				KanbanMain,
 			),
 		);
 	}, "kanban: main view");
+
+	ctx.effect(
+		() =>
+			ctx.slots.inject("main", () =>
+				ctx.slots.register({ name: "kanban.preview" }, KanbanSessionPreview),
+			),
+		"kanban: session preview",
+	);
 
 	// Register Kanban transition dropdown in prompt bar tools
 	ctx.effect(() => {
@@ -427,6 +442,7 @@ function applyKanban(ctx: ClientContext): void {
 						unholdSession: kanbanActions.unholdSession,
 						markDone: kanbanActions.markDone,
 						reopen: kanbanActions.reopen,
+						closePane: navigation.removeSession,
 						startPreparedTask: kanbanActions.startPreparedTask,
 					}),
 				},

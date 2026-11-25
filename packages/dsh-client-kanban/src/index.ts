@@ -122,7 +122,7 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
 	ctx.tools.register(
 		defineTool({
 			name: "kanban_add_link",
-			description: `Collect a confirmed HTTP(S) URL for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status. ${config.kanban_add_link_tool_instructions}`,
+			description: `Collect a confirmed HTTP(S) URL or DSH session link (dsh://sessions/{session-id}) for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status. ${config.kanban_add_link_tool_instructions}`,
 			parameters: {
 				label: {
 					type: "string",
@@ -132,7 +132,8 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
 				url: {
 					type: "string",
 					required: true,
-					description: "Confirmed absolute HTTP or HTTPS URL.",
+					description:
+						"Confirmed absolute HTTP or HTTPS URL, or dsh://sessions/{session-id}.",
 				},
 				priority: {
 					type: "number",

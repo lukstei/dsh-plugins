@@ -60,7 +60,7 @@ Used by: [`dsh-client-kanban`](../dsh-client-kanban/README.md) (optional), [`dsh
 | Member | Purpose |
 |---|---|
 | `getSnapshot`, `subscribe` | Observe `SplitState` (`sessionIds`, `focusedSessionId`, `maximizedSessionId`, `hoveredSessionId`, `suspended`, `overlays`) |
-| `openSession`, `toggleSession`, `removeSession`, `resetToSingle` | Pane membership |
+| `openSession`, `toggleSession`, `removeSession`, `replaceSession`, `resetToSingle` | Pane membership |
 | `setFocus`, `toggleMaximize`, `setHoveredSession`, `reorderSession` | Pane state |
 | `suspend`, `resume`, `isSuspended`, `isSplitActive` | Switch between split and native view |
 | `openSlotOverlay(hostId, slotName, title, props)`, `closeOverlay(hostId)` | Factory overlays |

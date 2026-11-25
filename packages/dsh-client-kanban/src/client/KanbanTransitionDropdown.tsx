@@ -1,7 +1,9 @@
 import {
 	Button,
 	IconChevronDownOutlineRegular,
+	IconCloseOutlineRegular,
 	Menu,
+	type MenuEntry,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
@@ -97,6 +99,7 @@ export interface KanbanTransitionActions {
 	readonly unholdSession: (id: SessionId) => Promise<void>;
 	readonly markDone: (id: SessionId) => Promise<void>;
 	readonly reopen: (id: SessionId) => Promise<void>;
+	readonly closePane: (id: SessionId) => void;
 	readonly startPreparedTask: (id: SessionId, prompt: string) => Promise<void>;
 }
 
@@ -118,6 +121,7 @@ export function KanbanTransitionDropdown({
 	unholdSession,
 	markDone,
 	reopen,
+	closePane,
 	startPreparedTask,
 }: KanbanTransitionDropdownProps) {
 	const [open, setOpen] = useState(false);
@@ -141,7 +145,7 @@ export function KanbanTransitionDropdown({
 	);
 	const laneLabel = formatLaneLabel(lane, record);
 
-	const items = useMemo(() => {
+	const laneItems = useMemo(() => {
 		if (lane === "active") return [];
 		if (lane === "review") {
 			return [
@@ -212,6 +216,22 @@ export function KanbanTransitionDropdown({
 		return [];
 	}, [lane, isBlank]);
 
+	const items: MenuEntry[] = [
+		...laneItems,
+		...(laneItems.length > 0
+			? [{ type: "separator" as const, id: "close-separator" }]
+			: []),
+		{
+			id: "close",
+			label: (
+				<span className="dsh-kanban-transition-item">
+					<IconCloseOutlineRegular size={14} />
+					<span>Close pane</span>
+				</span>
+			),
+		},
+	];
+
 	// Subagent sessions have no Kanban lane of their own.
 	if (summary?.origin === "subagent") return null;
 
@@ -232,6 +252,8 @@ export function KanbanTransitionDropdown({
 					void markDone(sessionId);
 				} else if (id === "reopen") {
 					void reopen(sessionId);
+				} else if (id === "close") {
+					closePane(sessionId);
 				} else if (id === "resume") {
 					if (isBlank && record?.prompt) {
 						void startPreparedTask(sessionId, record.prompt);

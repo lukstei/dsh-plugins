@@ -787,25 +787,3 @@ export function setStoredKanbanWorkspace(workspaceId: string): void {
 		// ignore
 	}
 }
-
-/**
- * Purpose: Intersect partitioned Kanban lanes with host content-search hits.
- * Contract:
- * - Inputs: PartitionedKanbanSessions snapshot and matching session IDs.
- * - Outputs: Matching visible sessions in their existing lane order.
- * - Throws / Errors: Never throws.
- */
-export function filterPartitionedSessions(
-	partitioned: PartitionedKanbanSessions,
-	matchingIds: ReadonlySet<SessionId>,
-): PartitionedKanbanSessions {
-	const matches = (session: SessionSummary): boolean =>
-		matchingIds.has(session.id);
-
-	return {
-		todo: partitioned.todo.filter(matches),
-		active: partitioned.active.filter(matches),
-		review: partitioned.review.filter(matches),
-		done: partitioned.done.filter(matches),
-	};
-}

@@ -34,6 +34,7 @@ export const inject = [
 const HANDOFF_FILE = "HANDOFF.md";
 const RECENT_LIMIT = 5;
 const SHORT_ID_LENGTH = 8;
+const RESUMED_SUFFIX = " (Resumed)";
 
 export function apply(ctx: Context): void {
 	ctx.commands.register({
@@ -264,8 +265,17 @@ async function createBeside(
 		agent.session,
 		sourceTitle === undefined
 			? `Handoff ${shortId(targetId)}`
-			: `${sourceTitle.title} - Handoff`,
+			: sourceTitle.title,
 	);
+	if (
+		sourceTitle !== undefined &&
+		!sourceTitle.title.endsWith(RESUMED_SUFFIX)
+	) {
+		ctx.sessionTitle.rename(
+			source.session,
+			`${sourceTitle.title}${RESUMED_SUFFIX}`,
+		);
+	}
 
 	// edge case: a session the controller creates carries no kanban marker, so the
 	// board would never list it; this is the init kanban's own client sends.
@@ -281,6 +291,19 @@ async function createBeside(
 	for (const args of kanbanLinkArgs(snapshot)) {
 		await ctx.commands.execute(agent, `/kanban ${args}`, [], signal);
 	}
+
+	const sourceLink = {
+		action: "add-link",
+		label: `Resumed from ${targetId}`,
+		url: `dsh://sessions/${targetId}`,
+		priority: 0,
+	};
+	await ctx.commands.execute(
+		agent,
+		`/kanban ${JSON.stringify(sourceLink)}`,
+		[],
+		signal,
+	);
 
 	await deliver(ctx, agent, targetId, markdown);
 	return created;

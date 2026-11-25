@@ -67,6 +67,7 @@ export interface ISplitView {
 	readonly toggleSession: (targetId: SessionId) => void;
 	readonly openSession: (targetId: SessionId) => void;
 	readonly removeSession: (targetId: SessionId) => void;
+	readonly replaceSession: (oldId: SessionId, newId: SessionId) => void;
 	readonly resetToSingle: () => void;
 	readonly suspend: (targetId: SessionId) => void;
 	readonly resume: () => void;

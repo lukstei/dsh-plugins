@@ -96,7 +96,7 @@ Id resolution: exact id first, then unique prefix over `sessionQuery.listSession
 1. Renders this session's brief.
 2. Creates a session via `sessionController.create()` in the current workspace (falls back to `cwd` when the session has no workspace), same `agentPreset`.
 3. Replays the current model selection onto the new agent.
-4. Titles it `<source title> - Handoff` (or `Handoff <first 8 id chars>` when untitled). A user title pins it against auto-generated titles.
+4. Titles it with the full source title (or `Handoff <first 8 id chars>` when untitled) and renames the source to `<title> (Resumed)` unless it already ends with that. A user title pins it against auto-generated titles. Adds a Kanban link `Resumed from <source id>` (`dsh://sessions/<id>`, opens the source session) to record the origin.
 5. Runs `/kanban {"action":"init","createdAt":…}` against the new agent so it appears on the Kanban board. No `prompt` is sent, since that would seed the composer draft with the follow-up text.
 6. Copies the source session's kanban links by replaying its `add-link` commands against the new agent.
 7. Writes `HANDOFF.md` into the new session's scratch directory and queues the read-the-brief follow-up.
@@ -134,7 +134,7 @@ Files:
 Details:
 
 - The command declares `input: { hint: "[session-id]" }`. Without a declared input the client sends the raw line to the model as a prompt and the handler never runs.
-- A slash command has no structured return channel to the client, so the Host encodes the new id in the command result text, which is persisted in the `command/done` event. The client subscribes to every open session's event source and calls `ctx.splitView.toggleSession()` when it sees a successful `command/done` starting with `Handoff launched: `. It then sends `/kanban {"action":"done"}` to the source session and calls `ctx.splitView.removeSession()` on it, as the Kanban Done button does. A source never initialised in Kanban ignores the done action but still loses its pane.
+- A slash command has no structured return channel to the client, so the Host encodes the new id in the command result text, which is persisted in the `command/done` event. The client subscribes to every open session's event source and calls `ctx.splitView.replaceSession()` when it sees a successful `command/done` starting with `Handoff launched: `, replacing the pane in-place atomically. It then sends `/kanban {"action":"done"}` to the source session, as the Kanban Done button does. A source never initialised in Kanban ignores the done action.
 - The pane is added through the split store, not `uiWorkspace.openSession()`. The split view patches that method into a read-only overlay without its own composer, so prompts would keep landing in the pane underneath.
 - The client reacts only to `append` changes. A `replace` replays the whole window on first open and after reconnect gaps and would reopen panes the user closed; the split view restores its panes from local storage.
 - Kanban membership is a session-log fact: the board lists only sessions whose `kanban` projection is initialized, which happens when `/kanban` runs in that session. Hence the explicit `init`.

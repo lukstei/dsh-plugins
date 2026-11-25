@@ -1048,6 +1048,87 @@ describe("SplitStore", () => {
 			expect(parsed.sessionIds).toEqual([sid("s2"), sid("s1"), sid("s3")]);
 		});
 	});
+
+	describe("replaceSession", () => {
+		beforeEach(() => {
+			splitStore.toggleSession(sid("s2"));
+			splitStore.toggleSession(sid("s3"));
+			// sessionIds: [s1, s2, s3]
+		});
+
+		it("replaces session in-place at the exact same index", () => {
+			splitStore.replaceSession(sid("s2"), sid("s4"));
+			const state = splitStore.getSnapshot();
+			expect(state.sessionIds).toEqual([sid("s1"), sid("s4"), sid("s3")]);
+			expect(state.focusedSessionId).toBe(sid("s4"));
+			expect(sessions.retain).toHaveBeenCalledWith(sid("s4"), {
+				source: "splitView",
+			});
+			expect(retained.get(sid("s2"))?.release).toHaveBeenCalled();
+			expect(retained.get(sid("s1"))?.release).not.toHaveBeenCalled();
+			expect(retained.get(sid("s3"))?.release).not.toHaveBeenCalled();
+		});
+
+		it("transfers maximized state to the replacement session", () => {
+			splitStore.toggleMaximize(sid("s2"));
+			expect(splitStore.getSnapshot().maximizedSessionId).toBe(sid("s2"));
+
+			splitStore.replaceSession(sid("s2"), sid("s4"));
+			expect(splitStore.getSnapshot().maximizedSessionId).toBe(sid("s4"));
+		});
+
+		it("cleans up overlays belonging to the replaced session", () => {
+			splitStore.openSlotOverlay(sid("s2"), "split.props-test", "Props", {
+				query: "test",
+				options: { line: 1 },
+			});
+			expect(splitStore.getSnapshot().overlays.has(sid("s2"))).toBe(true);
+
+			splitStore.replaceSession(sid("s2"), sid("s4"));
+			expect(splitStore.getSnapshot().overlays.has(sid("s2"))).toBe(false);
+			expect(splitStore.getSnapshot().overlays.has(sid("s4"))).toBe(false);
+		});
+
+		it("falls back to toggleSession when oldId is not present", () => {
+			splitStore.replaceSession(sid("unknown"), sid("s4"));
+			expect(splitStore.getSnapshot().sessionIds).toEqual([
+				sid("s1"),
+				sid("s2"),
+				sid("s3"),
+				sid("s4"),
+			]);
+		});
+
+		it("deduplicates if newId was already present in splitView", () => {
+			splitStore.replaceSession(sid("s1"), sid("s3"));
+			expect(splitStore.getSnapshot().sessionIds).toEqual([
+				sid("s3"),
+				sid("s2"),
+			]);
+			expect(splitStore.getSnapshot().focusedSessionId).toBe(sid("s3"));
+		});
+
+		it("resets maximizedSessionId when deduplication leaves <= 1 session", () => {
+			splitStore.toggleSession(sid("s3")); // leaves [s1, s2]
+			splitStore.toggleMaximize(sid("s1"));
+			expect(splitStore.getSnapshot().maximizedSessionId).toBe(sid("s1"));
+
+			splitStore.replaceSession(sid("s1"), sid("s2"));
+			expect(splitStore.getSnapshot().sessionIds).toEqual([sid("s2")]);
+			expect(splitStore.getSnapshot().maximizedSessionId).toBeUndefined();
+		});
+
+		it("focuses newId instead of removing it when oldId is missing and newId is already open", () => {
+			splitStore.setFocus(sid("s1"));
+			splitStore.replaceSession(sid("unknown"), sid("s2"));
+			expect(splitStore.getSnapshot().sessionIds).toEqual([
+				sid("s1"),
+				sid("s2"),
+				sid("s3"),
+			]);
+			expect(splitStore.getSnapshot().focusedSessionId).toBe(sid("s2"));
+		});
+	});
 });
 
 function checkFactoryProps(): void {

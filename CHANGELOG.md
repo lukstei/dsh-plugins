@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.2-rc.5.5 - 2026-11-25
+
+- **@lukstei/dsh-client-kanban**
+  - Searching the board shows a ranked list of matching sessions beside a live preview of the focused one. Arrow keys move through results, Enter opens the session, and Escape clears the search. Double-clicking a result also opens it.
+  - The preview has an "Open session" button.
+  - Session links can point to another DSH session (`dsh://sessions/<id>`). Opening one switches to that session in the app instead of a browser tab.
+  - The session menu has a "Close pane" entry that closes the pane without changing the session's Kanban lane.
+- **@lukstei/dsh-client-split-view**
+  - Adds `replaceSession(oldId, newId)` to swap the session in a pane for another one in place, keeping the pane's position.
+- **@lukstei/dsh-session-handoff**
+  - The context ring is now a clickable gauge button. Clicking it runs `/handoff` in the session.
+  - Warning thresholds are higher: yellow at 100k prompt tokens and red at 150k when the cache is warm. After 5 idle minutes they are 70k and 100k. The window-share caps still apply.
+  - The handoff session keeps the source title. The source session is renamed to `<title> (Resumed)`, unless it already has that suffix.
+  - The new session gets a Kanban link back to the source session, labelled "Resumed from <id>".
+  - After `/handoff`, the new session takes over the source's pane in the split view instead of opening beside it. The source is marked done in Kanban.
+
 ## v0.2.2-rc.5.4 - 2026-11-23
 
 - **@lukstei/dsh-session-handoff**

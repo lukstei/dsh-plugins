@@ -135,7 +135,7 @@ export function KanbanCard({
 					)}
 				</div>
 				{record !== undefined && record !== null && (
-					<SessionLinks links={record.links} />
+					<SessionLinks links={record.links} onOpenSession={onSelect} />
 				)}
 			</div>
 			{onTransition !== undefined && lane !== "active" && (

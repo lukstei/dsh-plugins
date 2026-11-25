@@ -44,6 +44,7 @@ vi.mock("react/jsx-dev-runtime", () => ({
 vi.mock("@deepseek-ai/dsh-client-ui-primitives", () => ({
 	Button: "Button",
 	Menu: "Menu",
+	IconCloseOutlineRegular: "IconCloseOutlineRegular",
 	IconChevronDownOutlineRegular: "IconChevronDownOutlineRegular",
 }));
 
@@ -53,6 +54,7 @@ describe("KanbanTransitionDropdown", () => {
 	const unholdSession = vi.fn(async () => {});
 	const markDone = vi.fn(async () => {});
 	const reopen = vi.fn(async () => {});
+	const closePane = vi.fn();
 	const startPreparedTask = vi.fn(async () => {});
 
 	beforeEach(() => {
@@ -75,6 +77,7 @@ describe("KanbanTransitionDropdown", () => {
 			unholdSession,
 			markDone,
 			reopen,
+			closePane,
 			startPreparedTask,
 		} as unknown as KanbanTransitionDropdownProps;
 		return KanbanTransitionDropdown(props);
@@ -203,7 +206,7 @@ describe("KanbanTransitionDropdown", () => {
 		assert(menuCall);
 		const menuProps = menuCall[1] as ComponentProps<typeof Menu>;
 		const itemIds = menuProps.items?.map((item) => item.id);
-		expect(itemIds).toEqual(["done", "hold"]);
+		expect(itemIds).toEqual(["done", "hold", "close-separator", "close"]);
 
 		// Select hold
 		menuProps.onSelect?.("hold");
@@ -213,6 +216,9 @@ describe("KanbanTransitionDropdown", () => {
 		// Select done
 		menuProps.onSelect?.("done");
 		expect(markDone).toHaveBeenCalledWith(sessionId);
+
+		menuProps.onSelect?.("close");
+		expect(closePane).toHaveBeenCalledWith(sessionId);
 	});
 
 	it("provides Resume and Done options in To Do lane", () => {
@@ -235,7 +241,7 @@ describe("KanbanTransitionDropdown", () => {
 		assert(menuCall);
 		const menuProps = menuCall[1] as ComponentProps<typeof Menu>;
 		const itemIds = menuProps.items?.map((item) => item.id);
-		expect(itemIds).toEqual(["resume", "done"]);
+		expect(itemIds).toEqual(["resume", "done", "close-separator", "close"]);
 
 		menuProps.onSelect?.("resume");
 		expect(unholdSession).toHaveBeenCalledWith(sessionId);
@@ -267,7 +273,7 @@ describe("KanbanTransitionDropdown", () => {
 		assert(menuCall);
 		const menuProps = menuCall[1] as ComponentProps<typeof Menu>;
 		const itemIds = menuProps.items?.map((item) => item.id);
-		expect(itemIds).toEqual(["reopen", "hold"]);
+		expect(itemIds).toEqual(["reopen", "hold", "close-separator", "close"]);
 
 		menuProps.onSelect?.("reopen");
 		expect(reopen).toHaveBeenCalledWith(sessionId);

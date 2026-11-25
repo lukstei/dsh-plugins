@@ -1,6 +1,7 @@
 import { Menu } from "@deepseek-ai/dsh-client-ui-primitives";
+import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import { useState } from "react";
-import type { KanbanRecord } from "../types.ts";
+import { type KanbanRecord, sessionLinkId } from "../types.ts";
 
 /**
  * Purpose: Show collected session links in a shared icon-triggered popover.
@@ -11,8 +12,10 @@ import type { KanbanRecord } from "../types.ts";
  */
 export function SessionLinks({
 	links,
+	onOpenSession,
 }: {
 	readonly links: KanbanRecord["links"];
+	readonly onOpenSession: (id: SessionId) => void;
 }) {
 	const [open, setOpen] = useState(false);
 	return (
@@ -26,7 +29,12 @@ export function SessionLinks({
 				listClassName="dsh-session-links-menu"
 				onClose={() => setOpen(false)}
 				onSelect={(url) => {
-					window.open(url, "_blank", "noopener,noreferrer");
+					const sessionId = sessionLinkId(url);
+					if (sessionId === undefined) {
+						window.open(url, "_blank", "noopener,noreferrer");
+					} else {
+						onOpenSession(sessionId);
+					}
 					setOpen(false);
 				}}
 				items={links.map((link) => ({

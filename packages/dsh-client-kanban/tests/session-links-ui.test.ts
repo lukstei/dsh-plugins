@@ -83,7 +83,7 @@ test.each([
 	{ entries: links.slice(0, 1) },
 	{ entries: links },
 ])("shows the collected URLs behind an icon for $entries", ({ entries }) => {
-	const result = SessionLinks({ links: entries });
+	const result = SessionLinks({ links: entries, onOpenSession: vi.fn() });
 	if (entries.length === 0) {
 		expect(result).toBe(false);
 		expect(ui.jsx).not.toHaveBeenCalled();
@@ -152,7 +152,8 @@ test("opens selected URLs safely, closes, and renders updated projections", () =
 	const open = vi.fn();
 	vi.stubGlobal("window", { open });
 	ui.open = true;
-	SessionLinks({ links });
+	const onOpenSession = vi.fn();
+	SessionLinks({ links, onOpenSession });
 	const menu = menuProps();
 	assert(menu.onSelect);
 	menu.onSelect(links[1].url);
@@ -162,10 +163,17 @@ test("opens selected URLs safely, closes, and renders updated projections", () =
 		"noopener,noreferrer",
 	);
 	expect(ui.setOpen).toHaveBeenCalledWith(false);
+	expect(onOpenSession).not.toHaveBeenCalled();
+	menu.onSelect("dsh://sessions/abc-123");
+	expect(onOpenSession).toHaveBeenCalledWith("abc-123");
+	expect(open).toHaveBeenCalledTimes(1);
 	menu.onClose();
-	expect(ui.setOpen).toHaveBeenCalledTimes(2);
+	expect(ui.setOpen).toHaveBeenCalledTimes(3);
 	ui.jsx.mockClear();
-	SessionLinks({ links: [{ ...links[0], label: "Updated issue" }] });
+	SessionLinks({
+		links: [{ ...links[0], label: "Updated issue" }],
+		onOpenSession: vi.fn(),
+	});
 	expect(menuProps().items).toHaveLength(1);
 	expect(
 		ui.jsx.mock.calls.some(
@@ -196,7 +204,7 @@ test("both card surfaces use the same collected-link component", () => {
 		ui.jsx.mock.calls
 			.filter(([type]) => type === SessionLinks)
 			.map(([, props]) => props),
-	).toEqual([{ links }]);
+	).toEqual([{ links, onOpenSession: onSelect }]);
 	ui.jsx.mockClear();
 	const list = {
 		ids: [id],
@@ -248,6 +256,6 @@ test("both card surfaces use the same collected-link component", () => {
 		ui.jsx.mock.calls
 			.filter(([type]) => type === SessionLinks)
 			.map(([, props]) => props),
-	).toEqual([{ links }]);
+	).toEqual([{ links, onOpenSession: onSelect }]);
 	expect(onSelect).not.toHaveBeenCalled();
 });

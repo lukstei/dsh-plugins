@@ -501,7 +501,10 @@ export function InFlightSidebar({
 												)}
 												<div className="dsh-inflight-card-content">
 													{record !== undefined && record !== null && (
-														<SessionLinks links={record.links} />
+														<SessionLinks
+															links={record.links}
+															onOpenSession={selectSession}
+														/>
 													)}
 													<button
 														type="button"

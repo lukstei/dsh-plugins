@@ -227,6 +227,139 @@ export const KANBAN_CSS = `
   color: var(--dsw-alias-label-secondary, #64748b);
 }
 
+.dsh-kanban-board {
+  display: contents;
+}
+
+.dsh-kanban-results-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) 3fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.dsh-kanban-results-layout > .dsh-kanban-results {
+  overflow-y: auto;
+  align-content: start;
+}
+
+.dsh-kanban-preview {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--dsw-alias-border-l1, #e2e8f0);
+  border-radius: 6px;
+  background: var(--dsw-alias-bg-base);
+  overflow: hidden;
+}
+
+.dsh-kanban-preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1, #e2e8f0);
+}
+
+.dsh-kanban-preview-title {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsh-kanban-preview-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .dsh-kanban-results-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(120px, 2fr) 3fr;
+  }
+}
+
+.dsh-kanban-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dsh-kanban-result {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--dsw-alias-bg-base);
+  border: 1px solid var(--dsw-alias-border-l1, #e2e8f0);
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.dsh-kanban-result:hover,
+.dsh-kanban-result:focus-visible {
+  border-color: var(--dsw-alias-state-business-primary, #2563eb);
+  outline: none;
+}
+
+.dsh-kanban-result.is-focused {
+  border-left: 3px solid var(--dsw-alias-state-business-primary, #2563eb);
+}
+
+.dsh-kanban-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.dsh-kanban-result-title {
+  font-size: 14px;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.dsh-kanban-result-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary, #64748b);
+}
+
+.dsh-kanban-result-snippet {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #64748b);
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dsh-kanban-result-snippet mark {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary, #2563eb) 25%, transparent);
+  color: var(--dsw-alias-label-primary, #1e293b);
+  border-radius: 2px;
+}
+
 .dsh-kanban-scroll {
   flex: 1;
   overflow-y: auto;
