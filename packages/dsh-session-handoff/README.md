@@ -76,7 +76,7 @@ Server-side and client-side entries.
 
 ### Handoff ring
 
-A small ring beside the send button marks a session worth handing off: yellow at 70k prompt tokens, red at 100k. After 5 idle minutes the prompt cache is cold and the bars drop to 40k and 70k. Both bars are also capped at 60% and 80% of the model's context window. For ACP agent sessions, which never report usage to DSH, it reads the agent's context usage from `@zaimokuza/dsh-acp-adapter` once per finished turn. The adapter is an optional peer dependency: without it the ring only covers regular DSH sessions. Display only; run `/handoff` yourself. Thresholds live in `src/client/level.ts`.
+A small gauge button beside the send button marks a session worth handing off: yellow at 100k prompt tokens, red at 150k. After 5 idle minutes the prompt cache is cold and the bars drop to 70k and 100k. Both bars are also capped at 60% and 80% of the model's context window. For ACP agent sessions, which never report usage to DSH, it reads the agent's context usage from `@zaimokuza/dsh-acp-adapter` once per finished turn. The adapter is an optional peer dependency: without it the ring only covers regular DSH sessions. Clicking the button runs `/handoff` directly; it is disabled while a turn is running or a handoff is in flight. Thresholds live in `src/client/level.ts`.
 
 Code import (no mount): [`@lukstei/dsh-scratch-dir`](../dsh-scratch-dir/README.md) (`scratchDirectory`).
 
@@ -108,11 +108,13 @@ The client opens the pane. Without the client bundle the session is created but 
 
 | Section | Contents |
 | --- | --- |
-| Header | session id, cwd, creation time, event and turn counts |
-| `## Goal` | first user prompt, head 500 + tail 300 chars |
-| `## Turns` | one `### T<n> [end reason]` block per turn: ask and final reply. Last 5 turns quote each 1200 head + 400 tail chars; older turns flatten to the ask (500/300) and reply (240 chars) |
-| `## Failures` | every `tool/result` with `isError`: turn, tool name, reason (200 chars) |
-| `## Artifacts` | deduped paths from tool call arguments (`path`, `file_path`, `filePath`, `notebook_path`), max 12 |
+| Header | session id, `chain` of ancestor ids (when handed off before), cwd, creation time, event and turn counts across the chain |
+| `## Goal` | first real user prompt of the oldest ancestor, head 500 + tail 300 chars |
+| `## Turns` | one `### T<n> [end reason]` block per turn, numbered across the chain, handoff turns skipped. Last 5 turns quote each 1200 head + 400 tail chars; the 30 before them flatten to the ask (500/300) and reply (240 chars); older ones collapse to `… N earlier turns omitted` |
+| `## Failures` | newest 20 `tool/result` errors: turn, session id when from an ancestor, tool name, reason (200 chars), plus `… N older failures omitted` |
+| `## Artifacts` | deduped paths from tool call arguments (`path`, `file_path`, `filePath`, `notebook_path`) across the chain, newest 100, plus `… N older paths omitted`; the brief files themselves are excluded |
+
+Every section is bounded by entry count and per-line length (paths 300 chars, tool names 80), so a brief stays near 50k characters however many times a session is handed off.
 
 Empty sections render `none`. Output is deterministic for a given log. `request/header`, `agent/inbox/spliced` and reasoning blocks are excluded.
 
@@ -141,6 +143,7 @@ Details:
 - A session created by `cwd` alone is attached to no workspace and stays out of the sidebar tree until the next Host start, so the workspace id is used when available.
 - Turn attribution: `user/message` carries no turn number, so it is attributed to the most recently opened turn.
 - Artifact extraction parses tool arguments as JSON; non-JSON payloads are ignored.
+- Handoff chain: a handed-off session starts with the follow-up "The handoff brief for session <id> is at <file>." `readChain` follows that id back through `sessionQuery.readSession` (cycle-guarded; a deleted parent ends the walk) and `renderHandoff` merges the logs oldest first. The follow-up turn and the read of its brief file add no Goal, Turn or Artifact.
 - The scratch path comes from `scratchDirectory()`; an unsafe id throws and the command returns an error.
 
 Trust boundary: the session id argument and session log contents are untrusted text; output is markdown written under the scratch directory only.

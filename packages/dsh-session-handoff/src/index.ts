@@ -18,7 +18,11 @@ import type {} from "@deepseek-ai/dsh-session-title";
 import type {} from "@deepseek-ai/dsh-working-directory";
 import type { Workspace } from "@deepseek-ai/dsh-workspace";
 import { scratchDirectory } from "@lukstei/dsh-scratch-dir";
-import { handoffInstruction, renderHandoff } from "./handoff.ts";
+import {
+	handoffInstruction,
+	parentSessionId,
+	renderHandoff,
+} from "./handoff.ts";
 import { formatLaunchResult } from "./launch.ts";
 
 export const name = "session-handoff";
@@ -105,7 +109,9 @@ async function handoff(
 
 	try {
 		const snapshot = await ctx.sessionQuery.readSession(targetId);
-		const rendered = renderHandoff(snapshot);
+		const rendered = renderHandoff(
+			await readChain(ctx, snapshot, invocation.signal),
+		);
 		if (rendered.turns === 0) {
 			return {
 				kind: "error",
@@ -140,6 +146,35 @@ async function handoff(
 			text: `Handoff failed: ${error instanceof Error ? error.message : String(error)}`,
 		};
 	}
+}
+
+/**
+ * The handed-off session preceded by every ancestor it was itself handed off from,
+ * oldest first, so the brief keeps what earlier briefs summarized.
+ */
+async function readChain(
+	ctx: Context,
+	snapshot: SessionLogSnapshot,
+	signal: AbortSignal,
+): Promise<SessionLogSnapshot[]> {
+	const chain = [snapshot];
+	const seen = new Set([String(snapshot.session.id)]);
+	let parent = parentSessionId(snapshot);
+	if (parent === undefined) return chain;
+	// `readSession` has no typed not-found error, so deleted parents are found by id.
+	const known = new Set(
+		(await ctx.sessionQuery.listSessions(signal)).map((session) =>
+			String(session.header.id),
+		),
+	);
+	while (parent !== undefined && !seen.has(parent) && known.has(parent)) {
+		seen.add(parent);
+		// Safe: the id was just matched against the listed session ids.
+		const ancestor = await ctx.sessionQuery.readSession(parent as SessionId);
+		chain.unshift(ancestor);
+		parent = parentSessionId(ancestor);
+	}
+	return chain;
 }
 
 /**

@@ -34,6 +34,9 @@ export function HandoffRing({
 	const running = useSession((session) => session.running);
 	const [acp, setAcp] = useState<AcpUsage | undefined>(undefined);
 	const [cold, setCold] = useState(false);
+	const [pendingSession, setPendingSession] = useState<
+		SessionStandardProps["sessionId"] | undefined
+	>(undefined);
 
 	// ACP agents report occupancy to the adapter, never to DSH's `contextPressure`; read it
 	// when a turn settles. The reader is unset (so this is a no-op) without the adapter.
@@ -74,23 +77,47 @@ export function HandoffRing({
 	const level = handoffLevel(tokens, window, cold);
 	if (level === "none" || tokens === undefined) return null;
 	const k = Math.round(tokens / 1000);
+	const pending = pendingSession === sessionId;
+	const isDisabled = running || pending;
+	const startHandoff = async (): Promise<void> => {
+		if (isDisabled) return;
+		setPendingSession(sessionId);
+		try {
+			await onHandoff(sessionId);
+		} catch (error: unknown) {
+			console.error("session-handoff: handoff failed", error);
+		} finally {
+			setPendingSession((current) =>
+				current === sessionId ? undefined : current,
+			);
+		}
+	};
 	const hint = cold
 		? "cache is cold, a fresh session is cheaper now"
 		: "consider a fresh session";
-	const label = `Context ${k}k tokens: ${hint}. Click to hand off (/handoff)`;
+	const action = pending
+		? "Handing off…"
+		: running
+			? "Wait for the current turn to finish to hand off (/handoff)"
+			: "Click to hand off (/handoff)";
+	const label = `Context ${k}k tokens: ${hint}. ${action}`;
 	return createElement(Tooltip, {
 		label,
 		side: "top",
 		portal: true,
+		// Disabled native buttons omit mouseleave, so close Tooltip from state.
+		disabled: isDisabled,
 		// biome-ignore lint/correctness/noChildrenProp: Tooltip types `children` as a required prop, which createElement's 3rd argument does not satisfy
 		children: createElement(Button, {
 			variant: "ghost",
 			size: "sm",
+			disabled: isDisabled,
+			title: isDisabled ? label : undefined,
 			"aria-label": label,
 			// the icon strokes with currentColor; 28px square instead of the text-button padding
 			style: { color: COLOR[level], padding: 0, width: 28 },
 			icon: createElement(IconGaugeOutlineMedium, { size: 16 }),
-			onClick: () => void onHandoff(sessionId),
+			onClick: () => void startHandoff(),
 		}),
 	});
 }

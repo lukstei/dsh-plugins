@@ -40,7 +40,10 @@ export function apply(ctx: Context): void {
 	// Same command the user would type; sent directly so the composer draft stays untouched.
 	const handoff = async (id: SessionId): Promise<void> => {
 		await sessions.using(id, { source: "splitView" }, async (reference) => {
-			await reference.binding.session.command("/handoff");
+			const result = await reference.binding.session.command("/handoff");
+			if (!result.ok) {
+				console.warn("session-handoff: /handoff failed", result);
+			}
 		});
 	};
 

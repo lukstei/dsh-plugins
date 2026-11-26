@@ -17,7 +17,11 @@ import type {
 	SessionRecord,
 } from "@deepseek-ai/dsh-session-query";
 import type { WorkspaceId } from "@deepseek-ai/dsh-workspace";
-import { renderHandoff } from "./handoff.ts";
+import {
+	handoffInstruction,
+	parentSessionId,
+	renderHandoff,
+} from "./handoff.ts";
 import * as plugin from "./index.ts";
 import { formatLaunchResult, launchedSessionId } from "./launch.ts";
 
@@ -194,6 +198,7 @@ async function setup(
 		readonly resolveError?: string;
 		readonly unassigned?: boolean;
 		readonly sourceTitle?: string;
+		readonly logs?: Readonly<Record<string, SessionLogSnapshot | Error>>;
 	} = {},
 ): Promise<Harness> {
 	const definition: CommandDefinition[] = [];
@@ -241,7 +246,10 @@ async function setup(
 		listSessions: async () => sessions,
 		readSession: async (sessionId: string) => {
 			read.push(sessionId);
-			return snapshot;
+			const log =
+				options.logs === undefined ? undefined : options.logs[sessionId];
+			if (log instanceof Error) throw log;
+			return log === undefined ? snapshot : log;
 		},
 	});
 	ctx.provide("workspaceRegistry", {
@@ -300,7 +308,7 @@ function invocation(
 const records = [{ header: { id: TARGET_ID } }] as unknown as SessionRecord[];
 
 test("renderHandoff summarizes goal, turns, failures and artifacts", () => {
-	const rendered = renderHandoff(snapshot);
+	const rendered = renderHandoff([snapshot]);
 
 	assert.equal(rendered.turns, 2);
 	assert.equal(
@@ -343,11 +351,18 @@ Tests are in.
 });
 
 test("renderHandoff degrades every empty section to none", () => {
-	const rendered = renderHandoff({
-		session: { version: 4, id: TARGET_ID, createdAt: CREATED, isSeeded: false },
-		inheritedEventCount: 0,
-		events: [],
-	} as unknown as SessionLogSnapshot);
+	const rendered = renderHandoff([
+		{
+			session: {
+				version: 4,
+				id: TARGET_ID,
+				createdAt: CREATED,
+				isSeeded: false,
+			},
+			inheritedEventCount: 0,
+			events: [],
+		} as unknown as SessionLogSnapshot,
+	]);
 
 	assert.equal(rendered.turns, 0);
 	assert.match(rendered.markdown, /^- cwd: `unknown`$/m);
@@ -399,11 +414,18 @@ test("the last five turns are quoted longer than older ones", () => {
 		);
 	}
 
-	const rendered = renderHandoff({
-		session: { version: 4, id: TARGET_ID, createdAt: CREATED, isSeeded: false },
-		inheritedEventCount: 0,
-		events: events as SessionEvent[],
-	} as unknown as SessionLogSnapshot);
+	const rendered = renderHandoff([
+		{
+			session: {
+				version: 4,
+				id: TARGET_ID,
+				createdAt: CREATED,
+				isSeeded: false,
+			},
+			inheritedEventCount: 0,
+			events: events as SessionEvent[],
+		} as unknown as SessionLogSnapshot,
+	]);
 	const md = rendered.markdown;
 
 	assert.equal(rendered.turns, 7);
@@ -454,11 +476,18 @@ test("a long ask keeps its head and tail in the recent-turn budget", () => {
 		},
 	] as SessionEvent[];
 
-	const rendered = renderHandoff({
-		session: { version: 4, id: TARGET_ID, createdAt: CREATED, isSeeded: false },
-		inheritedEventCount: 0,
-		events,
-	} as unknown as SessionLogSnapshot);
+	const rendered = renderHandoff([
+		{
+			session: {
+				version: 4,
+				id: TARGET_ID,
+				createdAt: CREATED,
+				isSeeded: false,
+			},
+			inheritedEventCount: 0,
+			events,
+		} as unknown as SessionLogSnapshot,
+	]);
 
 	assert.ok(
 		rendered.markdown.includes(
@@ -710,4 +739,213 @@ test("launchedSessionId only reads the launch marker", () => {
 		} as unknown as SessionEvent),
 		undefined,
 	);
+});
+
+interface TurnSpec {
+	readonly ask: string;
+	readonly path?: string;
+	readonly failure?: string;
+}
+
+function sessionLog(
+	id: string,
+	specs: readonly TurnSpec[],
+): SessionLogSnapshot {
+	const log: unknown[] = [];
+	specs.forEach((spec, i) => {
+		const turn = i + 1;
+		log.push(
+			{ type: "turn/start", seq: 0, time: CREATED, data: { turn } },
+			{
+				type: "user/message",
+				seq: 0,
+				time: CREATED,
+				data: {
+					id: `u${turn}`,
+					role: "user",
+					content: [{ type: "text", text: spec.ask }],
+					source: { kind: "user" },
+				},
+			},
+		);
+		if (spec.path !== undefined) {
+			log.push({
+				type: "tool/call",
+				seq: 0,
+				time: CREATED,
+				data: {
+					turn,
+					step: 1,
+					callId: `c${turn}`,
+					name: "read",
+					arguments: JSON.stringify({ path: spec.path }),
+				},
+			});
+		}
+		if (spec.failure !== undefined) {
+			log.push({
+				type: "tool/result",
+				seq: 0,
+				time: CREATED,
+				data: {
+					turn,
+					step: 1,
+					message: {
+						id: `r${turn}`,
+						role: "tool",
+						content: [],
+						source: { kind: "tool" },
+						toolCallId: `c${turn}`,
+						isError: true,
+					},
+					error: { name: "Error", code: "X", reason: spec.failure },
+				},
+			});
+		}
+		log.push({
+			type: "turn/end",
+			seq: 0,
+			time: CREATED,
+			data: { turn, reason: { kind: "completed" } },
+		});
+	});
+	return {
+		session: { version: 4, id, createdAt: CREATED, isSeeded: false },
+		inheritedEventCount: 0,
+		events: log as SessionEvent[],
+	} as unknown as SessionLogSnapshot;
+}
+
+const BRIEF = "/scratch/HANDOFF.md";
+
+test("a chained handoff keeps goal, turns, failures and artifacts of every ancestor", () => {
+	const a = sessionLog("aaaaaaaa-0000", [
+		{ ask: "original goal", path: "/repo/a.ts", failure: "boom" },
+	]);
+	const b = sessionLog("bbbbbbbb-0000", [
+		{ ask: handoffInstruction("aaaaaaaa-0000", BRIEF), path: BRIEF },
+		{ ask: "second ask", path: "/repo/b.ts" },
+	]);
+	const c = sessionLog("cccccccc-0000", [
+		{ ask: handoffInstruction("bbbbbbbb-0000", BRIEF), path: BRIEF },
+	]);
+
+	assert.equal(parentSessionId(c), "bbbbbbbb-0000");
+	assert.equal(parentSessionId(a), undefined);
+
+	const rendered = renderHandoff([a, b, c]);
+	assert.equal(rendered.turns, 2);
+	assert.match(
+		rendered.markdown,
+		/- chain: `aaaaaaaa` → `bbbbbbbb` → `cccccccc`/,
+	);
+	assert.match(rendered.markdown, /## Goal\n\noriginal goal\n/);
+	assert.match(rendered.markdown, /### T1 \[completed\]\n\noriginal goal/);
+	assert.match(rendered.markdown, /### T2 \[completed\]\n\nsecond ask/);
+	assert.match(
+		rendered.markdown,
+		/- \*\*T1\*\* \(aaaaaaaa\) tool `read`: boom/,
+	);
+	assert.match(rendered.markdown, /- `\/repo\/a\.ts`\n- `\/repo\/b\.ts`\n$/);
+	assert.doesNotMatch(rendered.markdown, /HANDOFF\.md/);
+});
+
+test("a ten-link chain stays within the section bounds", () => {
+	const chain: SessionLogSnapshot[] = [];
+	let previous: string | undefined;
+	for (let link = 0; link < 10; link++) {
+		const id = `${String(link).padStart(8, "0")}-0000`;
+		const specs: TurnSpec[] = [];
+		if (previous !== undefined)
+			specs.push({ ask: handoffInstruction(previous, BRIEF), path: BRIEF });
+		for (let n = 0; n < 20; n++)
+			specs.push({
+				ask: `ask ${link}.${n}`,
+				path: `/repo/f${link}-${n}.ts`,
+				failure: `fail ${link}.${n}`,
+			});
+		chain.push(sessionLog(id, specs));
+		previous = id;
+	}
+
+	const md = renderHandoff(chain).markdown;
+	assert.match(md, /… 165 earlier turns omitted/);
+	assert.match(md, /- … 180 older failures omitted/);
+	assert.match(md, /- … 100 older paths omitted/);
+	assert.match(md, /ask 9\.19/);
+	assert.doesNotMatch(md, /### T1 \[/);
+	assert.ok(md.length < 50_000, `brief is ${md.length} chars`);
+});
+
+function recordsOf(...ids: string[]): SessionRecord[] {
+	return ids.map((id) => ({ header: { id } })) as unknown as SessionRecord[];
+}
+
+async function handoffOf(
+	t: { after: (fn: () => Promise<void>) => void },
+	target: string,
+	known: string[],
+	logs: Record<string, SessionLogSnapshot | Error>,
+) {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+	const harness = await setup(cwd, recordsOf(...known), { logs });
+	const result = await harness.definition.handler(invocation(harness, target));
+	return { harness, result };
+}
+
+test("a cycle in the parent chain ends it", async (t) => {
+	const A = "aaaaaaaa-0000";
+	const B = "bbbbbbbb-0000";
+	const { harness, result } = await handoffOf(t, A, [A, B], {
+		[A]: sessionLog(A, [{ ask: handoffInstruction(B, BRIEF) }, { ask: "a" }]),
+		[B]: sessionLog(B, [{ ask: handoffInstruction(A, BRIEF) }, { ask: "b" }]),
+	});
+	assert.equal(result.kind, "success");
+	assert.deepEqual(harness.read, [A, B]);
+});
+
+test("a deleted parent ends the chain without an error", async (t) => {
+	const A = "aaaaaaaa-0000";
+	const { harness, result } = await handoffOf(t, A, [A], {
+		[A]: sessionLog(A, [
+			{ ask: handoffInstruction("deleted-0000", BRIEF) },
+			{ ask: "a" },
+		]),
+	});
+	assert.equal(result.kind, "success");
+	assert.deepEqual(harness.read, [A]);
+});
+
+test("a failing read of a listed parent surfaces as an error", async (t) => {
+	const A = "aaaaaaaa-0000";
+	const B = "bbbbbbbb-0000";
+	const { result } = await handoffOf(t, A, [A, B], {
+		[A]: sessionLog(A, [{ ask: handoffInstruction(B, BRIEF) }, { ask: "a" }]),
+		[B]: new Error("corrupt log"),
+	});
+	assert.equal(result.kind, "error");
+	assert.match(JSON.stringify(result), /Handoff failed: corrupt log/);
+});
+
+test("an instruction pasted later in a session is an ordinary ask", () => {
+	const log = sessionLog("aaaaaaaa-0000", [
+		{ ask: "real goal" },
+		{ ask: handoffInstruction("bbbbbbbb-0000", BRIEF), path: "/repo/x.ts" },
+	]);
+	assert.equal(parentSessionId(log), undefined);
+	const rendered = renderHandoff([log]);
+	assert.equal(rendered.turns, 2);
+	assert.match(rendered.markdown, /- `\/repo\/x\.ts`/);
+});
+
+test("very long artifact paths and tool names are clipped", () => {
+	const longPath = `/repo/${"p".repeat(1000)}.ts`;
+	const md = renderHandoff([
+		sessionLog("aaaaaaaa-0000", [
+			{ ask: "go", path: longPath, failure: "boom" },
+		]),
+	]).markdown;
+	assert.ok(!md.includes(longPath));
+	assert.match(md, /- `\/repo\/p+…`/);
 });

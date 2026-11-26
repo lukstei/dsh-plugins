@@ -25,7 +25,7 @@ DSH runs one conversation at a time and tells you little while you look elsewher
 - **Awareness.** Desktop notifications, a chime, an app badge and a status favicon tell you when an agent stops or needs approval. You can install DSH as an app.
 - **Automation.** YAML workflows run multi-step prompts you wrote yourself. Scheduled scripts poll in the background and wake the agent only when something changed.
 - **Context.** `/handoff` moves a long session into a fresh one with a short brief. Every session gets its own scratch folder.
-- **Reliability.** Per-logger log files, a session list that survives a corrupt log, and commands that copy a transcript for bug reports.
+- **Reliability.** Per-logger log files and commands that copy a transcript for bug reports.
 
 ## Plugins at a glance
 
@@ -47,16 +47,17 @@ DSH runs one conversation at a time and tells you little while you look elsewher
 | [`dsh-client-pwa`](packages/dsh-client-pwa/README.md) | Installable app and trusted-proxy login | Upstream is not installable as an app and logs in with a launch token only. |
 | **Observability and reliability** | | |
 | [`dsh-log`](packages/dsh-log/README.md) | Per-logger log files and levels | Upstream logging has no file output and no per-logger levels. |
-| [`dsh-resilient-persistence`](packages/dsh-resilient-persistence/README.md) | Corrupt session logs no longer break the session list | In upstream, one corrupt session log breaks the session list. |
 | [`dsh-debug`](packages/dsh-debug/README.md) | `/copy-transcript` and `/copy-session-id` | Upstream has no command to copy a transcript or session id. |
 | **Internals** | | |
 | [`util-review-ui`](packages/util-review-ui/README.md) | Shared review UI used by review-git | Library. It comes in as a dependency of `dsh-client-review-git`. |
 
 ## Quick start
 
-<!-- re-check after the install smoke test passes -->
+You need DSH with Node 24.9 or newer. The browser plugins need a profile that serves the web app, so create one from the shipped `web` template, then add a plugin:
 
-You need DSH with Node 24.9 or newer. Add a plugin to a profile:
+```sh
+dsh --profile <profile-name> --from-default-profile web --dump-config
+```
 
 ```sh
 dsh plugin --profile <profile-name> add @lukstei/dsh-client-kanban
@@ -247,17 +248,6 @@ Trusting a header or network range grants access to everyone who can set it. Che
 
 No rotation and no size cap. [Package README](packages/dsh-log/README.md)
 
-#### dsh-resilient-persistence
-
-**Gap it fills:** in upstream, one corrupt session log breaks the session list.
-
-- Opens each listed session once to test it, and leaves out the ones that fail.
-- Logs one warning per corrupt session with the error.
-- Caches the result until the session changes, and checks 16 sessions in parallel.
-- Also hides logs written by a newer DSH with event types your version does not know.
-
-It hides sessions and does not repair them. Delete the session folder to remove one. This plugin patches an upstream function, so a DSH persistence change can break it. [Package README](packages/dsh-resilient-persistence/README.md)
-
 #### dsh-debug
 
 **Gap it fills:** upstream has no command to copy a transcript or session id.
@@ -268,8 +258,6 @@ It hides sessions and does not repair them. Delete the session folder to remove 
 Uses `pbcopy`, so it works on macOS only. [Package README](packages/dsh-debug/README.md)
 
 ## Recommended setups
-
-<!-- re-check after the install smoke test passes -->
 
 **Web workspace.** Run several agents and stay informed.
 
@@ -291,13 +279,13 @@ done
 
 Handoff needs split view and the scratch folder, so install all three together. Add Kanban to mark the old session done after a handoff.
 
-**Reliability.** Add `dsh-log`, `dsh-resilient-persistence` and `dsh-debug` to any profile.
+**Reliability.** Add `dsh-log` and `dsh-debug` to any profile.
 
 ## FAQ
 
 **Which DSH version does a plugin support?** Versions follow the DSH release they target: `<dsh-version>.<n>`. For example, `0.2.3-alpha.2.1` targets DSH `0.2.3-alpha.2`. Install the plugin version that matches your DSH.
 
-**What happens when I upgrade DSH?** Upgrade the plugins together with DSH. `dsh-resilient-persistence` patches an upstream function and `dsh-client-review-git` expects host and client to update together.
+**What happens when I upgrade DSH?** Upgrade the plugins together with DSH. `dsh-client-review-git` expects host and client to update together.
 
 **Which plugins need each other?** `dsh-session-handoff` needs `dsh-client-split-view` and `dsh-scratch-dir`. `dsh-client-notify` needs `dsh-client-pwa` for the app badge. The favicon's review ticks and the handoff's "done" mark need `dsh-client-kanban`. Each package README lists its requirements.
 

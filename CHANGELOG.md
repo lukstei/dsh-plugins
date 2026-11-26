@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.2-rc.5.8 - 2026-11-26
+
+- **@lukstei/dsh-client-kanban**
+  - Workspace tab counts for running, needs-attention and in-review sessions sit inline after the workspace name instead of overlapping the tab's edge. The counts are slightly larger.
+- **@lukstei/dsh-resilient-persistence**
+  - Retired and removed. Sessions with corrupt logs are no longer hidden from the session list, so one corrupt log can break session listing again. Remove the package from any profile that lists it.
+- **@lukstei/dsh-session-handoff**
+  - Handing off a session that was itself handed off now carries the earlier history into the brief. The brief lists the chain of session ids and merges the turns, failures and file paths of every earlier session, oldest first.
+  - Briefs stay a bounded size however long the chain gets. Only the newest turns, failures and file paths are kept in full, and the rest are counted as omitted.
+  - The handoff button is disabled while a turn is running or a handoff is already starting. Its tooltip says to wait for the turn to finish, and reads "Handing off…" while the handoff runs.
+
 ## v0.2.2-rc.5.7 - 2026-11-25
 
 - **@lukstei/dsh-session-handoff**

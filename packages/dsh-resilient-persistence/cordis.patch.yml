@@ -1,4 +1,0 @@
-- insert:
-    - id: resilient-session-persistence
-      name: '@lukstei/dsh-resilient-persistence'
-      config: {}

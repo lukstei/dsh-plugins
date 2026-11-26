@@ -93,43 +93,33 @@ export const KANBAN_CSS = `
 }
 
 .dsh-kanban-ws-badges {
-  position: absolute;
-  top: -3px;
-  bottom: -3px;
-  right: -7px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 2px;
+  display: inline-flex;
   align-items: center;
+  gap: 3px;
   line-height: 1;
-  pointer-events: none;
-  z-index: 1;
+  flex-shrink: 0;
 }
 
 .dsh-kanban-ws-badge {
   font-size: 9px;
   font-weight: 700;
   border-radius: 9999px;
-  min-width: 12px;
-  height: 12px;
+  min-width: 14px;
+  height: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
   color: #ffffff;
   box-sizing: border-box;
-  box-shadow: 0 0 0 1.5px var(--dsw-alias-bg-module-platform);
 }
 
 .dsh-kanban-ws-badge-top {
   background: var(--dsw-alias-state-success-primary);
-  margin-bottom: auto;
 }
 
 .dsh-kanban-ws-badge-bottom {
   background: var(--dsw-alias-state-warn-primary);
-  margin-top: auto;
 }
 
 .dsh-kanban-ws-badge-alert {

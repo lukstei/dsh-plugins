@@ -11,13 +11,25 @@ const ASK_HEAD = 500;
 const ASK_TAIL = 300;
 const OUTCOME_LIMIT = 240;
 const FAILURE_LIMIT = 200;
-const ARTIFACT_LIMIT = 12;
+const PATH_LIMIT = 300;
+const TOOL_NAME_LIMIT = 80;
 const RECENT_TURNS = 5;
 const RECENT_HEAD = 1200;
 const RECENT_TAIL = 400;
+/**
+ * Bounds that keep a brief small however long the handoff chain is: each section
+ * keeps only its newest entries and names how many it dropped.
+ */
+const OLDER_TURNS = 30;
+const FAILURE_MAX = 20;
+const ARTIFACT_MAX = 100;
+const SHORT_ID_LENGTH = 8;
 
 /** Tool argument keys that carry a durable file path. */
 const PATH_KEYS = ["path", "file_path", "filePath", "notebook_path"];
+
+/** The first line of every handoff follow-up; names the parent session and its brief. */
+const INSTRUCTION_LINE = /^The handoff brief for session (\S+) is at (.+)\.$/;
 
 export interface RenderedHandoff {
 	readonly markdown: string;
@@ -26,90 +38,158 @@ export interface RenderedHandoff {
 
 interface TurnArc {
 	readonly turn: number;
+	readonly sessionId: string;
+	/** Running number across the whole chain; assigned after collection. */
+	index: number;
 	ask: string;
 	outcome: string;
 	reason: TurnEndReason | undefined;
+	/** The turn only read a parent brief; it carries no work of its own. */
+	isHandoff: boolean;
 }
 
-export function renderHandoff(snapshot: SessionLogSnapshot): RenderedHandoff {
-	const turns: TurnArc[] = [];
-	const byId = new Map<number, TurnArc>();
-	const failures: string[] = [];
-	const artifacts: string[] = [];
-	const callNames = new Map<string, string>();
-	const seenArtifacts = new Set<string>();
-	let open: TurnArc | undefined;
-	let goal = "";
+interface Failure {
+	readonly arc: TurnArc;
+	readonly text: string;
+}
 
+/**
+ * Id of the session whose brief this session was started from, read from the
+ * handoff follow-up it received.
+ */
+export function parentSessionId(
+	snapshot: SessionLogSnapshot,
+): string | undefined {
 	for (const event of snapshot.events) {
-		switch (event.type) {
-			case "turn/start": {
-				const opened: TurnArc = {
-					turn: event.data.turn,
-					ask: "",
-					outcome: "",
-					reason: undefined,
-				};
-				turns.push(opened);
-				byId.set(event.data.turn, opened);
-				// edge case: `user/message` carries no turn number, so it is attributed
-				// to the most recently opened turn.
-				open = opened;
-				break;
+		if (event.type !== "user/message" || event.data.source.kind !== "user")
+			continue;
+		const text = blockText(event.data.content);
+		if (text === "") continue;
+		// Only the session's first user message can be the handoff follow-up.
+		const match = INSTRUCTION_LINE.exec(text.split("\n", 1)[0]);
+		return match === null ? undefined : match[1];
+	}
+	return undefined;
+}
+
+/**
+ * Renders one brief for a handoff chain.
+ * @param snapshots - Session logs, oldest ancestor first, the handed-off session last.
+ */
+export function renderHandoff(
+	snapshots: readonly SessionLogSnapshot[],
+): RenderedHandoff {
+	const turns: TurnArc[] = [];
+	const failures: Failure[] = [];
+	// A Map keeps insertion order; re-inserting moves a repeated path to its newest use.
+	const artifacts = new Map<string, true>();
+	const briefFiles = new Set<string>();
+	let goal = "";
+	let eventCount = 0;
+
+	for (const snapshot of snapshots) {
+		const sessionId = String(snapshot.session.id);
+		const byId = new Map<number, TurnArc>();
+		const callNames = new Map<string, string>();
+		let open: TurnArc | undefined;
+		let sawUserMessage = false;
+		eventCount += snapshot.events.length;
+
+		for (const event of snapshot.events) {
+			switch (event.type) {
+				case "turn/start": {
+					const opened: TurnArc = {
+						turn: event.data.turn,
+						sessionId,
+						index: 0,
+						ask: "",
+						outcome: "",
+						reason: undefined,
+						isHandoff: false,
+					};
+					turns.push(opened);
+					byId.set(event.data.turn, opened);
+					// edge case: `user/message` carries no turn number, so it is attributed
+					// to the most recently opened turn.
+					open = opened;
+					break;
+				}
+				case "user/message": {
+					if (event.data.source.kind !== "user") break;
+					const text = blockText(event.data.content);
+					if (text === "") break;
+					const instruction = sawUserMessage
+						? null
+						: INSTRUCTION_LINE.exec(text.split("\n", 1)[0]);
+					sawUserMessage = true;
+					if (instruction !== null) {
+						briefFiles.add(instruction[2]);
+						if (open !== undefined) open.isHandoff = true;
+						break;
+					}
+					if (goal === "") goal = elide(flatten(text), ASK_HEAD, ASK_TAIL);
+					if (open !== undefined && open.ask === "") open.ask = text;
+					break;
+				}
+				case "assistant/message": {
+					const arc = byId.get(event.data.turn);
+					if (arc === undefined) break;
+					// The last text-bearing step of a turn is the answer the user saw.
+					arc.outcome = blockText(event.data.message.content);
+					break;
+				}
+				case "turn/end": {
+					const arc = byId.get(event.data.turn);
+					if (arc === undefined) break;
+					arc.reason = event.data.reason;
+					break;
+				}
+				case "tool/call": {
+					const arc = byId.get(event.data.turn);
+					callNames.set(event.data.callId, event.data.name);
+					if (arc === undefined || arc.isHandoff) break;
+					collectArtifacts(event.data.arguments, artifacts, briefFiles);
+					break;
+				}
+				case "tool/result": {
+					const arc = byId.get(event.data.turn);
+					if (event.data.message.isError !== true || arc === undefined) break;
+					if (arc.isHandoff) break;
+					const callId = event.data.message.toolCallId;
+					const name = callNames.get(callId);
+					failures.push({
+						arc,
+						text: `tool \`${clip(name === undefined ? callId : name, TOOL_NAME_LIMIT)}\`: ${clip(errorReason(event.data.error), FAILURE_LIMIT)}`,
+					});
+					break;
+				}
+				default:
+					break;
 			}
-			case "user/message": {
-				if (event.data.source.kind !== "user") break;
-				const text = blockText(event.data.content);
-				if (text === "") break;
-				if (goal === "") goal = elide(flatten(text), ASK_HEAD, ASK_TAIL);
-				if (open !== undefined && open.ask === "") open.ask = text;
-				break;
-			}
-			case "assistant/message": {
-				const arc = byId.get(event.data.turn);
-				if (arc === undefined) break;
-				// The last text-bearing step of a turn is the answer the user saw.
-				arc.outcome = blockText(event.data.message.content);
-				break;
-			}
-			case "turn/end": {
-				const arc = byId.get(event.data.turn);
-				if (arc === undefined) break;
-				arc.reason = event.data.reason;
-				break;
-			}
-			case "tool/call": {
-				const arc = byId.get(event.data.turn);
-				callNames.set(event.data.callId, event.data.name);
-				if (arc === undefined) break;
-				collectArtifacts(event.data.arguments, artifacts, seenArtifacts);
-				break;
-			}
-			case "tool/result": {
-				const arc = byId.get(event.data.turn);
-				if (event.data.message.isError !== true || arc === undefined) break;
-				const callId = event.data.message.toolCallId;
-				const name = callNames.get(callId);
-				failures.push(
-					`- **T${arc.turn}** tool \`${name === undefined ? callId : name}\`: ${clip(errorReason(event.data.error), FAILURE_LIMIT)}`,
-				);
-				break;
-			}
-			default:
-				break;
 		}
 	}
 
-	const id = String(snapshot.session.id);
-	const cwd = snapshot.session.cwd;
+	const work = turns.filter((turn) => !turn.isHandoff);
+	work.forEach((turn, index) => {
+		turn.index = index + 1;
+	});
+
+	const current = snapshots[snapshots.length - 1];
+	const id = String(current.session.id);
+	const cwd = current.session.cwd;
 	const lines = [
 		`# Handoff — ${id}`,
 		"",
 		`- session: \`${id}\``,
+		...(snapshots.length > 1
+			? [
+					`- chain: ${snapshots.map((snapshot) => `\`${shortId(String(snapshot.session.id))}\``).join(" → ")}`,
+				]
+			: []),
 		`- cwd: \`${cwd === undefined ? "unknown" : cwd}\``,
-		`- created: ${new Date(snapshot.session.createdAt).toISOString()}`,
-		`- events: ${snapshot.events.length}`,
-		`- turns: ${turns.length}`,
+		`- created: ${new Date(current.session.createdAt).toISOString()}`,
+		`- events: ${eventCount}`,
+		`- turns: ${work.length}`,
 		"",
 		"## Goal",
 		"",
@@ -117,26 +197,33 @@ export function renderHandoff(snapshot: SessionLogSnapshot): RenderedHandoff {
 		"",
 		"## Turns",
 		"",
-		turns.length === 0
-			? "none"
-			: turns
-					.map((turn, index) =>
-						turnBlock(turn, index >= turns.length - RECENT_TURNS),
-					)
-					.join("\n\n"),
+		work.length === 0 ? "none" : turnList(work),
 		"",
 		"## Failures",
 		"",
-		failures.length === 0 ? "none" : failures.join("\n"),
+		failures.length === 0
+			? "none"
+			: bounded(
+					failures.map(
+						({ arc, text }) =>
+							`- **T${arc.index}**${arc.sessionId === id ? "" : ` (${shortId(arc.sessionId)})`} ${text}`,
+					),
+					FAILURE_MAX,
+					"older failures",
+				),
 		"",
 		"## Artifacts",
 		"",
-		artifacts.length === 0
+		artifacts.size === 0
 			? "none"
-			: artifacts.map((file) => `- \`${file}\``).join("\n"),
+			: bounded(
+					[...artifacts.keys()].map((file) => `- \`${file}\``),
+					ARTIFACT_MAX,
+					"older paths",
+				),
 	];
 
-	return { markdown: `${lines.join("\n")}\n`, turns: turns.length };
+	return { markdown: `${lines.join("\n")}\n`, turns: work.length };
 }
 
 export function handoffInstruction(sessionId: string, file: string): string {
@@ -150,6 +237,28 @@ export function handoffInstruction(sessionId: string, file: string): string {
 		"",
 		"Do not start the work until the user confirms the next action.",
 	].join("\n");
+}
+
+/** Last RECENT_TURNS turns quoted at length, OLDER_TURNS before them flattened, the rest counted. */
+function turnList(work: readonly TurnArc[]): string {
+	const kept = work.slice(-(RECENT_TURNS + OLDER_TURNS));
+	const dropped = work.length - kept.length;
+	const blocks = kept.map((turn, index) =>
+		turnBlock(turn, index >= kept.length - RECENT_TURNS),
+	);
+	if (dropped > 0) blocks.unshift(`… ${dropped} earlier turns omitted`);
+	return blocks.join("\n\n");
+}
+
+/** Keeps the newest `max` lines, naming how many older ones were dropped. */
+function bounded(lines: string[], max: number, noun: string): string {
+	const dropped = lines.length - max;
+	if (dropped <= 0) return lines.join("\n");
+	return [`- … ${dropped} ${noun} omitted`, ...lines.slice(-max)].join("\n");
+}
+
+function shortId(id: string): string {
+	return id.slice(0, SHORT_ID_LENGTH);
 }
 
 /** Recent turns quote the ask and reply at length; older turns are flattened and short. */
@@ -168,7 +277,7 @@ function turnBlock(turn: TurnArc, recent: boolean): string {
 	)
 		.filter((part) => part !== "")
 		.join("\n\n");
-	return `### T${turn.turn} [${kind}]\n\n${body === "" ? "(no content)" : body}`;
+	return `### T${turn.index} [${kind}]\n\n${body === "" ? "(no content)" : body}`;
 }
 
 function blockText(blocks: readonly ContentBlock[]): string {
@@ -211,8 +320,8 @@ function errorReason(
 
 function collectArtifacts(
 	args: string,
-	into: string[],
-	seen: Set<string>,
+	into: Map<string, true>,
+	briefFiles: ReadonlySet<string>,
 ): void {
 	let parsed: unknown;
 	try {
@@ -227,9 +336,10 @@ function collectArtifacts(
 	const record = parsed as Record<string, unknown>;
 	for (const key of PATH_KEYS) {
 		const value = record[key];
-		if (typeof value !== "string" || value === "" || seen.has(value)) continue;
-		seen.add(value);
-		into.push(value);
-		if (into.length >= ARTIFACT_LIMIT) return;
+		if (typeof value !== "string" || value === "" || briefFiles.has(value))
+			continue;
+		const path = clip(value, PATH_LIMIT);
+		into.delete(path);
+		into.set(path, true);
 	}
 }
