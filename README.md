@@ -123,7 +123,7 @@ No config. Other plugins use it to open their views in panes. `dsh-session-hando
 
 - `/handoff` creates a new session in a split pane. It contains a `HANDOFF.md` with the goal, each turn's ask and reply, tool failures and touched files. The agent answers with Goal, State and Next.
 - The old session is renamed "(Resumed)" and marked done on the Kanban board.
-- `/handoff <session-id>` writes the brief of another session into the current session's scratch folder.
+- Typed bare in the composer, `/handoff` first offers a model list, so the new session can run on another model, native or ACP. `/handoff <provider>/<model>` skips the list.
 - A ring next to the send button turns yellow at 70k prompt tokens and red at 100k. It tells you when a handoff makes sense.
 
 Requires `dsh-client-split-view` and `dsh-scratch-dir`. [Package README](packages/dsh-session-handoff/README.md)

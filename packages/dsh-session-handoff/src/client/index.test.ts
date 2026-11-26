@@ -34,9 +34,22 @@ interface Harness {
 	readonly retain: (ids: readonly string[]) => void;
 	readonly release: (id: string) => void;
 	readonly emit: (id: string, event: SessionEvent) => void;
+	/** Decorations hung on host commands through `commandUi.decorate`. */
+	readonly decorations: {
+		name: string;
+		ui: {
+			options: (session: { sessionId: string }) => Promise<unknown>;
+			onSelect: (
+				option: { id: string },
+				session: { sessionId: string },
+			) => Promise<void>;
+		};
+	}[];
 }
 
-function setup(): Harness {
+function setup(
+	current: unknown = { provider: "google", model: "gemini-4" },
+): Harness {
 	const replaced: { oldId: SessionId; newId: SessionId }[] = [];
 	const commands: { id: string; line: string }[] = [];
 	const listeners = new Map<string, Set<Listener>>();
@@ -44,7 +57,34 @@ function setup(): Harness {
 	const listListeners = new Set<Listener>();
 	let ids: string[] = [];
 
+	const decorations: Harness["decorations"] = [];
+
 	const ctx = new Context();
+	ctx.provide("commandUi", {
+		decorate: (decoration: Harness["decorations"][number]) => {
+			decorations.push(decoration);
+			return () => {};
+		},
+	});
+	ctx.provide("modelDirectories", {
+		directoryFor: () => ({
+			load: async () => ({
+				current,
+				groups: [
+					{
+						id: "google",
+						name: "Google",
+						models: [{ id: "gemini-4", name: "Gemini 4" }],
+					},
+					{
+						id: "openrouter",
+						name: "OpenRouter",
+						models: [{ id: "baidu/ernie", name: "Ernie" }],
+					},
+				],
+			}),
+		}),
+	});
 	ctx.provide("slots", {
 		inject: () => () => {},
 		register: () => () => {},
@@ -65,6 +105,7 @@ function setup(): Harness {
 					session: {
 						command: async (line: string) => {
 							commands.push({ id, line });
+							return { ok: true };
 						},
 					},
 				},
@@ -125,7 +166,7 @@ function setup(): Harness {
 		for (const listener of set) listener();
 	};
 
-	return { replaced, commands, retain, release, emit };
+	return { replaced, commands, retain, release, emit, decorations };
 }
 
 const launchedEvent = (id: string): SessionEvent =>
@@ -190,4 +231,40 @@ test("a released session stops watching", () => {
 	harness.emit(SOURCE, launchedEvent(LAUNCHED));
 
 	assert.deepEqual(harness.replaced, []);
+});
+
+test("a bare /handoff lists the catalog and submits the pick as an argued line", async () => {
+	const harness = setup();
+	const [decoration] = harness.decorations;
+	const session = { sessionId: SOURCE };
+
+	assert.equal(decoration.name, "handoff");
+	assert.deepEqual(await decoration.ui.options(session), [
+		{
+			id: "google/gemini-4",
+			label: "Gemini 4",
+			group: { name: "google", label: "Google" },
+			active: true,
+		},
+		{
+			id: "openrouter/baidu/ernie",
+			label: "Ernie",
+			group: { name: "openrouter", label: "OpenRouter" },
+		},
+	]);
+
+	await decoration.ui.onSelect({ id: "openrouter/baidu/ernie" }, session);
+
+	assert.deepEqual(harness.commands, [
+		{ id: SOURCE, line: "/handoff openrouter/baidu/ernie" },
+	]);
+});
+
+test("without a current model no picker row is marked active", async () => {
+	const harness = setup(null);
+	const [decoration] = harness.decorations;
+
+	const options = await decoration.ui.options({ sessionId: SOURCE });
+
+	assert.equal(JSON.stringify(options).includes("active"), false);
 });

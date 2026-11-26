@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Context } from "@deepseek-ai/cordis";
-import type { Agent } from "@deepseek-ai/dsh-agent";
+import type { Agent, ModelSelection } from "@deepseek-ai/dsh-agent";
 import type { SessionCreateValue } from "@deepseek-ai/dsh-api-session-controller";
 import type {
 	CommandInvocation,
@@ -10,10 +10,7 @@ import type {
 import { createUserMessage } from "@deepseek-ai/dsh-llm";
 import type {} from "@deepseek-ai/dsh-session";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
-import type {
-	SessionLogSnapshot,
-	SessionRecord,
-} from "@deepseek-ai/dsh-session-query";
+import type { SessionLogSnapshot } from "@deepseek-ai/dsh-session-query";
 import type {} from "@deepseek-ai/dsh-session-title";
 import type {} from "@deepseek-ai/dsh-working-directory";
 import type { Workspace } from "@deepseek-ai/dsh-workspace";
@@ -33,10 +30,10 @@ export const inject = [
 	"sessionController",
 	"sessionTitle",
 	"workspaceRegistry",
+	"llm",
 ];
 
 const HANDOFF_FILE = "HANDOFF.md";
-const RECENT_LIMIT = 5;
 const SHORT_ID_LENGTH = 8;
 const RESUMED_SUFFIX = " (Resumed)";
 
@@ -44,26 +41,51 @@ export function apply(ctx: Context): void {
 	ctx.commands.register({
 		name: "handoff",
 		description:
-			"Hand this session off to a new one, or write the resume brief for <session-id> into this one",
+			"Hand this session off to a new one (bare: pick the model from a list)",
 		// edge case: without a declared input the client sends the raw line to the
 		// model as a prompt and this handler never runs.
-		input: { hint: "[session-id]" },
+		input: { hint: "[provider/model]" },
 		handler: (invocation: CommandInvocation): Promise<CommandResult> =>
 			handoff(ctx, invocation),
 	});
 }
 
-export function resolveHandoffTarget(
-	sessions: readonly SessionRecord[],
-	query: string,
-): readonly SessionRecord[] {
-	const exact = sessions.filter(
-		(session) => String(session.header.id) === query,
-	);
-	if (exact.length > 0) return exact;
-	return sessions.filter((session) =>
-		String(session.header.id).startsWith(query),
-	);
+/**
+ * Split `provider/model` at the first slash: provider ids have none, model ids may.
+ * @internal exported for the unit test only.
+ */
+export function parseModelArg(raw: string): ModelSelection | undefined {
+	const text = raw.trim();
+	const slash = text.indexOf("/");
+	if (slash <= 0 || slash === text.length - 1) return undefined;
+	return { provider: text.slice(0, slash), model: text.slice(slash + 1) };
+}
+
+/**
+ * Check the route against the registered providers and the provider's own model
+ * resolution, the same check subagent routes get, so a typo fails here and not
+ * on the new session's first turn.
+ * @returns an error text, or `undefined` when the route resolves.
+ */
+async function modelError(
+	ctx: Context,
+	model: ModelSelection,
+	signal: AbortSignal,
+): Promise<string | undefined> {
+	try {
+		const providers = ctx.llm.listProviders();
+		if (!providers.some((provider) => provider.id === model.provider)) {
+			const available = providers.map((provider) => provider.id).join(", ");
+			return `LLM provider '${model.provider}' is not registered; available providers: ${available || "(none)"}`;
+		}
+		await ctx.llm.resolveCallConfig(
+			{ provider: model.provider, model: model.model },
+			signal,
+		);
+		return undefined;
+	} catch (error: unknown) {
+		return error instanceof Error ? error.message : String(error);
+	}
 }
 
 async function handoff(
@@ -71,41 +93,21 @@ async function handoff(
 	invocation: CommandInvocation,
 ): Promise<CommandResult> {
 	const raw = invocation.rawInput.trim();
-	// edge case: no id means "this session", the common case, so it skips the
-	// session index entirely and reads the agent's own session.
-	const launch = raw === "";
-	const agent = invocation.agent;
-
-	let targetId: SessionId;
-	if (launch) {
-		targetId = agent.session.id;
-	} else {
-		const sessions = await ctx.sessionQuery.listSessions(invocation.signal);
-		const matches = resolveHandoffTarget(sessions, raw);
-		if (matches.length === 0) {
-			const recent = sessions
-				.slice(0, RECENT_LIMIT)
-				.map((session) => `- ${String(session.header.id)}`)
-				.join("\n");
+	// edge case: no argument keeps the source's own model, the ring's path.
+	let model: ModelSelection | undefined;
+	if (raw !== "") {
+		model = parseModelArg(raw);
+		if (model === undefined) {
 			return {
 				kind: "error",
-				text: `No session matches "${raw}". Most recent sessions:\n${recent}`,
+				text: `Expected "<provider>/<model>", got "${raw}"; run bare /handoff to pick one.`,
 			};
 		}
-		if (matches.length > 1) {
-			const candidates = matches
-				.map((session) => `- ${String(session.header.id)}`)
-				.join("\n");
-			return { kind: "error", text: `"${raw}" is ambiguous:\n${candidates}` };
-		}
-		targetId = matches[0].header.id;
-		if (targetId === agent.session.id) {
-			return {
-				kind: "error",
-				text: "That is this session; there is nothing to hand off.",
-			};
-		}
+		const invalid = await modelError(ctx, model, invocation.signal);
+		if (invalid !== undefined) return { kind: "error", text: invalid };
 	}
+	const agent = invocation.agent;
+	const targetId = agent.session.id;
 
 	try {
 		const snapshot = await ctx.sessionQuery.readSession(targetId);
@@ -115,30 +117,21 @@ async function handoff(
 		if (rendered.turns === 0) {
 			return {
 				kind: "error",
-				text: launch
-					? "This session has no turns to hand off."
-					: `Session ${shortId(targetId)} has no turns to hand off.`,
+				text: "This session has no turns to hand off.",
 			};
 		}
-		if (launch) {
-			const created = await createBeside(
-				ctx,
-				agent,
-				targetId,
-				rendered.markdown,
-				snapshot,
-				invocation.signal,
-			);
-			return {
-				kind: "success",
-				text: formatLaunchResult(created.sessionId),
-			};
-		}
-
-		const file = await deliver(ctx, agent, targetId, rendered.markdown);
+		const created = await createBeside(
+			ctx,
+			agent,
+			targetId,
+			rendered.markdown,
+			snapshot,
+			invocation.signal,
+			model,
+		);
 		return {
 			kind: "success",
-			text: `Handoff for ${shortId(targetId)} (${rendered.turns} turns) → ${file}`,
+			text: formatLaunchResult(created.sessionId),
 		};
 	} catch (error: unknown) {
 		return {
@@ -255,8 +248,8 @@ function shortId(id: string): string {
 }
 
 /**
- * Create the resumed session beside this one: same workspace, same preset, same
- * model, the brief in its own scratch directory, and one follow-up turn that
+ * Create the resumed session beside this one: same workspace, same preset, the
+ * source's model or the given one, the brief in its own scratch directory, and one follow-up turn that
  * tells it to read that brief.
  * @param ctx - Host context.
  * @param source - Session the command runs in.
@@ -264,6 +257,7 @@ function shortId(id: string): string {
  * @param markdown - Rendered brief.
  * @param snapshot - Source session log, the origin of the kanban links to copy.
  * @param signal - Cancellation signal of the invoking command.
+ * @param model - Model the new session starts on; the source's own when absent.
  * @returns the created session identity.
  */
 async function createBeside(
@@ -273,8 +267,9 @@ async function createBeside(
 	markdown: string,
 	snapshot: SessionLogSnapshot,
 	signal: AbortSignal,
+	model: ModelSelection | undefined,
 ): Promise<SessionCreateValue> {
-	const selection = source.model.current();
+	const selection = model === undefined ? source.model.current() : model;
 	const agentPreset = source.session.header.agentPreset;
 	// edge case: a session created by cwd alone is attached to no workspace, so it
 	// would stay out of the sidebar tree until the next Host start.

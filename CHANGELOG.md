@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.2-rc.5.9 - 2026-11-26
+
+- **@lukstei/dsh-session-handoff**
+  - Typing a bare `/handoff` in the composer opens the same model list as `/model`. Picking a model starts the new session on that model with the brief loaded. Works across native and ACP models.
+  - `/handoff <provider>/<model>` starts the new session on that model directly. The model is checked before the session is created, so a typo returns an error instead of a broken session.
+  - The handoff ring is unchanged and keeps the source session's model.
+  - Breaking: `/handoff <session-id>` is removed. It used to write another session's brief into the current session. Use bare `/handoff` or the ring instead.
+
 ## v0.2.2-rc.5.8 - 2026-11-26
 
 - **@lukstei/dsh-client-kanban**

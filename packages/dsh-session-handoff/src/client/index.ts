@@ -1,6 +1,8 @@
 import type { Context } from "@deepseek-ai/cordis";
 import type { ISessions } from "@deepseek-ai/dsh-api-session-controller/client";
+import type {} from "@deepseek-ai/dsh-client-ui-commands/client";
 import type {} from "@deepseek-ai/dsh-client-ui-conversation/client";
+import type {} from "@deepseek-ai/dsh-client-ui-model-selection/client";
 import type {} from "@deepseek-ai/dsh-client-ui-renderer/client";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import type {} from "@lukstei/dsh-client-split-view/client-contract";
@@ -9,7 +11,13 @@ import { launchedSessionId } from "../launch.ts";
 import { type AcpUsageReader, setAcpUsageReader } from "./acp-usage.ts";
 import { HandoffRing } from "./ring.ts";
 
-export const inject = ["sessions", "splitView", "slots"];
+export const inject = [
+	"sessions",
+	"splitView",
+	"slots",
+	"commandUi",
+	"modelDirectories",
+];
 
 /**
  * Open every session the Host reports as launched as a pane of its own. A slash
@@ -38,14 +46,49 @@ export function apply(ctx: Context): void {
 	};
 
 	// Same command the user would type; sent directly so the composer draft stays untouched.
-	const handoff = async (id: SessionId): Promise<void> => {
+	const run = async (id: SessionId, line: string): Promise<void> => {
 		await sessions.using(id, { source: "splitView" }, async (reference) => {
-			const result = await reference.binding.session.command("/handoff");
+			const result = await reference.binding.session.command(line);
 			if (!result.ok) {
-				console.warn("session-handoff: /handoff failed", result);
+				console.warn(`session-handoff: ${line} failed`, result);
 			}
 		});
 	};
+	const handoff = (id: SessionId): Promise<void> => run(id, "/handoff");
+
+	// A bare composer `/handoff` opens the same model list as `/model`; the pick is
+	// submitted back as the argued line the Host command parses (the ring sends the bare line straight to the Host, which keeps the source model).
+	ctx.effect(
+		() =>
+			ctx.commandUi.decorate({
+				name: "handoff",
+				available: () => true,
+				ui: {
+					kind: "popupSelect",
+					searchMode: "fuzzy-label",
+					options: async (session) => {
+						const state = await ctx.modelDirectories
+							.directoryFor(session.sessionId)
+							.load();
+						return state.groups.flatMap((group) =>
+							group.models.map((model) => ({
+								id: `${group.id}/${model.id}`,
+								label: model.name,
+								group: { name: group.id, label: group.name },
+								...(state.current !== null &&
+								state.current.provider === group.id &&
+								state.current.model === model.id
+									? { active: true }
+									: {}),
+							})),
+						);
+					},
+					onSelect: (option, session) =>
+						run(session.sessionId, `/handoff ${option.id}`),
+				},
+			}),
+		"session-handoff: /handoff picker",
+	);
 
 	const watch = (id: SessionId): void => {
 		const binding = sessions.binding(id);

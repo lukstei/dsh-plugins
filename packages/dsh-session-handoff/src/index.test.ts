@@ -186,6 +186,8 @@ interface Harness {
 	readonly followups: unknown[];
 	readonly created: SessionCreateRequest[];
 	readonly selections: ModelSelection[];
+	/** Calls into the `llm` service, in order. */
+	readonly llmCalls: string[];
 	readonly read: string[];
 	readonly kanban: string[];
 	readonly titles: { sessionId: unknown; title: string }[];
@@ -199,12 +201,14 @@ async function setup(
 		readonly unassigned?: boolean;
 		readonly sourceTitle?: string;
 		readonly logs?: Readonly<Record<string, SessionLogSnapshot | Error>>;
+		readonly listProvidersError?: string;
 	} = {},
 ): Promise<Harness> {
 	const definition: CommandDefinition[] = [];
 	const followups: unknown[] = [];
 	const created: SessionCreateRequest[] = [];
 	const selections: ModelSelection[] = [];
+	const llmCalls: string[] = [];
 	const read: string[] = [];
 	const kanban: string[] = [];
 	const titles: { sessionId: unknown; title: string }[] = [];
@@ -239,6 +243,19 @@ async function setup(
 		rename: (session: { id: string }, title: string) => {
 			titles.push({ sessionId: session.id, title });
 			return { title };
+		},
+	});
+	ctx.provide("llm", {
+		listProviders: () => {
+			llmCalls.push("listProviders");
+			if (options.listProvidersError !== undefined) {
+				throw new Error(options.listProvidersError);
+			}
+			return [{ id: "google" }, { id: "openrouter" }];
+		},
+		resolveCallConfig: async (route: { model: string }) => {
+			llmCalls.push("resolveCallConfig");
+			if (route.model === "bogus") throw new Error("Model 'bogus' not found");
 		},
 	});
 	ctx.provide("workingDirectory", { get: () => cwd });
@@ -278,6 +295,7 @@ async function setup(
 		followups,
 		created,
 		selections,
+		llmCalls,
 		read,
 		kanban,
 		titles,
@@ -496,54 +514,6 @@ test("a long ask keeps its head and tail in the recent-turn budget", () => {
 	);
 });
 
-test("resolveHandoffTarget prefers an exact id and reports ambiguity", () => {
-	const known = [
-		{ header: { id: TARGET_ID } },
-		{ header: { id: "06542298-beef" } },
-		{ header: { id: "deadbeef-0000" } },
-	] as unknown as SessionRecord[];
-
-	assert.equal(plugin.resolveHandoffTarget(known, TARGET_ID)[0], known[0]);
-	assert.equal(plugin.resolveHandoffTarget(known, "deadbeef").length, 1);
-	assert.equal(plugin.resolveHandoffTarget(known, "06542298").length, 2);
-	assert.equal(plugin.resolveHandoffTarget(known, "nope").length, 0);
-});
-
-test("handoff writes the brief to the current scratch dir and follows up", async (t) => {
-	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
-	t.after(() => rm(cwd, { recursive: true, force: true }));
-
-	const harness = await setup(cwd, records);
-	const result = await harness.definition.handler(
-		invocation(harness, ` ${TARGET_ID.slice(0, 8)} `),
-	);
-	const file = path.join(cwd, ".agents", "scratch", CURRENT_ID, "HANDOFF.md");
-
-	assert.equal(result.kind, "success");
-	assert.match(await readFile(file, "utf8"), /^# Handoff — /);
-	assert.equal(harness.followups.length, 1);
-	assert.match(JSON.stringify(harness.followups[0]), /HANDOFF\.md/);
-	assert.match(JSON.stringify(harness.followups[0]), /Goal: /);
-	assert.deepEqual(harness.kanban, []);
-});
-
-test("handoff rejects an unknown id and its own session", async (t) => {
-	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
-	t.after(() => rm(cwd, { recursive: true, force: true }));
-
-	const harness = await setup(cwd, records);
-	for (const rawInput of ["nope", CURRENT_ID]) {
-		const result = await harness.definition.handler(
-			invocation(harness, rawInput),
-		);
-		assert.equal(
-			result.kind,
-			"error",
-			`expected an error for ${JSON.stringify(rawInput)}`,
-		);
-	}
-});
-
 test("handoff launch creates the resumed session beside this one", async (t) => {
 	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
 	t.after(() => rm(cwd, { recursive: true, force: true }));
@@ -665,30 +635,6 @@ test("handoff launch fails loud when the created agent cannot be resolved", asyn
 		text: "Handoff failed: session/not-found",
 	});
 	assert.equal(harness.followups.length, 0);
-});
-
-test("only a blank line launches; any other text is an id query", async (t) => {
-	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
-	t.after(() => rm(cwd, { recursive: true, force: true }));
-
-	const harness = await setup(cwd, records);
-	for (const rawInput of [`launch ${TARGET_ID}`, "launch nope", "launch"]) {
-		const result = await harness.definition.handler(
-			invocation(harness, rawInput),
-		);
-		assert.equal(
-			result.kind,
-			"error",
-			`expected an error for ${JSON.stringify(rawInput)}`,
-		);
-	}
-	assert.deepEqual(harness.created, []);
-
-	const blank = await harness.definition.handler(invocation(harness, "   "));
-	assert.deepEqual(blank, {
-		kind: "success",
-		text: `Handoff launched: ${LAUNCHED_ID}`,
-	});
 });
 
 test("launchedSessionId only reads the launch marker", () => {
@@ -890,7 +836,9 @@ async function handoffOf(
 	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
 	t.after(() => rm(cwd, { recursive: true, force: true }));
 	const harness = await setup(cwd, recordsOf(...known), { logs });
-	const result = await harness.definition.handler(invocation(harness, target));
+	const result = await harness.definition.handler(
+		invocation(harness, "", target),
+	);
 	return { harness, result };
 }
 
@@ -948,4 +896,97 @@ test("very long artifact paths and tool names are clipped", () => {
 	]).markdown;
 	assert.ok(!md.includes(longPath));
 	assert.match(md, /- `\/repo\/p+…`/);
+});
+
+test("parseModelArg splits at the first slash and keeps slashes in the model id", () => {
+	assert.deepEqual(plugin.parseModelArg(" openrouter/baidu/ernie-5.5 "), {
+		provider: "openrouter",
+		model: "baidu/ernie-5.5",
+	});
+	for (const bad of ["", "nope", "/model", "provider/", "  "]) {
+		assert.equal(plugin.parseModelArg(bad), undefined, bad);
+	}
+});
+
+test("handoff launches the resumed session on the chosen model", async (t) => {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+
+	const harness = await setup(cwd, records);
+	const result = await harness.definition.handler(
+		invocation(harness, "google/gemini-4"),
+	);
+
+	assert.deepEqual(result, {
+		kind: "success",
+		text: `Handoff launched: ${LAUNCHED_ID}`,
+	});
+	assert.deepEqual(harness.selections, [
+		{ provider: "google", model: "gemini-4" },
+	]);
+});
+
+test("handoff rejects an argument that is not a registered, resolvable provider/model", async (t) => {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+
+	const harness = await setup(cwd, records);
+	const errors: unknown[] = [];
+	for (const rawInput of [
+		"gemini",
+		TARGET_ID,
+		"nope/gemini-4",
+		"google/bogus",
+	]) {
+		errors.push(
+			await harness.definition.handler(invocation(harness, rawInput)),
+		);
+	}
+
+	assert.deepEqual(errors, [
+		{
+			kind: "error",
+			text: 'Expected "<provider>/<model>", got "gemini"; run bare /handoff to pick one.',
+		},
+		{
+			kind: "error",
+			text: `Expected "<provider>/<model>", got "${TARGET_ID}"; run bare /handoff to pick one.`,
+		},
+		{
+			kind: "error",
+			text: "LLM provider 'nope' is not registered; available providers: google, openrouter",
+		},
+		{ kind: "error", text: "Model 'bogus' not found" },
+	]);
+	assert.deepEqual(harness.created, []);
+	assert.deepEqual(harness.selections, []);
+});
+
+test("a failing provider listing is a command error, not a thrown one", async (t) => {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+
+	const harness = await setup(cwd, records, { listProvidersError: "no llm" });
+	const result = await harness.definition.handler(
+		invocation(harness, "google/gemini-4"),
+	);
+
+	assert.deepEqual(result, { kind: "error", text: "no llm" });
+	assert.deepEqual(harness.created, []);
+});
+
+test("a blank or whitespace-only line keeps the source model and never asks llm", async (t) => {
+	const cwd = await mkdtemp(path.join(tmpdir(), "dsh-handoff-"));
+	t.after(() => rm(cwd, { recursive: true, force: true }));
+
+	const harness = await setup(cwd, records);
+	for (const rawInput of ["", "   "]) {
+		const result = await harness.definition.handler(
+			invocation(harness, rawInput),
+		);
+		assert.equal(result.kind, "success");
+	}
+
+	assert.deepEqual(harness.selections, [MODEL, MODEL]);
+	assert.deepEqual(harness.llmCalls, []);
 });

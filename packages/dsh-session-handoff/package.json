@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-session-handoff",
-	"version": "0.2.2-rc.5.8",
+	"version": "0.2.2-rc.5.9",
 	"description": "Session handoff brief command for DSH",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -36,7 +36,9 @@
 			"inject": [
 				"@deepseek-ai/dsh-api-session-controller",
 				"@lukstei/dsh-client-split-view",
+				"@deepseek-ai/dsh-client-ui-commands",
 				"@deepseek-ai/dsh-client-ui-conversation",
+				"@deepseek-ai/dsh-client-ui-model-selection",
 				"@deepseek-ai/dsh-client-ui-renderer"
 			]
 		}
@@ -57,7 +59,9 @@
 		"@deepseek-ai/cordis": "*",
 		"@deepseek-ai/dsh-agent": "*",
 		"@deepseek-ai/dsh-api-session-controller": "*",
+		"@deepseek-ai/dsh-client-ui-commands": "*",
 		"@deepseek-ai/dsh-client-ui-conversation": "*",
+		"@deepseek-ai/dsh-client-ui-model-selection": "*",
 		"@deepseek-ai/dsh-client-ui-primitives": "*",
 		"@deepseek-ai/dsh-client-ui-renderer": "*",
 		"@deepseek-ai/dsh-client-ui-session": "*",
@@ -77,7 +81,9 @@
 		"@deepseek-ai/cordis": "catalog:",
 		"@deepseek-ai/dsh-agent": "catalog:",
 		"@deepseek-ai/dsh-api-session-controller": "catalog:",
+		"@deepseek-ai/dsh-client-ui-commands": "catalog:",
 		"@deepseek-ai/dsh-client-ui-conversation": "catalog:",
+		"@deepseek-ai/dsh-client-ui-model-selection": "catalog:",
 		"@deepseek-ai/dsh-client-ui-primitives": "catalog:",
 		"@deepseek-ai/dsh-client-ui-renderer": "catalog:",
 		"@deepseek-ai/dsh-client-ui-session": "catalog:",

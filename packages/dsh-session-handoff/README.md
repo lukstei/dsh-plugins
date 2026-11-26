@@ -2,7 +2,7 @@
 
 ## Summary
 
-Adds a `/handoff` command that turns a session log into a short resume brief. Bare `/handoff` starts a new session beside the current one with the brief loaded; `/handoff <session-id>` writes another session's brief into the current session.
+Adds a `/handoff` command that turns a session log into a short resume brief. `/handoff` starts a new session beside the current one with the brief loaded, on the same model or on a model picked from a list.
 
 ## Table of Contents
 
@@ -40,25 +40,27 @@ Mount through the bundle patch ([`cordis.patch.yml`](cordis.patch.yml)) and add 
 
 Then `pnpm install` in the profile directory and restart the harness. No config fields.
 
-Required Host services (`inject`): `commands`, `sessionQuery`, `workingDirectory`, `sessionController`, `sessionTitle`, `workspaceRegistry`. Workspace dependency: [`@lukstei/dsh-scratch-dir`](../dsh-scratch-dir/README.md) (`scratchDirectory()`).
+Required Host services (`inject`): `commands`, `llm`, `sessionQuery`, `workingDirectory`, `sessionController`, `sessionTitle`, `workspaceRegistry`. Workspace dependency: [`@lukstei/dsh-scratch-dir`](../dsh-scratch-dir/README.md) (`scratchDirectory()`).
 
 The client half needs `@deepseek-ai/dsh-api-session-controller` and [`@lukstei/dsh-client-split-view`](../dsh-client-split-view/README.md). Build it with `pnpm build` (emits `dist/client.js`); rebuild and restart after changing `src/client/`. The client bundle is marked `immediately` because no route lazily pulls it in; without stage-one prefetch its watcher would never register.
 
 ```text
 /handoff
-/handoff 06542298
-/handoff 06542298-c989-417d-9ed4-fa5877768140
+/handoff google/gemini-4
 ```
+
+Typed in the composer, a bare `/handoff` opens the same provider-grouped model list as `/model`, with the current model highlighted; picking a row starts the new session on that model with the brief loaded. The argued form (`<provider>/<model>`, split at the first slash) skips the list. The Host checks the route against the registered LLM providers and the provider's own model resolution, so a typo returns an error before any session is created. Because it creates a new session, it also works across native and ACP models, where an in-place model switch is blocked. Reasoning effort is the model's default. The handoff ring sends the bare line straight to the Host, which keeps the source's model and skips the list. The client half also needs `@deepseek-ai/dsh-client-ui-commands` and `@deepseek-ai/dsh-client-ui-model-selection`.
 
 ### Plugin dependencies
 
 Server-side and client-side entries.
 
-**Server-side** (`inject`: `commands`, `sessionQuery`, `workingDirectory`, `sessionController`, `sessionTitle`, `workspaceRegistry`):
+**Server-side** (`inject`: `commands`, `llm`, `sessionQuery`, `workingDirectory`, `sessionController`, `sessionTitle`, `workspaceRegistry`):
 
 | Plugin / service | Required? | Provided by | Effect without it |
 |---|---|---|---|
 | `commands` | Required | @deepseek-ai/dsh-commands | Plugin stays pending; never applies. No `/handoff`. |
+| `llm` | Required | @deepseek-ai/dsh-llm | Plugin stays pending; never applies. |
 | `sessionQuery` | Required | @deepseek-ai/dsh-session-query | Plugin stays pending; never applies. |
 | `workingDirectory` | Required | @deepseek-ai/dsh-working-directory | Plugin stays pending; never applies. |
 | `sessionController` | Required | @deepseek-ai/dsh-api-session-controller | Plugin stays pending; never applies. |
@@ -84,18 +86,18 @@ Used by: nothing.
 
 ### Modes
 
-| Input | Brief describes | Brief lands in | Then |
-|---|---|---|---|
-| `/handoff` | this session | scratch directory of a newly created session | New session opens as a split pane; the source is marked done in Kanban and its pane is closed. |
-| `/handoff <id-or-prefix>` | that session | `<cwd>/.agents/scratch/<current-session-id>/HANDOFF.md` | Current agent is told to read it. |
+| Input | Model of the new session |
+|---|---|
+| `/handoff` (Host, e.g. from the ring) | the source's own |
+| `/handoff <provider>/<model>` | that model, validated first |
 
-Id resolution: exact id first, then unique prefix over `sessionQuery.listSessions()`. Unknown ids return an error listing the 5 most recent sessions; ambiguous prefixes list candidates. Passing the current session's id is an error. Any non-id text, including `launch`, is treated as an id. A session with no turns returns an error. All I/O failures return `{ kind: "error" }`.
+Any other argument is an error naming the expected form. A session with no turns returns an error. All I/O failures return `{ kind: "error" }`.
 
-### Bare `/handoff` launch
+### Launch
 
 1. Renders this session's brief.
 2. Creates a session via `sessionController.create()` in the current workspace (falls back to `cwd` when the session has no workspace), same `agentPreset`.
-3. Replays the current model selection onto the new agent.
+3. Selects the requested model on the new agent, or replays the source's own selection.
 4. Titles it with the full source title (or `Handoff <first 8 id chars>` when untitled) and renames the source to `<title> (Resumed)` unless it already ends with that. A user title pins it against auto-generated titles. Adds a Kanban link `Resumed from <source id>` (`dsh://sessions/<id>`, opens the source session) to record the origin.
 5. Runs `/kanban {"action":"init","createdAt":…}` against the new agent so it appears on the Kanban board. No `prompt` is sent, since that would seed the composer draft with the follow-up text.
 6. Copies the source session's kanban links by replaying its `add-link` commands against the new agent.
@@ -128,14 +130,14 @@ Empty sections render `none`. Output is deterministic for a given log. `request/
 
 Files:
 
-- [`src/index.ts`](src/index.ts): command registration, target resolution, `deliver` (write brief + queue follow-up), `createBeside` (launch).
+- [`src/index.ts`](src/index.ts): command registration, model validation, `deliver` (write brief + queue follow-up), `createBeside` (launch).
 - [`src/handoff.ts`](src/handoff.ts): `renderHandoff` and `handoffInstruction`, pure.
 - [`src/launch.ts`](src/launch.ts): `LAUNCH_PREFIX`, `formatLaunchResult`, `launchedSessionId`.
 - [`src/client/index.ts`](src/client/index.ts): client watcher. Tests sit beside each file.
 
 Details:
 
-- The command declares `input: { hint: "[session-id]" }`. Without a declared input the client sends the raw line to the model as a prompt and the handler never runs.
+- The command declares `input: { hint: "[provider/model]" }`. Without a declared input the client sends the raw line to the model as a prompt and the handler never runs.
 - A slash command has no structured return channel to the client, so the Host encodes the new id in the command result text, which is persisted in the `command/done` event. The client subscribes to every open session's event source and calls `ctx.splitView.replaceSession()` when it sees a successful `command/done` starting with `Handoff launched: `, replacing the pane in-place atomically. It then sends `/kanban {"action":"done"}` to the source session, as the Kanban Done button does. A source never initialised in Kanban ignores the done action.
 - The pane is added through the split store, not `uiWorkspace.openSession()`. The split view patches that method into a read-only overlay without its own composer, so prompts would keep landing in the pane underneath.
 - The client reacts only to `append` changes. A `replace` replays the whole window on first open and after reconnect gaps and would reopen panes the user closed; the split view restores its panes from local storage.
