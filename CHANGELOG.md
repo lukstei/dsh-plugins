@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2-rc.5.10 - 2026-11-26
+
+- **General**
+  - The README now opens with what a DSH workspace gives you and a three-step quick start. It then describes each workflow, the plugin catalog and an FAQ.
+
 ## v0.2.2-rc.5.9 - 2026-11-26
 
 - **@lukstei/dsh-session-handoff**

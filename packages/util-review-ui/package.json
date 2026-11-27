@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/util-review-ui",
-	"version": "0.2.2-rc.5.9",
+	"version": "0.2.2-rc.5.10",
 	"type": "module",
 	"exports": {
 		".": "./src/types.ts",

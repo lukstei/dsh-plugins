@@ -3,169 +3,126 @@
 [![npm](https://img.shields.io/npm/v/@lukstei/dsh-debug?label=npm)](https://www.npmjs.com/org/lukstei)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Plugins for [DeepSeek Harness](https://github.com/deepseek-ai) (DSH) that turn the web client into a workspace for running several agents at once. You get a Kanban board, side-by-side sessions, a git review view, notifications, YAML workflows and a few reliability fixes. Each plugin installs on its own from npm.
+**Run several coding agents side by side in [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), see at a glance which one needs you, and review their changes without leaving the browser.**
 
-![Split view with Kanban sidebar and Git review](assets/screenshots/hero-split-view.png)
+<!-- CAPTURE hero.gif (1600x920 displayed, 12 to 15 s loop, under 8 MB; also export hero.png from the review frame)
+Purpose: show the whole loop in one look. You hand out work, agents run in parallel, you step in only when one needs you, and you review and close the task in the browser.
+Scene: start on the Kanban board of the `client-plugins` workspace. The cursor drags "Add keyboard shortcuts for split-pane focus" from To Do to Active, and the card switches to "Running…". Cut to split view with three session panes side by side, all streaming. After a few seconds the middle pane asks to approve a `bash` command: the tab favicon gets its red centre dot and a macOS-style banner "Tool approval requested: bash" slides in at the top right (render it in the page; Playwright cannot capture OS notifications). The cursor clicks the banner, the pane takes focus, the cursor approves. The agent finishes and posts a git review card; a click opens the diff as an overlay in the same pane with two red/green hunks. End back on the board: the card gets dragged to Done, which loops to the start.
+Framing: left session sidebar collapsed. Cursor visible with eased movement. Hold about 1 s after each step. No text overlays.
+Seed: the existing demo-showcase workspace (`client-plugins`, `backend-service`) with a real git repo behind `client-plugins`.
+Interim: hero-split-view.png until this capture exists.
+-->
+![Kanban board in the sidebar, two sessions side by side, one with the git review of its changes](assets/screenshots/hero-split-view.png)
 
-- [Why these plugins](#why-these-plugins)
-- [Plugins at a glance](#plugins-at-a-glance)
-- [Quick start](#quick-start)
-- [Screenshots](#screenshots)
-- [Plugin details](#plugin-details)
-- [Recommended setups](#recommended-setups)
-- [FAQ](#faq)
-- [Development](#development)
+**[Install in one minute](#quick-start)** · [See what you get](#what-you-get) · [All plugins](#plugin-catalog)
 
-## Why these plugins
+## How it works
 
-DSH runs one conversation at a time and tells you little while you look elsewhere. These plugins cover what you miss once you run several agents in parallel.
+DeepSeek Harness (DSH) is an open-source agent harness with a web client. These plugins extend that web client into a workspace for running many agents at once:
 
-- **Overview.** A Kanban board shows which sessions run, wait for you or are done. Split view puts several sessions next to each other.
-- **Review.** A standalone git review shows branches, commits and uncommitted changes, and can sit in a split-view pane.
-- **Awareness.** Desktop notifications, a chime, an app badge and a status favicon tell you when an agent stops or needs approval. You can install DSH as an app.
-- **Automation.** YAML workflows run multi-step prompts you wrote yourself. Scheduled scripts poll in the background and wake the agent only when something changed.
-- **Context.** `/handoff` moves a long session into a fresh one with a short brief. Every session gets its own scratch folder.
-- **Reliability.** Per-logger log files and commands that copy a transcript for bug reports.
+1. **Plan.** You put tasks on a Kanban board. Moving a card to Active starts the agent.
+2. **Run in parallel.** Each agent gets its own pane. You see several sessions next to each other.
+3. **Get called in.** When an agent stops or asks for approval, the tab icon changes and your desktop shows a notification.
+4. **Review.** You open the agent's diff in a pane next to its chat and quote lines back to it.
+5. **Close.** You drag the card to Done.
 
-## Plugins at a glance
-
-| Plugin | What it does | Gap it fills (vs. upstream DSH) |
-| --- | --- | --- |
-| **Multi-session workflow** | | |
-| [`dsh-client-kanban`](packages/dsh-client-kanban/README.md) | Four-lane Kanban board for sessions | Upstream lists sessions in a flat list. No board, no review, done or hold states. |
-| [`dsh-client-split-view`](packages/dsh-client-split-view/README.md) | Side-by-side session panes with file and plugin overlays | Upstream shows one session in the main area. Files open only in the right sidebar. |
-| [`dsh-session-handoff`](packages/dsh-session-handoff/README.md) | `/handoff` resume brief into a fresh session | Upstream has compaction and Ralph handoff, but no command that starts a new session from a brief. |
-| [`dsh-scratch-dir`](packages/dsh-scratch-dir/README.md) | Per-session git-ignored scratch folder | Upstream has no per-session scratch folder. |
-| **Code review** | | |
-| [`dsh-client-review-git`](packages/dsh-client-review-git/README.md) | Git and GitButler diff review view and in-chat review card | Upstream has a review tab. This one is a separate view that also runs inside a split-view pane. |
-| **Automation** | | |
-| [`dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md) | Multi-step prompt workflows from YAML files (`/wf`) | Upstream's `workflow` tool is a script the model writes. You cannot run your own workflow file. |
-| [`dsh-schedule-script`](packages/dsh-schedule-script/README.md) | Recurring background scripts that wake the agent only when needed | Every upstream schedule run invokes the model. |
-| **Awareness and access** | | |
-| [`dsh-client-notify`](packages/dsh-client-notify/README.md) | Desktop notifications, chimes and app badge | Upstream sends no notification, sound or badge. |
-| [`dsh-client-favicon`](packages/dsh-client-favicon/README.md) | Tab favicon as a live status ring | Upstream keeps a static favicon. |
-| [`dsh-client-pwa`](packages/dsh-client-pwa/README.md) | Installable app and trusted-proxy login | Upstream is not installable as an app and logs in with a launch token only. |
-| **Observability and reliability** | | |
-| [`dsh-log`](packages/dsh-log/README.md) | Per-logger log files and levels | Upstream logging has no file output and no per-logger levels. |
-| [`dsh-debug`](packages/dsh-debug/README.md) | `/copy-transcript` and `/copy-session-id` | Upstream has no command to copy a transcript or session id. |
-| **Internals** | | |
-| [`util-review-ui`](packages/util-review-ui/README.md) | Shared review UI used by review-git | Library. It comes in as a dependency of `dsh-client-review-git`. |
+Each plugin is its own npm package. Install the set below, or pick single plugins from the [catalog](#plugin-catalog).
 
 ## Quick start
 
-You need DSH with Node 24.9 or newer. The browser plugins need a profile that serves the web app, so create one from the shipped `web` template, then add a plugin:
+You need DSH and Node 24.9 or newer. Plugin versions follow the DSH release they target, so `0.2.3-alpha.2.1` works with DSH `0.2.3-alpha.2`. Install the plugin version that matches your DSH, and upgrade both together.
+
+**1. Create a profile** from the shipped `web` template. `--dump-config` creates it and prints its config without starting DSH:
 
 ```sh
-dsh --profile <profile-name> --from-default-profile web --dump-config
+dsh --profile workspace --from-default-profile web --dump-config
 ```
+
+**2. Add the workspace plugins:**
 
 ```sh
-dsh plugin --profile <profile-name> add @lukstei/dsh-client-kanban
+dsh plugin --profile workspace add @lukstei/dsh-client-kanban @lukstei/dsh-client-split-view @lukstei/dsh-client-review-git @lukstei/dsh-client-notify @lukstei/dsh-client-favicon @lukstei/dsh-client-pwa
 ```
 
-`add` installs the package and mounts it in the profile. Restart DSH, and the plugin is active. To remove it:
+**3. Start DSH** with `dsh workspace`, open the Kanban board from the sidebar and start a task.
 
-```sh
-dsh plugin --profile <profile-name> remove @lukstei/dsh-client-kanban
-```
+To remove a plugin, run `dsh plugin --profile workspace remove <package>`. The [DSH docs](https://deepseek-harness.github.io/deepseek-harness/) cover profiles and plugins in depth.
 
-Replace the package name to install any plugin from the table above. Several plugins work better together. See [Recommended setups](#recommended-setups).
+## What you get
 
-## Screenshots
+### See every agent at once
 
-Split view with eight parallel sessions on an ultra-wide display:
+The Kanban board sorts your sessions into To Do, Active, Review and Done. The board moves cards for you: a running agent sits in Active, and one that waits for your approval or answer moves to Review. You can hold or pin cards, search across message text, and let agents attach ticket or PR links to their card. The board shows the sessions you start from it, or mark with `/kanban`. [dsh-client-kanban](packages/dsh-client-kanban/README.md)
 
-![Eight parallel sessions on an ultra-wide display](assets/screenshots/split-view-ultrawide.png)
+<!-- CAPTURE kanban-board.png (3200x1800, PNG, 2x)
+Purpose: one glance tells you what each agent is doing and which one waits for you.
+Scene: the board alone. Workspace tabs at the top with counts (`client-plugins` with 3 running, 1 review, 1 waiting). Four lanes from left to right: To Do with two cards, one marked "On hold"; Active with three cards, each with a green "Running…"; Review with two cards, the top one with a red left border and a red "Permission" badge; Done with two cards showing their age ("1d ago"). Resting state, nothing mid-drag.
+Framing: left session sidebar collapsed.
+Callout: outline the Permission card, label "Needs your approval".
+Seed: existing demo-showcase board seed.
+Interim: kanban-board.png until this capture exists.
+-->
+![Kanban board with sessions in To Do, Active, Review and Done](assets/screenshots/kanban-board.png)
 
-The Kanban board, with sessions in four lanes:
+Split view puts sessions in columns next to each other. Inside any pane you can open a Markdown file, an image, a related session or the git review as an overlay and keep the chat in view. DSH restores your panes after a reload. [dsh-client-split-view](packages/dsh-client-split-view/README.md)
 
-![Kanban board](assets/screenshots/kanban-board.png)
+<!-- CAPTURE split-view.png (3200x1800, PNG, 2x)
+Purpose: watch several sessions side by side and open files or reviews next to the chat instead of switching tabs.
+Scene: three equal panes. Left: an agent mid-answer with a half-done to-do list. Middle: a rendered Markdown file overlay (a short `PLAN.md` with a heading, a checklist and a code block) over its chat. Right: the git review overlay with the file tree and one open hunk. Each pane header shows workspace / session title and the controls (maximize, open as overlay, close).
+Framing: left session sidebar collapsed so the panes get the full width.
+Callout: outline the middle pane's header controls, label "Overlay files and views".
+Seed: three demo sessions plus a `PLAN.md` in the `client-plugins` repo.
+Interim: split-view-file-overlay.png until this capture exists.
+-->
+![Two sessions side by side, one with a Markdown file open as an overlay](assets/screenshots/split-view-file-overlay.png)
 
-Git review of a feature branch:
+### Know when an agent needs you
 
-![Git review](assets/screenshots/git-review.png)
+You can work in another window. The tab icon turns into a status ring: green ticks for running agents, orange for sessions in Review, a red dot when an agent waits for you. Desktop notifications and a chime tell you when an agent stops or asks for approval, and a click takes you back to its tab. Install DSH as an app to get a dock icon with a badge for pending requests. [dsh-client-favicon](packages/dsh-client-favicon/README.md) · [dsh-client-notify](packages/dsh-client-notify/README.md) · [dsh-client-pwa](packages/dsh-client-pwa/README.md)
 
-## Plugin details
+<!-- CAPTURE attention.png (3200x900, PNG, 2x, composite)
+Purpose: you don't have to watch the screen, DSH tells you when to look.
+Scene: one wide strip in two halves. Left half: a browser tab strip with four pinned DSH tabs in the four favicon states, each with a short caption below the tab: "idle" (original whale icon), "3 running" (green ticks), "2 running · 2 review" (green and orange ticks), "needs you" (red centre dot). Right half: a macOS notification banner "DeepSeek Harness: Tool approval requested: bash · Fix ghost cursor drift on HiDPI displays" above a slice of the dock showing the installed DSH app icon with a red badge "2".
+Framing: crop tight to the tab strip and the banner; no full browser window.
+Callout: none, the captions do that job.
+Seed: favicon states as in the old favicon-states composite; the banner and dock are a manual composite.
+Interim: favicon-states.png + notify-desktop.png until this capture exists.
+-->
+![Tab icon states: idle, running, running with review, waiting for approval](assets/screenshots/favicon-states.png)
 
-Each block links to the package README for config and requirements.
+![Desktop notification for a pending tool approval and the app badge in the dock](assets/screenshots/notify-desktop.png)
 
-### Multi-session workflow
+### Review changes in place
 
-#### dsh-client-kanban
+The git review shows what an agent changed: a whole branch, a single commit, or the staged and unstaged work in your tree. You see one file tree with line counts and can expand any hunk. Select code to quote it into your next message. Agents can post a review card in the chat, and a click opens the review in a pane. The review only reads your repository, and works with plain git and GitButler. [dsh-client-review-git](packages/dsh-client-review-git/README.md)
 
-**Gap it fills:** upstream lists sessions in a flat list. With several agents running, you cannot tell which one waits for you.
+<!-- CAPTURE git-review.png (3200x1800, PNG, 2x)
+Purpose: review what an agent changed, by commit or uncommitted, next to the conversation, and quote code back to it.
+Scene: two panes. Left: a chat whose latest agent message ends with the review card "Review feat/split-pane-focus · 3 commits · 3 files". Right: the review view for `client-plugins`, scope dropdown reading "feat/split-pane-focus · all commits", a file tree with three files and their +/- counts (one modified, one added, one deleted), and the `split-focus.ts` diff expanded with two hunks. Two lines in the second hunk are selected, with the quote-into-composer action visible.
+Framing: left session sidebar collapsed.
+Callout: outline the review card on the left, label "Agent posts this, click to open".
+Seed: small git repo with a feature branch of 3 commits touching 3 files.
+Interim: git-review.png until this capture exists.
+-->
+![Review card in the chat next to the git review of the branch](assets/screenshots/git-review.png)
 
-- Four lanes: To Do, Active, Review and Done. A session moves on its own: running means Active, waiting for approval or input means Review.
-- Drag cards between lanes, or use the card buttons. Moving a card from To Do to Active starts the prepared prompt.
-- Hold, pin or delete a session. Done cards hide after 7 days unless you pin them.
-- Workspace tabs and a search box that also looks through message text.
-- Agents can attach ticket, PR or session links to a card with the `kanban_add_link` tool.
+### Keep long sessions sharp
 
-Only sessions started from the board appear on it. Run `/kanban` in a session to enable the board for it. Works best with split view, favicon and notify. [Package README](packages/dsh-client-kanban/README.md)
+In a long session the agent gets slower and starts to lose track. A ring next to the send button turns yellow at 70k prompt tokens and red at 100k. Run `/handoff` and DSH opens a fresh session in a new pane that starts from a short brief of the old one: goal, what each turn asked and answered, failed tool calls and touched files. You can pick another model for the new session. Every session also gets its own git-ignored scratch folder, so agents keep notes and one-off scripts out of your repository. [dsh-session-handoff](packages/dsh-session-handoff/README.md) · [dsh-scratch-dir](packages/dsh-scratch-dir/README.md)
 
-![Kanban card with links](assets/screenshots/kanban-card-links.png)
+<!-- CAPTURE handoff.png (3200x1800, PNG, 2x)
+Purpose: when a session gets long, one command moves the work into a fresh session that starts with a short brief instead of the full history.
+Scene: two panes. Left: the old session titled "Refactor split-pane focus state machine (Resumed)"; its composer shows the context ring next to the send button in red, and the footer reads about 164K tokens. Right: the new session "Continue split-pane focus refactor" with the `HANDOFF.md` overlay open at the top (goal, turn list, touched files) and, below it, the agent's three-line reply with bold Goal / State / Next.
+Framing: left session sidebar collapsed.
+Callout: outline the red ring, label "Over 100k tokens: time to hand off".
+Seed: a session with 10+ turns, one failed tool call and a few edited files.
+Interim: session-handoff.png until this capture exists.
+-->
+![Old session marked Resumed next to the new session with its Goal, State and Next reply](assets/screenshots/session-handoff.png)
 
-#### dsh-client-split-view
+### Automate repeat work
 
-**Gap it fills:** upstream shows one session in the main area, and files open only in the right sidebar.
-
-- Sessions sit in equal-width columns. Maximize, close or reorder them by dragging the header.
-- Open a Markdown file, an image, a related session or another plugin's view, such as the git review, as an overlay inside a pane.
-- Open panes survive a reload. On a phone you see one pane at a time.
-
-No config. Other plugins use it to open their views in panes. `dsh-session-handoff` requires it. [Package README](packages/dsh-client-split-view/README.md)
-
-![Markdown file overlay next to the chat](assets/screenshots/split-view-file-overlay.png)
-
-#### dsh-session-handoff
-
-**Gap it fills:** upstream compacts a session or hands off between Ralph rounds, but cannot start a new session from a short brief of the old one.
-
-- `/handoff` creates a new session in a split pane. It contains a `HANDOFF.md` with the goal, each turn's ask and reply, tool failures and touched files. The agent answers with Goal, State and Next.
-- The old session is renamed "(Resumed)" and marked done on the Kanban board.
-- Typed bare in the composer, `/handoff` first offers a model list, so the new session can run on another model, native or ACP. `/handoff <provider>/<model>` skips the list.
-- A ring next to the send button turns yellow at 70k prompt tokens and red at 100k. It tells you when a handoff makes sense.
-
-Requires `dsh-client-split-view` and `dsh-scratch-dir`. [Package README](packages/dsh-session-handoff/README.md)
-
-![Handoff into a new split pane](assets/screenshots/session-handoff.png)
-
-#### dsh-scratch-dir
-
-**Gap it fills:** upstream gives agents no place for temporary files, so notes and scripts end up in your repository.
-
-- Creates `.agents/scratch/<session-id>` for each session and tells the agent its path in the system prompt.
-- Adds a `.gitignore` so scratch files never reach git.
-- Nothing cleans the folders up.
-
-No config. [Package README](packages/dsh-scratch-dir/README.md)
-
-### Code review
-
-#### dsh-client-review-git
-
-**Gap it fills:** upstream has a review tab. This plugin is a separate review view that you can also open inside a split-view pane, with git and GitButler scopes.
-
-- Scopes: a branch against its merge base (all commits or a single commit), and the working tree split into staged and unstaged changes.
-- One file tree with added and removed line counts. Hunks expand to show more context.
-- It finds repositories from the files the session edited, and offers a repository dropdown.
-- Select code and quote it into the composer.
-- The `git_review_present` tool posts a review card in the chat. A click opens the review.
-- Read-only. It never checks out or fetches.
-
-Needs `git` on the host. GitButler is optional. [Package README](packages/dsh-client-review-git/README.md)
-
-### Automation
-
-#### dsh-yaml-workflow
-
-**Gap it fills:** upstream's `workflow` tool is a script the model writes at run time. You cannot keep a workflow in a file and run it again.
-
-- `/wf <file> key=value` runs a YAML file step by step. The file is validated before the first step.
-- Steps are prompts, `print` lines that cost no tokens, `gate` pauses for your review, `if` conditions and subagent steps. Subagent output can fan out over a list with `foreach`.
-- Typed arguments with defaults and choices.
-- A workflow card in the chat shows each step and has Resume and Discard buttons. Progress survives a restart.
-- `/wf-list`, `/wf-validate`, `/wf-resume` and `/wf-abort` manage runs.
+Write a multi-step routine once as a YAML file and run it with `/wf <file>`. Steps can be prompts, subagents that fan out over a list, conditions, and gates where the run pauses until you check the result. DSH keeps the progress of a run across restarts.
 
 ```yaml
 name: "Deploy to {{args.environment}}"
@@ -177,121 +134,56 @@ steps:
   - prompt: "Deploy."
 ```
 
-Run it with `/wf deploy environment=production`. DSH looks in the working directory, `.agents/wf/` and `~/.agents/wf/`. [Package README](packages/dsh-yaml-workflow/README.md)
+[dsh-yaml-workflow](packages/dsh-yaml-workflow/README.md)
 
-![Workflow card paused at a gate](assets/screenshots/yaml-workflow.png)
+<!-- CAPTURE workflow.png (3200x1600, PNG, 2x)
+Purpose: a routine you wrote once as a YAML file runs step by step and pauses where you want to check things.
+Scene: two panes. Left: the `deploy.yaml` file overlay, about 15 lines: `args` with an `environment` choice, a `print` step, two prompt steps, a subagent step and a `gate`. Right: the workflow card mid-run for `/wf deploy environment=production`. Steps 1 and 2 have checkmarks, step 3 (subagent canary audit) shows its one-line summary, and the card is paused at the gate "Confirm staging canary health before promoting to production". The orange "Resume: promote" and "Discard" buttons are visible in the composer.
+Framing: left session sidebar collapsed.
+Callout: outline the Resume and Discard buttons, label "Gate: you decide".
+Seed: 4-step `deploy.yaml` in `.agents/wf/`, run stopped at the gate.
+Interim: yaml-workflow.png until this capture exists.
+-->
+![Workflow card paused at a gate with Resume and Discard buttons](assets/screenshots/yaml-workflow.png)
 
-#### dsh-schedule-script
+Ask an agent to "check CI every 5 minutes and tell me when it fails", and it writes a small script that runs in the background. Runs that find nothing cost no tokens. The agent only wakes up when the script reports something. Scripts run with your user's permissions, so read one before you confirm it. [dsh-schedule-script](packages/dsh-schedule-script/README.md)
 
-**Gap it fills:** every upstream schedule run invokes the model, even when nothing happened.
+<!-- CAPTURE schedule.png (3200x900, PNG, 2x, wide crop)
+Purpose: a background check runs every few minutes for free and only wakes the agent when something happened.
+Scene: one session pane cropped to its lower half. In the chat: the schedule card "CI watch · every 5 min · 14 runs · last: idle", followed by an incoming message "[Scheduled Task: CI watch] main build #482 failed: split-focus.spec.ts" and the agent starting to investigate. The prompt toolbar below shows the schedule status pill.
+Framing: crop to the chat bottom and the composer toolbar.
+Callout: outline "14 runs", label "13 runs cost no tokens".
+Seed: a polling script at 60 s with a few completed runs and one wake-up.
+Interim: schedule-script.png until this capture exists.
+-->
+![Scheduled task waking the agent after a failed CI build, with the schedule status card](assets/screenshots/schedule-script.png)
 
-- Ask for "check CI every 5 minutes and tell me only when it fails". The agent writes a TypeScript script and runs it once to test it.
-- After you confirm, the script runs on a timer, at least 60 seconds apart. It keeps its own state between runs.
-- A run that finds nothing costs no tokens. When the script returns a prompt, it arrives as a `[Scheduled Task: ...]` message and wakes the agent.
-- A status pill in the prompt toolbar and a card in the chat show runs, last state and last error.
+## Plugin catalog
 
-One script schedule per session. Scripts are not sandboxed and run with your permissions. [Package README](packages/dsh-schedule-script/README.md)
+| Plugin | Use it when you want to… | Needs |
+| --- | --- | --- |
+| [`dsh-client-kanban`](packages/dsh-client-kanban/README.md) | track many sessions on a board that updates itself | |
+| [`dsh-client-split-view`](packages/dsh-client-split-view/README.md) | see sessions, files and reviews side by side | |
+| [`dsh-client-review-git`](packages/dsh-client-review-git/README.md) | review an agent's git changes next to its chat | `git` on the host |
+| [`dsh-client-notify`](packages/dsh-client-notify/README.md) | get a desktop notification and a chime when an agent stops or asks | `dsh-client-pwa` for the dock badge |
+| [`dsh-client-favicon`](packages/dsh-client-favicon/README.md) | read agent status from a pinned tab | `dsh-client-kanban` for the review ticks |
+| [`dsh-client-pwa`](packages/dsh-client-pwa/README.md) | install DSH as an app, or log in through a trusted reverse proxy | |
+| [`dsh-session-handoff`](packages/dsh-session-handoff/README.md) | continue a long session in a fresh one | `dsh-client-split-view`, `dsh-scratch-dir` |
+| [`dsh-scratch-dir`](packages/dsh-scratch-dir/README.md) | give each session a git-ignored folder for notes and scripts | |
+| [`dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md) | rerun a multi-step routine from a YAML file | |
+| [`dsh-schedule-script`](packages/dsh-schedule-script/README.md) | poll something in the background without spending tokens | |
+| [`dsh-log`](packages/dsh-log/README.md) | write DSH logs to a file, with a level per logger | |
+| [`dsh-debug`](packages/dsh-debug/README.md) | copy a session transcript or id for a bug report | macOS (`pbcopy`) |
 
-![Schedule script card and wake-up message](assets/screenshots/schedule-script.png)
-
-### Awareness and access
-
-#### dsh-client-notify
-
-**Gap it fills:** upstream tells you nothing while the tab is in the background.
-
-- Desktop notifications for "Agent stopped", tool approval requests, questions and required actions.
-- Two chimes: a soft one when an agent stops, a sharper one when it needs you.
-- Debounced, so a burst of events gives one notification. Subagents stay quiet. While the tab has focus, you only hear the chime.
-- With the installed app, the dock icon shows a badge with the number of pending requests.
-- A click on the notification focuses the DSH tab.
-
-The browser asks for notification permission on your first click or keypress. [Package README](packages/dsh-client-notify/README.md)
-
-![Desktop notification for a pending approval](assets/screenshots/notify-desktop.png)
-
-#### dsh-client-favicon
-
-**Gap it fills:** upstream keeps a static favicon, so a pinned tab never shows agent state.
-
-- The favicon becomes a ring of 8 ticks. Green ticks fill from the bottom for each running session.
-- Orange ticks fill from the top for sessions waiting for review. This needs the Kanban plugin.
-- A red dot in the center means an agent waits for your approval or answer.
-- The original favicon returns when everything is idle.
-
-No permissions, no config. [Package README](packages/dsh-client-favicon/README.md)
-
-![Favicon states](assets/screenshots/favicon-states.png)
-
-#### dsh-client-pwa
-
-**Gap it fills:** upstream is not installable as an app, and you log in with a launch token only.
-
-- Serves the manifest and icons, so the browser offers "Install app". You get a standalone window and a dock icon.
-- Logs you in from a trusted reverse-proxy header or trusted network ranges, for example behind Tailscale. No token to type.
-- Name, colors, start URL and path prefixes are configurable.
-- Needed for the app badge of `dsh-client-notify`.
-
-Trusting a header or network range grants access to everyone who can set it. Check the proxy setup before you enable it. [Package README](packages/dsh-client-pwa/README.md)
-
-![DSH installed as an app](assets/screenshots/pwa-installed.png)
-
-### Observability and reliability
-
-#### dsh-log
-
-**Gap it fills:** upstream logging has no file output and no per-logger levels.
-
-- Writes logs to stdout, to a file or to both.
-- Sets a level per logger and output: `-1` silences, `0` error, `1` warn, `2` info, `3` debug. Setting the default to `-1` and naming a few loggers gives you an include list.
-- Line format: `<ISO timestamp> [<LEVEL>] [<logger>] <message>`.
-
-No rotation and no size cap. [Package README](packages/dsh-log/README.md)
-
-#### dsh-debug
-
-**Gap it fills:** upstream has no command to copy a transcript or session id.
-
-- `/copy-transcript` copies all session events as JSON Lines to your clipboard. Paste it into a bug report.
-- `/copy-session-id` copies the session id.
-
-Uses `pbcopy`, so it works on macOS only. [Package README](packages/dsh-debug/README.md)
-
-## Recommended setups
-
-**Web workspace.** Run several agents and stay informed.
-
-```sh
-for p in dsh-client-kanban dsh-client-split-view dsh-client-review-git dsh-client-notify dsh-client-favicon dsh-client-pwa; do
-  dsh plugin --profile <profile-name> add @lukstei/$p
-done
-```
-
-Kanban shows the state, split view shows the sessions, review-git shows the changes. Notify, favicon and pwa tell you when to look. The app badge needs notify and pwa. The review ticks in the favicon need Kanban.
-
-**Automation and long sessions.** Workflows, background checks and session handoff.
-
-```sh
-for p in dsh-yaml-workflow dsh-schedule-script dsh-session-handoff dsh-scratch-dir dsh-client-split-view; do
-  dsh plugin --profile <profile-name> add @lukstei/$p
-done
-```
-
-Handoff needs split view and the scratch folder, so install all three together. Add Kanban to mark the old session done after a handoff.
-
-**Reliability.** Add `dsh-log` and `dsh-debug` to any profile.
+Each package README lists its config and requirements.
 
 ## FAQ
 
-**Which DSH version does a plugin support?** Versions follow the DSH release they target: `<dsh-version>.<n>`. For example, `0.2.3-alpha.2.1` targets DSH `0.2.3-alpha.2`. Install the plugin version that matches your DSH.
+**Is the trusted-proxy login safe?** Only if a reverse proxy you control sets the header and strips it from outside requests. Anyone who can set that header, or reach DSH from a trusted network range, gets in. See [`dsh-client-pwa`](packages/dsh-client-pwa/README.md).
 
-**What happens when I upgrade DSH?** Upgrade the plugins together with DSH. `dsh-client-review-git` expects host and client to update together.
+**Do scheduled scripts run in a sandbox?** No. They run with your user's permissions.
 
-**Which plugins need each other?** `dsh-session-handoff` needs `dsh-client-split-view` and `dsh-scratch-dir`. `dsh-client-notify` needs `dsh-client-pwa` for the app badge. The favicon's review ticks and the handoff's "done" mark need `dsh-client-kanban`. Each package README lists its requirements.
-
-**Is it safe to enable the trusted-proxy login?** Only if a reverse proxy you control sets the header and strips it from outside requests. See `dsh-client-pwa` above.
-
-**Do scheduled scripts run in a sandbox?** No. They run with your user's permissions. Read a script before you confirm it.
+**Where do the scratch folders go?** Into `.agents/scratch/<session-id>` in the working directory. The plugin does not clean them up.
 
 ## Development
 
@@ -300,7 +192,7 @@ pnpm install
 pnpm run verify
 ```
 
-The packages live in [`packages/`](packages/). This repository is generated from a private monorepo; history starts at the first release.
+The packages live in [`packages/`](packages/). [`util-review-ui`](packages/util-review-ui/README.md) is the shared review UI library behind `dsh-client-review-git`; you don't install it yourself. This repository is generated from a private monorepo, and its history starts at the first release.
 
 ## License
 
