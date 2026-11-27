@@ -16,6 +16,9 @@ const TOOL_NAME_LIMIT = 80;
 const RECENT_TURNS = 5;
 const RECENT_HEAD = 1200;
 const RECENT_TAIL = 400;
+/** The last turn is quoted in full up to this cap, split head/tail like the others. */
+const LAST_HEAD = 15000;
+const LAST_TAIL = 5000;
 /**
  * Bounds that keep a brief small however long the handoff chain is: each section
  * keeps only its newest entries and names how many it dropped.
@@ -41,7 +44,8 @@ interface TurnArc {
 	readonly sessionId: string;
 	/** Running number across the whole chain; assigned after collection. */
 	index: number;
-	ask: string;
+	/** Every user message of the turn, in order. */
+	asks: string[];
 	outcome: string;
 	reason: TurnEndReason | undefined;
 	/** The turn only read a parent brief; it carries no work of its own. */
@@ -102,7 +106,7 @@ export function renderHandoff(
 						turn: event.data.turn,
 						sessionId,
 						index: 0,
-						ask: "",
+						asks: [],
 						outcome: "",
 						reason: undefined,
 						isHandoff: false,
@@ -128,7 +132,7 @@ export function renderHandoff(
 						break;
 					}
 					if (goal === "") goal = elide(flatten(text), ASK_HEAD, ASK_TAIL);
-					if (open !== undefined && open.ask === "") open.ask = text;
+					if (open !== undefined) open.asks.push(text);
 					break;
 				}
 				case "assistant/message": {
@@ -239,12 +243,19 @@ export function handoffInstruction(sessionId: string, file: string): string {
 	].join("\n");
 }
 
-/** Last RECENT_TURNS turns quoted at length, OLDER_TURNS before them flattened, the rest counted. */
+/** The last turn in full, RECENT_TURNS before it at length, OLDER_TURNS before those flattened, the rest counted. */
 function turnList(work: readonly TurnArc[]): string {
 	const kept = work.slice(-(RECENT_TURNS + OLDER_TURNS));
 	const dropped = work.length - kept.length;
 	const blocks = kept.map((turn, index) =>
-		turnBlock(turn, index >= kept.length - RECENT_TURNS),
+		turnBlock(
+			turn,
+			index === kept.length - 1
+				? "last"
+				: index >= kept.length - RECENT_TURNS
+					? "recent"
+					: "older",
+		),
 	);
 	if (dropped > 0) blocks.unshift(`… ${dropped} earlier turns omitted`);
 	return blocks.join("\n\n");
@@ -261,23 +272,30 @@ function shortId(id: string): string {
 	return id.slice(0, SHORT_ID_LENGTH);
 }
 
-/** Recent turns quote the ask and reply at length; older turns are flattened and short. */
-function turnBlock(turn: TurnArc, recent: boolean): string {
+/**
+ * The last turn quotes every user message and the reply in full, recent turns quote the first
+ * ask and the reply at length, older turns are flattened and short. Roles are labelled so an
+ * unanswered ask is never mistaken for a reply.
+ */
+function turnBlock(turn: TurnArc, tier: "last" | "recent" | "older"): string {
 	const kind = turn.reason === undefined ? "unfinished" : turn.reason.kind;
-	const body = (
-		recent
-			? [
-					elide(turn.ask, RECENT_HEAD, RECENT_TAIL),
-					elide(turn.outcome, RECENT_HEAD, RECENT_TAIL),
-				]
-			: [
-					elide(flatten(turn.ask), ASK_HEAD, ASK_TAIL),
-					clip(turn.outcome, OUTCOME_LIMIT),
-				]
-	)
-		.filter((part) => part !== "")
-		.join("\n\n");
-	return `### T${turn.index} [${kind}]\n\n${body === "" ? "(no content)" : body}`;
+	const quote = (text: string): string =>
+		tier === "last"
+			? elide(text, LAST_HEAD, LAST_TAIL)
+			: elide(text, RECENT_HEAD, RECENT_TAIL);
+	const asks = tier === "last" ? turn.asks : turn.asks.slice(0, 1);
+	const user = asks.map((ask) =>
+		tier === "older"
+			? `**User:** ${elide(flatten(ask), ASK_HEAD, ASK_TAIL)}`
+			: `**User:**\n\n${quote(ask)}`,
+	);
+	const reply =
+		turn.outcome.trim() === ""
+			? "**Assistant:** (no reply)"
+			: tier === "older"
+				? `**Assistant:** ${clip(turn.outcome, OUTCOME_LIMIT)}`
+				: `**Assistant:**\n\n${quote(turn.outcome)}`;
+	return `### T${turn.index} [${kind}]\n\n${[...user, reply].join("\n\n")}`;
 }
 
 function blockText(blocks: readonly ContentBlock[]): string {
@@ -292,7 +310,7 @@ function blockText(blocks: readonly ContentBlock[]): string {
 function clip(value: string, limit: number): string {
 	const flat = flatten(value);
 	if (flat.length <= limit) return flat;
-	return `${flat.slice(0, limit - 1)}…`;
+	return `${flat.slice(0, limit)} … [${flat.length - limit} chars omitted]`;
 }
 
 function flatten(value: string): string {

@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-scratch-dir",
-	"version": "0.2.2-rc.5.10",
+	"version": "0.2.2-rc.5.11",
 	"description": "Scratch directory provisioner for DSH sessions",
 	"type": "module",
 	"main": "./dist/index.js",

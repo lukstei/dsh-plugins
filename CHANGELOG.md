@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.2-rc.5.11 - 2026-11-27
+
+- **@lukstei/dsh-session-handoff**
+  - The brief quotes the last turn in full, up to 20,000 characters, so the most recent exchange carries over intact. The four turns before it keep the shorter quotes.
+  - The last turn keeps every message you sent in it, not just the first. Earlier turns still keep only their first message.
+  - Each turn labels its messages **User** and **Assistant**, so an unanswered message is no longer mistaken for a reply. A turn without a reply says so.
+  - Where text is cut, the brief states how many characters were left out instead of showing a bare ellipsis.
+
 ## v0.2.2-rc.5.10 - 2026-11-26
 
 - **General**

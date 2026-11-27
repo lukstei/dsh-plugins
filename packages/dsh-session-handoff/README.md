@@ -112,7 +112,7 @@ The client opens the pane. Without the client bundle the session is created but 
 | --- | --- |
 | Header | session id, `chain` of ancestor ids (when handed off before), cwd, creation time, event and turn counts across the chain |
 | `## Goal` | first real user prompt of the oldest ancestor, head 500 + tail 300 chars |
-| `## Turns` | one `### T<n> [end reason]` block per turn, numbered across the chain, handoff turns skipped. Last 5 turns quote each 1200 head + 400 tail chars; the 30 before them flatten to the ask (500/300) and reply (240 chars); older ones collapse to `… N earlier turns omitted` |
+| `## Turns` | one `### T<n> [end reason]` block per turn, numbered across the chain, handoff turns skipped. each turn labels `**User:**` and `**Assistant:**`; the last turn quotes every user message and the reply in full (capped at 20,000 chars); the 4 before it quote 1200 head + 400 tail chars; the 30 before them flatten to the ask (500/300) and reply (240 chars); every cut is marked `[N chars omitted]`; older ones collapse to `… N earlier turns omitted` |
 | `## Failures` | newest 20 `tool/result` errors: turn, session id when from an ancestor, tool name, reason (200 chars), plus `… N older failures omitted` |
 | `## Artifacts` | deduped paths from tool call arguments (`path`, `file_path`, `filePath`, `notebook_path`) across the chain, newest 100, plus `… N older paths omitted`; the brief files themselves are excluded |
 

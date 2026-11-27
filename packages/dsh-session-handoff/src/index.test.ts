@@ -347,13 +347,21 @@ Build the handoff command plugin
 
 ### T1 [completed]
 
+**User:**
+
 Build the handoff command plugin
+
+**Assistant:**
 
 Writing the plugin now.
 
 ### T2 [aborted]
 
+**User:**
+
 Now add tests
+
+**Assistant:**
 
 Tests are in.
 
@@ -447,16 +455,78 @@ test("the last five turns are quoted longer than older ones", () => {
 	const md = rendered.markdown;
 
 	assert.equal(rendered.turns, 7);
-	assert.match(md, /### T1 \[completed\]\n\nask 1\n\ny+…/);
-	assert.match(md, /### T3 \[completed\]\n\nask 3\n\nreply 3/);
 	assert.match(
 		md,
-		new RegExp(`### T7 \\[completed\\]\\n\\nask 7\\n\\n${long}`),
+		/### T1 \[completed\]\n\n\*\*User:\*\* ask 1\n\n\*\*Assistant:\*\* y+ … \[160 chars omitted\]/,
+	);
+	assert.match(
+		md,
+		/### T3 \[completed\]\n\n\*\*User:\*\*\n\nask 3\n\n\*\*Assistant:\*\*\n\nreply 3/,
+	);
+	assert.match(
+		md,
+		new RegExp(
+			`### T7 \\[completed\\]\\n\\n\\*\\*User:\\*\\*\\n\\nask 7\\n\\n\\*\\*Assistant:\\*\\*\\n\\n${long}`,
+		),
 	);
 });
 
-test("a long ask keeps its head and tail in the recent-turn budget", () => {
-	const ask = `${"H".repeat(600)}${"M".repeat(1000)}${"E".repeat(400)}`;
+test("the last turn keeps every user message and a long reply in full", () => {
+	const reply = "r".repeat(5000);
+	const user = (seq: number, text: string) => ({
+		type: "user/message",
+		seq,
+		time: CREATED,
+		data: {
+			id: `u${seq}`,
+			role: "user",
+			content: [{ type: "text", text }],
+			source: { kind: "user" },
+		},
+	});
+	const events = [
+		{ type: "turn/start", seq: 1, time: CREATED, data: { turn: 1 } },
+		user(2, "first ask"),
+		user(3, "steering ask"),
+		{
+			type: "assistant/message",
+			seq: 4,
+			time: CREATED,
+			data: {
+				turn: 1,
+				step: 1,
+				message: {
+					id: "a1",
+					role: "assistant",
+					content: [{ type: "text", text: reply }],
+					source: { kind: "model" },
+				},
+				stream: [],
+			},
+		},
+	] as SessionEvent[];
+
+	const md = renderHandoff([
+		{
+			session: {
+				version: 4,
+				id: TARGET_ID,
+				createdAt: CREATED,
+				isSeeded: false,
+			},
+			inheritedEventCount: 0,
+			events,
+		} as unknown as SessionLogSnapshot,
+	]).markdown;
+
+	assert.match(
+		md,
+		/### T1 \[unfinished\]\n\n\*\*User:\*\*\n\nfirst ask\n\n\*\*User:\*\*\n\nsteering ask\n\n\*\*Assistant:\*\*\n\nr{5000}\n/,
+	);
+});
+
+test("a very long ask keeps its head and tail within the last-turn cap", () => {
+	const ask = `${"H".repeat(15000)}${"M".repeat(1000)}${"E".repeat(5000)}`;
 	const events = [
 		{ type: "turn/start", seq: 1, time: CREATED, data: { turn: 1 } },
 		{
@@ -509,7 +579,7 @@ test("a long ask keeps its head and tail in the recent-turn budget", () => {
 
 	assert.ok(
 		rendered.markdown.includes(
-			`${"H".repeat(600)}${"M".repeat(600)} … [400 chars omitted] … ${"E".repeat(400)}`,
+			`${"H".repeat(15000)} … [1000 chars omitted] … ${"E".repeat(5000)}`,
 		),
 	);
 });
@@ -786,8 +856,14 @@ test("a chained handoff keeps goal, turns, failures and artifacts of every ances
 		/- chain: `aaaaaaaa` → `bbbbbbbb` → `cccccccc`/,
 	);
 	assert.match(rendered.markdown, /## Goal\n\noriginal goal\n/);
-	assert.match(rendered.markdown, /### T1 \[completed\]\n\noriginal goal/);
-	assert.match(rendered.markdown, /### T2 \[completed\]\n\nsecond ask/);
+	assert.match(
+		rendered.markdown,
+		/### T1 \[completed\]\n\n\*\*User:\*\*\n\noriginal goal\n\n\*\*Assistant:\*\* \(no reply\)/,
+	);
+	assert.match(
+		rendered.markdown,
+		/### T2 \[completed\]\n\n\*\*User:\*\*\n\nsecond ask/,
+	);
 	assert.match(
 		rendered.markdown,
 		/- \*\*T1\*\* \(aaaaaaaa\) tool `read`: boom/,
@@ -895,7 +971,7 @@ test("very long artifact paths and tool names are clipped", () => {
 		]),
 	]).markdown;
 	assert.ok(!md.includes(longPath));
-	assert.match(md, /- `\/repo\/p+…`/);
+	assert.match(md, /- `\/repo\/p+ … \[709 chars omitted\]`/);
 });
 
 test("parseModelArg splits at the first slash and keeps slashes in the model id", () => {
