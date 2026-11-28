@@ -7,6 +7,7 @@ import type {
 	CommandInvocation,
 	CommandResult,
 } from "@deepseek-ai/dsh-commands";
+import type {} from "@deepseek-ai/dsh-host-webserver";
 import { createUserMessage } from "@deepseek-ai/dsh-llm";
 import type {} from "@deepseek-ai/dsh-session";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
@@ -14,6 +15,7 @@ import type { SessionLogSnapshot } from "@deepseek-ai/dsh-session-query";
 import type {} from "@deepseek-ai/dsh-session-title";
 import type {} from "@deepseek-ai/dsh-working-directory";
 import type { Workspace } from "@deepseek-ai/dsh-workspace";
+import Schema from "@deepseek-ai/schemastery";
 import { scratchDirectory } from "@lukstei/dsh-scratch-dir";
 import {
 	handoffInstruction,
@@ -21,6 +23,11 @@ import {
 	renderHandoff,
 } from "./handoff.ts";
 import { formatLaunchResult } from "./launch.ts";
+import {
+	CONFIG_GLOBAL,
+	type LimitOverride,
+	type LimitsConfig,
+} from "./limits.ts";
 
 export const name = "session-handoff";
 export const inject = [
@@ -31,13 +38,40 @@ export const inject = [
 	"sessionTitle",
 	"workspaceRegistry",
 	"llm",
+	"webServer",
 ];
 
 const HANDOFF_FILE = "HANDOFF.md";
 const SHORT_ID_LENGTH = 8;
 const RESUMED_SUFFIX = " (Resumed)";
 
-export function apply(ctx: Context): void {
+const tokens = (what: string) =>
+	Schema.natural().description(`${what} (tokens).`);
+
+const limitOverride: Schema<LimitOverride> = Schema.object({
+	warmSoft: tokens("Warm cache: context size that shows the amber ring"),
+	warmStrong: tokens("Warm cache: context size that shows the red ring"),
+	coldSoft: tokens("Cold cache: context size that shows the amber ring"),
+	coldStrong: tokens("Cold cache: context size that shows the red ring"),
+	cacheTtlMs: Schema.natural().description(
+		"Idle milliseconds after which the provider's prompt cache counts as cold.",
+	),
+});
+
+export const Config: Schema<LimitsConfig> = Schema.object({
+	defaults: limitOverride.description("Applies to every model."),
+	providers: Schema.dict(limitOverride).description(
+		"Per provider id; overrides `defaults`.",
+	),
+	models: Schema.dict(limitOverride).description(
+		'Per "provider/model"; overrides `providers`.',
+	),
+});
+
+export function apply(ctx: Context, config: LimitsConfig): void {
+	ctx.on("webserver/index-inject", (table) => {
+		table.push({ kind: "global", name: CONFIG_GLOBAL, value: config });
+	});
 	ctx.commands.register({
 		name: "handoff",
 		description:

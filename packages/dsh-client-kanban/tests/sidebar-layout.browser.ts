@@ -1,4 +1,4 @@
-// Run against the native-theme HeaderLayout story with playwright-cli eval.
+// Run against the native-theme HeaderLayout story with: agent-browser --session <name> eval --stdin < packages/dsh-client-kanban/tests/sidebar-layout.browser.ts
 (async () => {
 	const sidebar = document.querySelector(".dsh-inflight-sidebar");
 	const host = document.querySelector(".header-story-sidebar");

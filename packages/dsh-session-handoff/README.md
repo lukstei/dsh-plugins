@@ -191,6 +191,22 @@ About 60 tokens for the message, plus the brief when read. Brief size grows with
 
 Appended message only; the prompt prefix is untouched. In a launched session this is the first turn.
 
+<a id="configuration"></a>
+## Configuration
+
+The gauge ring appears when the context reaches a size bar. Bars are in tokens and differ for a warm and a cold prompt cache. Set them for every model (`defaults`), per provider id (`providers`) or per `provider/model` (`models`); the most specific entry wins, field by field.
+
+```yaml
+config:
+  defaults: { warmSoft: 100000, warmStrong: 150000, coldSoft: 70000, coldStrong: 100000, cacheTtlMs: 300000 }
+  providers:
+    anthropic: { cacheTtlMs: 300000 }
+  models:
+    deepseek/deepseek-chat: { warmSoft: 60000, warmStrong: 90000 }
+```
+
+Unset fields use the values above. A model's context window still caps the bars at 60% and 80%.
+
 <a id="known-limitations-and-deferred-work"></a>
 ## Known Limitations and Deferred Work
 

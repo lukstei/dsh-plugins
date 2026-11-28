@@ -1,125 +1,267 @@
 # dsh-plugins
 
-[![npm](https://img.shields.io/npm/v/@lukstei/dsh-debug?label=npm)](https://www.npmjs.com/org/lukstei)
+[![Release](https://img.shields.io/github/v/release/lukstei/dsh-plugins?include_prereleases&label=release)](https://github.com/lukstei/dsh-plugins/releases)
+[![npm](https://img.shields.io/npm/v/@lukstei/dsh-client-kanban?label=npm)](https://www.npmjs.com/search?q=%40lukstei%2Fdsh-)
+[![CI](https://github.com/lukstei/dsh-plugins/actions/workflows/ci.yml/badge.svg)](https://github.com/lukstei/dsh-plugins/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Run several coding agents side by side in [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), see at a glance which one needs you, and review their changes without leaving the browser.**
+**Run several coding agents side by side in [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), spot which one needs you, and review their changes in the browser.**
 
-<!-- Interim hero still; replace with manually recorded hero video/GIF later. -->
 ![Kanban board in the sidebar, two sessions side by side, one with the git review of its changes](assets/screenshots/hero-split-view.png)
 
-**[Install in one minute](#quick-start)** · [See what you get](#what-you-get) · [All plugins](#plugin-catalog)
+**[Starter setup](#starter-setup)** · [Workspace features](#workspace-features) · [Standalone utilities](#standalone-utilities) · [Plugin catalog](#plugin-catalog)
 
 ## How it works
 
-DeepSeek Harness (DSH) is an open-source agent harness with a web client. These plugins extend that web client into a workspace for running many agents at once:
+DeepSeek Harness (DSH) is an open-source agent harness with a web client. The starter set turns that web client into a multi-agent workspace:
 
-1. **Plan.** You put tasks on a Kanban board. Moving a card to Active starts the agent.
-2. **Run in parallel.** Each agent gets its own pane. You see several sessions next to each other.
-3. **Get called in.** When an agent stops or asks for approval, the tab icon changes and your desktop shows a notification.
-4. **Review.** You open the agent's diff in a pane next to its chat and quote lines back to it.
-5. **Close.** You drag the card to Done.
+1. **Plan.** Add tasks to a Kanban board. Moving a card to Active starts the agent.
+2. **Run in parallel.** Open sessions in side-by-side panes.
+3. **Spot attention requests.** The tab icon and desktop notifications tell you when an agent stops or waits for approval.
+4. **Review.** Inspect the branch, commit, or working tree diff beside the chat and quote lines back to the agent.
+5. **Hand off or close.** Start a fresh session with a brief when context fills up, or move the card to Done.
 
-Each plugin is its own npm package. Install the set below, or pick single plugins from the [catalog](#plugin-catalog).
+Each plugin is its own npm package. Install the full starter set below, or add standalone utilities as you need them.
 
-## Quick start
+## Starter setup
 
-You need DSH and Node 24.9 or newer. Plugin versions follow the DSH release they target, so `0.2.3-alpha.2.1` works with DSH `0.2.3-alpha.2`. Install the plugin version that matches your DSH, and upgrade both together.
+You need DSH and Node 24.9 or newer. Plugin versions follow the DSH release they target, so `0.2.3-alpha.2.1` targets DSH `0.2.3-alpha.2`. Install matching versions and upgrade both together.
 
-**1. Create a profile** from the shipped `web` template. `--dump-config` creates it and prints its config without starting DSH:
-
-```sh
-dsh --profile workspace --from-default-profile web --dump-config
-```
-
-**2. Add the workspace plugins:**
+**1. Install the Kanban workspace suite** into your profile (`web` or `desktop`):
 
 ```sh
-dsh plugin --profile workspace add @lukstei/dsh-client-kanban @lukstei/dsh-client-split-view @lukstei/dsh-client-review-git @lukstei/dsh-client-notify @lukstei/dsh-client-favicon @lukstei/dsh-client-pwa
+dsh plugin --profile <web|desktop> add \
+  @lukstei/dsh-client-kanban \
+  @lukstei/dsh-client-split-view \
+  @lukstei/dsh-client-review-git \
+  @lukstei/dsh-client-notify \
+  @lukstei/dsh-client-favicon \
+  @lukstei/dsh-session-handoff
 ```
 
-**3. Start DSH** with `dsh workspace`, open the Kanban board from the sidebar and start a task.
+**2. Start DSH** (for example `dsh web`), open the Kanban board from the sidebar, and start a task.
 
-To remove a plugin, run `dsh plugin --profile workspace remove <package>`. The [DSH docs](https://deepseek-harness.github.io/deepseek-harness/) cover profiles and plugins in depth.
+Each package ships a default `cordis.patch.yml`, so `dsh plugin add` mounts it with working defaults. If you want to customize Kanban link-tool instructions or handoff ring thresholds, override them in your profile `cordis.patch.yml`:
 
-## What you get
+```yaml
+- id: kanban
+  config:
+    kanban_add_link_tool_instructions: 'Collect task tickets and pull requests. Use concise labels.'
 
-### See every agent at once
+- id: session-handoff
+  config:
+    limits:
+      defaults: { warmSoft: 100000, warmStrong: 150000 }
+```
 
-The Kanban board sorts your sessions into To Do, Active, Review and Done. The board moves cards for you: a running agent sits in Active, and one that waits for your approval or answer moves to Review. You can hold or pin cards, search across message text, and let agents attach ticket or PR links to their card. The board shows the sessions you start from it, or mark with `/kanban`. [dsh-client-kanban](packages/dsh-client-kanban/README.md)
+To remove a plugin, run `dsh plugin --profile <web|desktop> remove <package>`. The [DSH docs](https://deepseek-harness.github.io/deepseek-harness/) cover profiles and plugins in depth.
+
+## Workspace features
+
+### Kanban board
+
+**Plugin:** [`@lukstei/dsh-client-kanban`](packages/dsh-client-kanban/README.md)
+
+The board sorts managed sessions into To Do, Active, Review, and Done. Running agents sit in Active, and sessions waiting for your approval or answer move to Review. You can hold or pin cards, search message text, and let agents attach ticket or PR links. The board shows sessions you start from it or mark with `/kanban`.
 
 ![Kanban board with sessions in To Do, Active, Review and Done](assets/screenshots/kanban-board.png)
 
-Split view puts sessions in columns next to each other. Inside any pane you can open a Markdown file, an image, a related session or the git review as an overlay and keep the chat in view. DSH restores your panes after a reload. [dsh-client-split-view](packages/dsh-client-split-view/README.md)
+### Split view
+
+**Plugin:** [`@lukstei/dsh-client-split-view`](packages/dsh-client-split-view/README.md)
+
+Split view puts sessions in side-by-side columns. Inside any pane you can open a Markdown file, an image, a related session, or the git review as an overlay while keeping the chat visible. DSH restores your open panes after a reload.
 
 ![Three panes side by side: chat with to-dos, a Markdown file overlay, and the git review overlay](assets/screenshots/split-view.png)
 
-### Know when an agent needs you
+### Tab status and desktop alerts
 
-You can work in another window. The tab icon turns into a status ring: green ticks for running agents, orange for sessions in Review, a red dot when an agent waits for you. Desktop notifications and a chime tell you when an agent stops or asks for approval, and a click takes you back to its tab. Install DSH as an app to get a dock icon with a badge for pending requests. [dsh-client-favicon](packages/dsh-client-favicon/README.md) · [dsh-client-notify](packages/dsh-client-notify/README.md) · [dsh-client-pwa](packages/dsh-client-pwa/README.md)
+**Plugins:** [`@lukstei/dsh-client-favicon`](packages/dsh-client-favicon/README.md) (tab ring) · [`@lukstei/dsh-client-notify`](packages/dsh-client-notify/README.md) (notifications, chime, app badge)
+
+The browser tab icon renders an eight-tick ring: green ticks for running agents, orange ticks for sessions in Review, and a red center dot when an agent waits for you. Desktop notifications and a chime fire when an agent stops or asks for approval, and clicking a notification focuses that tab. If you install DSH as a PWA, the app icon shows a badge for pending interactions and recent reviews.
 
 ![Browser tab icon states next to a macOS notification banner and dock badge](assets/screenshots/attention.png)
 
-### Review changes in place
+### Git review in place
 
-The git review shows what an agent changed: a whole branch, a single commit, or the staged and unstaged work in your tree. You see one file tree with line counts and can expand any hunk. Select code to quote it into your next message. Agents can post a review card in the chat, and a click opens the review in a pane. The review only reads your repository, and works with plain git and GitButler. [dsh-client-review-git](packages/dsh-client-review-git/README.md)
+**Plugin:** [`@lukstei/dsh-client-review-git`](packages/dsh-client-review-git/README.md)
+
+Inspect a branch, a single commit, or staged and unstaged changes across every repository a session touched. You get a unified file tree with line counts, expandable hunks, and selection quoting back into the composer. Agents can also post a review card in chat that opens the review pane. Reads never alter repository state and work with both plain Git and GitButler.
 
 ![Review card in the chat next to the git review of the branch](assets/screenshots/git-review.png)
 
-### Keep long sessions sharp
+### Session handoff
 
-In a long session the agent gets slower and starts to lose track. A ring next to the send button turns yellow at 70k prompt tokens and red at 100k. Run `/handoff` and DSH opens a fresh session in a new pane that starts from a short brief of the old one: goal, what each turn asked and answered, failed tool calls and touched files. You can pick another model for the new session. Every session also gets its own git-ignored scratch folder, so agents keep notes and one-off scripts out of your repository. [dsh-session-handoff](packages/dsh-session-handoff/README.md) · [dsh-scratch-dir](packages/dsh-scratch-dir/README.md)
+**Plugin:** [`@lukstei/dsh-session-handoff`](packages/dsh-session-handoff/README.md)
+
+A ring next to the send button changes color as prompt context grows; thresholds are configurable per provider and model. Run `/handoff` (or click the ring) to open a fresh session in a new pane seeded with a brief of the old one: goal, turn summaries, failed tool calls, and touched files. You can switch models across native and ACP backends when handing off.
 
 ![Old session marked Resumed next to the new session with its Goal, State and Next reply](assets/screenshots/handoff.png)
 
-### Automate repeat work
+## Standalone utilities
 
-Write a multi-step routine once as a YAML file and run it with `/wf <file>`. Steps can be prompts, subagents that fan out over a list, conditions, and gates where the run pauses until you check the result. DSH keeps the progress of a run across restarts.
+These packages work on their own without the Kanban workspace suite. Install any of them with `dsh plugin --profile <profile> add <package>`.
+
+### YAML workflows
+
+**Plugin:** [`@lukstei/dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md)
+
+Define multi-step prompt routines in YAML and run them with `/wf <file>`. Steps support prompts, subagent fan-out over lists, conditionals, zero-token print blocks, and approval gates that pause until you resume. DSH keeps run state across restarts.
 
 ```yaml
-name: "Deploy to {{args.environment}}"
+name: 'Deploy to {{args.environment}}'
 args: { environment: { type: choice, choices: [staging, production], default: staging } }
 steps:
-  - print: "Deploying to {{args.environment}}"
-  - prompt: "Run migrations."
-    gate: "Check the migration logs."
-  - prompt: "Deploy."
+  - print: 'Deploying to {{args.environment}}'
+  - prompt: 'Run migrations.'
+    gate: 'Check the migration logs.'
+  - prompt: 'Deploy.'
 ```
 
-[dsh-yaml-workflow](packages/dsh-yaml-workflow/README.md)
+Sample mount (`cordis.patch.yml`, zero config required):
+
+```yaml
+- insert:
+    - id: dsh-workflow-runner
+      name: '@lukstei/dsh-yaml-workflow'
+      config: {}
+```
 
 ![Workflow card paused at a gate with Resume and Discard buttons](assets/screenshots/workflow.png)
 
-Ask an agent to "check CI every 5 minutes and tell me when it fails", and it writes a small script that runs in the background. Runs that find nothing cost no tokens. The agent only wakes up when the script reports something. Scripts run with your user's permissions, so read one before you confirm it. [dsh-schedule-script](packages/dsh-schedule-script/README.md)
+### Scheduled background scripts
+
+**Plugin:** [`@lukstei/dsh-schedule-script`](packages/dsh-schedule-script/README.md)
+
+Ask an agent to poll a condition on an interval (for example, checking CI every 5 minutes and reporting failures). It writes a TypeScript check that runs in the background without spending tokens; the agent wakes only when the script returns a prompt. Scripts run with your user permissions, so review one before confirming it.
+
+Sample mount (`cordis.patch.yml`, zero config required):
+
+```yaml
+- insert:
+    - id: schedule-script
+      name: '@lukstei/dsh-schedule-script'
+      config: {}
+```
 
 ![Scheduled task waking the agent after a failed CI build, with the schedule status popover](assets/screenshots/schedule.png)
 
+### Per-session scratch folders
+
+**Plugin:** [`@lukstei/dsh-scratch-dir`](packages/dsh-scratch-dir/README.md)
+
+Creates `.agents/scratch/<session-id>` in the session working directory with a local `.gitignore` and adds its path to the agent system prompt. Agents write plans, notes, and throwaway scripts there instead of polluting your repository root.
+
+Sample mount (`cordis.patch.yml`, zero config required):
+
+```yaml
+- insert:
+    - id: scratch-dir
+      name: '@lukstei/dsh-scratch-dir'
+      config: {}
+```
+
+### File and stdout logger
+
+**Plugin:** [`@lukstei/dsh-log`](packages/dsh-log/README.md)
+
+Routes Cordis logger output to stdout or log files with per-logger level thresholds (`-1` silenced up to `3` DEBUG). The shipped patch logs `INFO` to stdout; override `outputs` in `cordis.patch.yml` to write selected loggers to disk:
+
+```yaml
+- id: file-log
+  config:
+    outputs:
+      - target: stdout
+        levels: { default: 2 }
+      - target: file
+        filePath: ~/.dsh/logs/dsh.log
+        levels: { default: -1, tools: 3 }
+```
+
+### Transcript and session ID copy
+
+**Plugin:** [`@lukstei/dsh-debug`](packages/dsh-debug/README.md)
+
+Adds `/copy-transcript` (JSON Lines of all snapshot events) and `/copy-session-id` to copy debugging context to your clipboard. The default writer uses `pbcopy` on macOS; programmatic setups can pass a custom `copy` handler.
+
+Sample mount (`cordis.patch.yml`, zero config required):
+
+```yaml
+- insert:
+    - id: debug
+      name: '@lukstei/dsh-debug'
+      config: {}
+```
+
+### PWA and optional proxy login
+
+**Plugin:** [`@lukstei/dsh-client-pwa`](packages/dsh-client-pwa/README.md)
+
+Serves a web app manifest and icons so you can install DSH as a standalone app, and adds optional reverse-proxy auth. The shipped patch leaves `config` empty so trusted-proxy login stays off by default.
+
+**Example 1: Localhost PWA** (installable app on `localhost`, standard DSH token login):
+
+```yaml
+- insert:
+    - id: client-pwa
+      name: '@lukstei/dsh-client-pwa'
+      config: {}
+```
+
+**Example 2: Tailscale Serve (my own setup, optional)**
+
+This is an example from my own setup for reaching local DSH from a phone. You do not need Tailscale or reverse-proxy login for desktop use; any authenticating HTTPS proxy works if you match its headers and IP range.
+
+Expose local DSH on your tailnet with Tailscale Serve:
+
+```sh
+tailscale serve --service=svc:dsh --https=443 http://localhost:3080
+```
+
+Then override `client-pwa` in your profile `cordis.patch.yml`:
+
+```yaml
+- id: client-pwa
+  config:
+    auth:
+      userHeader: 'tailscale-user-login'
+      trustedCidrs: ['127.0.0.1', '::1', '100.64.0.0/10', 'fd7a:115c:a1e0::/48']
+      authRoutes: ['/login', '/auth/tailscale', '/auto-login']
+      loginRedirectPath: '/login'
+    pwa:
+      pathPrefixes: ['/tsctl'] # optional: only needed when mounted under a subpath
+```
+
+Tailscale terminates HTTPS at `https://dsh.<tailnet>.ts.net` and injects `tailscale-user-login`. Requests from your tailnet sign in without a token, and Safari or Chrome can add DSH to your home screen. On phone viewports, Kanban stacks into one column and split view shows one session at a time.
+
+<img src="assets/screenshots/mobile.png" width="360" alt="Active DSH session on a mobile viewport">
+
 ## Plugin catalog
 
-| Plugin | Use it when you want to… | Needs |
+| Plugin | Use it when you want to… | Dependencies |
 | --- | --- | --- |
-| [`dsh-client-kanban`](packages/dsh-client-kanban/README.md) | track many sessions on a board that updates itself | |
-| [`dsh-client-split-view`](packages/dsh-client-split-view/README.md) | see sessions, files and reviews side by side | |
-| [`dsh-client-review-git`](packages/dsh-client-review-git/README.md) | review an agent's git changes next to its chat | `git` on the host |
-| [`dsh-client-notify`](packages/dsh-client-notify/README.md) | get a desktop notification and a chime when an agent stops or asks | `dsh-client-pwa` for the dock badge |
-| [`dsh-client-favicon`](packages/dsh-client-favicon/README.md) | read agent status from a pinned tab | `dsh-client-kanban` for the review ticks |
-| [`dsh-client-pwa`](packages/dsh-client-pwa/README.md) | install DSH as an app, or log in through a trusted reverse proxy | |
-| [`dsh-session-handoff`](packages/dsh-session-handoff/README.md) | continue a long session in a fresh one | `dsh-client-split-view`, `dsh-scratch-dir` |
-| [`dsh-scratch-dir`](packages/dsh-scratch-dir/README.md) | give each session a git-ignored folder for notes and scripts | |
-| [`dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md) | rerun a multi-step routine from a YAML file | |
-| [`dsh-schedule-script`](packages/dsh-schedule-script/README.md) | poll something in the background without spending tokens | |
-| [`dsh-log`](packages/dsh-log/README.md) | write DSH logs to a file, with a level per logger | |
-| [`dsh-debug`](packages/dsh-debug/README.md) | copy a session transcript or id for a bug report | macOS (`pbcopy`) |
+| [`@lukstei/dsh-client-kanban`](packages/dsh-client-kanban/README.md) | track many sessions on a live board | • **Optional:** `dsh-client-split-view` (opens panes + pane status dots)<br>• **Optional:** `dsh-client-favicon` (review ticks in tab ring)<br>• **Optional:** `dsh-client-notify` (review count in app badge) |
+| [`@lukstei/dsh-client-split-view`](packages/dsh-client-split-view/README.md) | view sessions, files, and reviews side by side | |
+| [`@lukstei/dsh-client-review-git`](packages/dsh-client-review-git/README.md) | review git changes next to the chat | • **Required:** `git` on host<br>• **Optional:** `dsh-client-split-view` (pane-header review button + overlay) |
+| [`@lukstei/dsh-client-notify`](packages/dsh-client-notify/README.md) | get desktop alerts and a chime when an agent stops or asks | • **Optional:** `dsh-client-kanban` (includes review count in badge)<br>• **Optional:** `dsh-client-pwa` (installable app for dock/home-screen badge) |
+| [`@lukstei/dsh-client-favicon`](packages/dsh-client-favicon/README.md) | read agent status from a pinned tab | • **Optional:** `dsh-client-kanban` (orange review ticks) |
+| [`@lukstei/dsh-session-handoff`](packages/dsh-session-handoff/README.md) | continue a long session in a fresh one | • **Optional:** `dsh-client-split-view` (handoff ring, model picker UI, side-pane launch; `/handoff` works on host without it) |
+| [`@lukstei/dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md) | rerun a multi-step routine from a YAML file | |
+| [`@lukstei/dsh-schedule-script`](packages/dsh-schedule-script/README.md) | poll something in the background without spending tokens | |
+| [`@lukstei/dsh-scratch-dir`](packages/dsh-scratch-dir/README.md) | give each session a git-ignored folder for notes and scripts | |
+| [`@lukstei/dsh-log`](packages/dsh-log/README.md) | write DSH logs to stdout or files per logger | |
+| [`@lukstei/dsh-debug`](packages/dsh-debug/README.md) | copy a session transcript or id for a bug report | • **Required:** macOS (`pbcopy`) by default |
+| [`@lukstei/dsh-client-pwa`](packages/dsh-client-pwa/README.md) | install DSH as a PWA or sign in via a reverse proxy | • **Required (proxy login only):** authenticating HTTPS reverse proxy |
 
-Each package README lists its config and requirements.
+Each package README covers its config fields and service contracts.
 
 ## FAQ
 
-**Is the trusted-proxy login safe?** Only if a reverse proxy you control sets the header and strips it from outside requests. Anyone who can set that header, or reach DSH from a trusted network range, gets in. See [`dsh-client-pwa`](packages/dsh-client-pwa/README.md).
+**Is trusted-proxy login safe?** Only if a reverse proxy you control sets the header and strips it from outside requests. Anyone who can spoof that header or reach DSH from a trusted CIDR gets in. See [`dsh-client-pwa`](packages/dsh-client-pwa/README.md).
 
-**Do scheduled scripts run in a sandbox?** No. They run with your user's permissions.
+**Do scheduled scripts run in a sandbox?** No. They run with your user permissions.
 
-**Where do the scratch folders go?** Into `.agents/scratch/<session-id>` in the working directory. The plugin does not clean them up.
+**Where do scratch folders go?** Into `.agents/scratch/<session-id>` in the working directory. The plugin does not clean them up.
 
 ## Development
 
@@ -128,7 +270,7 @@ pnpm install
 pnpm run verify
 ```
 
-The packages live in [`packages/`](packages/). [`util-review-ui`](packages/util-review-ui/README.md) is the shared review UI library behind `dsh-client-review-git`; you don't install it yourself. This repository is generated from a private monorepo, and its history starts at the first release.
+Packages live in [`packages/`](packages/). This repository is generated from a private monorepo, so its history starts at the first release.
 
 ## License
 

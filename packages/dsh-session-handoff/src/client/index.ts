@@ -8,6 +8,7 @@ import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import type {} from "@lukstei/dsh-client-split-view/client-contract";
 import type {} from "@zaimokuza/dsh-acp-adapter/remote";
 import { launchedSessionId } from "../launch.ts";
+import { CONFIG_GLOBAL, type LimitsConfig } from "../limits.ts";
 import { type AcpUsageReader, setAcpUsageReader } from "./acp-usage.ts";
 import { HandoffRing } from "./ring.ts";
 
@@ -53,6 +54,16 @@ export function apply(ctx: Context): void {
 				console.warn(`session-handoff: ${line} failed`, result);
 			}
 		});
+	};
+	// Safe: the Host validated this value against its Config schema before injecting it.
+	const config = (globalThis as unknown as Record<string, LimitsConfig>)[
+		CONFIG_GLOBAL
+	];
+	const loadRoute = async (
+		id: SessionId,
+	): Promise<{ provider: string; model: string } | undefined> => {
+		const { current } = await ctx.modelDirectories.directoryFor(id).load();
+		return current === null ? undefined : current;
 	};
 	const handoff = (id: SessionId): Promise<void> => run(id, "/handoff");
 
@@ -131,7 +142,7 @@ export function apply(ctx: Context): void {
 						name: "conversation.input.right",
 						id: "session-handoff.ring",
 						order: 1000,
-						inject: () => ({ onHandoff: handoff }),
+						inject: () => ({ onHandoff: handoff, loadRoute, config }),
 					},
 					HandoffRing,
 				),

@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.2-rc.5.12 - 2026-11-28
+
+- **@lukstei/dsh-client-pwa**
+  - Breaking: the shipped default no longer turns on trusted reverse-proxy login. Installing DSH as an app on `localhost` keeps normal token login. If you relied on the old default, set the `auth` options (`userHeader`, `trustedCidrs`, `authRoutes`, `loginRedirectPath`) in your profile's `cordis.patch.yml`.
+- **@lukstei/dsh-session-handoff**
+  - The ring's warning thresholds can be set for all models, per provider, or per provider and model. The most specific setting wins for each value. Unset values keep the built-in bars: 100k and 150k tokens with a warm cache, 70k and 100k with a cold one.
+  - The idle time after which the prompt cache counts as cold can also be set.
+  - The ring reads the session's current model after each turn, so switching models applies that model's thresholds. The 60% and 80% window-share caps still apply.
+- **General**
+  - The README is reorganized into a starter setup, workspace features, standalone utilities and the plugin catalog. It adds a mobile screenshot.
+
 ## v0.2.2-rc.5.11 - 2026-11-27
 
 - **@lukstei/dsh-session-handoff**

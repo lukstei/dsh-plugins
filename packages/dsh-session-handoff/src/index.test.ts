@@ -289,7 +289,8 @@ async function setup(
 					: { error: { message: options.resolveError } },
 			),
 	});
-	plugin.apply(ctx);
+	ctx.provide("webServer", {});
+	plugin.apply(ctx, {});
 	return {
 		definition: definition[0],
 		followups,

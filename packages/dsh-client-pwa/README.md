@@ -18,20 +18,47 @@ Makes DSH installable as a PWA and lets trusted reverse-proxy requests log in wi
 <a id="use-this-package"></a>
 ## Use this package
 
-Host plugin. Requires `webServer` and `connection`. Mount (this is the bundle patch, [cordis.patch.yml](cordis.patch.yml)):
+Host plugin. Requires `webServer` and `connection`. The shipped bundle patch ([cordis.patch.yml](cordis.patch.yml)) leaves `config` empty, so DSH serves the PWA manifest and icons while keeping standard token login active:
 
 ```yaml
 - insert:
     - id: client-pwa
       name: '@lukstei/dsh-client-pwa'
-      config:
-        auth:
-          userHeader: 'tailscale-user-login'
-          trustedCidrs: ['127.0.0.1', '::1', '100.64.0.0/10', 'fd7a:115c:a1e0::/48']
-          authRoutes: ['/login', '/auth/tailscale', '/auto-login']
-          loginRedirectPath: '/login'
-        pwa:
-          pathPrefixes: ['/tsctl']
+      config: {}
+```
+
+### Example 1: Localhost PWA
+
+Install DSH as a desktop app on `localhost` without changing auth. Customize manifest metadata only if you want different app names or colors:
+
+```yaml
+- id: client-pwa
+  config:
+    pwa:
+      name: 'DeepSeek Harness'
+      shortName: 'DSH'
+```
+
+### Example 2: Tailscale Serve (reverse-proxy login)
+
+Expose local DSH (`localhost:3080`) on your tailnet as an HTTPS service:
+
+```sh
+tailscale serve --service=svc:dsh --https=443 http://localhost:3080
+```
+
+Tailscale terminates TLS, sets `tailscale-user-login`, and proxies to DSH over loopback (`127.0.0.1` / `::1`). Override `client-pwa` in your profile `cordis.patch.yml` to trust that proxy:
+
+```yaml
+- id: client-pwa
+  config:
+    auth:
+      userHeader: 'tailscale-user-login'
+      trustedCidrs: ['127.0.0.1', '::1', '100.64.0.0/10', 'fd7a:115c:a1e0::/48']
+      authRoutes: ['/login', '/auth/tailscale', '/auto-login']
+      loginRedirectPath: '/login'
+    pwa:
+      pathPrefixes: ['/tsctl'] # optional: only needed when mounted under a subpath
 ```
 
 ### Config: `auth`
@@ -69,7 +96,7 @@ Server-side only (no client entry). `inject`: `webServer`, `connection`.
 
 Non-plugin requirement: a reverse proxy that sets the configured `auth.userHeader` and connects from `auth.trustedCidrs`; otherwise trusted login never fires.
 
-The package patch carries Tailscale defaults. Used by: nothing.
+The shipped patch leaves auth unconfigured, so trusted-proxy login stays off until you configure `auth.userHeader` or `auth.trustedCidrs`. Used by: nothing.
 
 ### Behavior
 

@@ -12,12 +12,13 @@ import {
 	useState,
 	useSyncExternalStore,
 } from "react";
+import { type LimitsConfig, resolveLimits } from "../limits.ts";
 import {
 	type AcpUsage,
 	currentAcpUsageReader,
 	subscribeAcpUsageReader,
 } from "./acp-usage.ts";
-import { CACHE_TTL_MS, handoffLevel } from "./level.ts";
+import { handoffLevel } from "./level.ts";
 
 const COLOR = { soft: "#d9a400", strong: "#d62839" } as const;
 
@@ -27,12 +28,22 @@ export function HandoffRing({
 	useProjection,
 	useSession,
 	onHandoff,
+	loadRoute,
+	config,
 }: Pick<SessionStandardProps, "sessionId" | "useProjection" | "useSession"> & {
 	onHandoff: (sessionId: SessionStandardProps["sessionId"]) => Promise<void>;
+	/** The session's current provider and model, which select its limits. */
+	loadRoute: (
+		sessionId: SessionStandardProps["sessionId"],
+	) => Promise<{ provider: string; model: string } | undefined>;
+	config: LimitsConfig;
 }) {
 	const pressure = useProjection("contextPressure");
 	const running = useSession((session) => session.running);
 	const [acp, setAcp] = useState<AcpUsage | undefined>(undefined);
+	const [route, setRoute] = useState<
+		{ provider: string; model: string } | undefined
+	>(undefined);
 	const [cold, setCold] = useState(false);
 	const [pendingSession, setPendingSession] = useState<
 		SessionStandardProps["sessionId"] | undefined
@@ -55,6 +66,19 @@ export function HandoffRing({
 		};
 	}, [sessionId, running, readUsage]);
 
+	// The model can change between turns, so re-read it whenever a turn settles.
+	useEffect(() => {
+		if (running) return;
+		let live = true;
+		void loadRoute(sessionId).then((current) => {
+			if (live) setRoute(current);
+		});
+		return () => {
+			live = false;
+		};
+	}, [sessionId, running, loadRoute]);
+	const limits = resolveLimits(config, route);
+
 	const tokens =
 		pressure !== undefined && pressure.pressureTokens !== undefined
 			? pressure.pressureTokens
@@ -70,11 +94,11 @@ export function HandoffRing({
 	useEffect(() => {
 		setCold(false);
 		if (running) return;
-		const timer = setTimeout(() => setCold(true), CACHE_TTL_MS);
+		const timer = setTimeout(() => setCold(true), limits.cacheTtlMs);
 		return () => clearTimeout(timer);
-	}, [tokens, running]);
+	}, [tokens, running, limits.cacheTtlMs]);
 
-	const level = handoffLevel(tokens, window, cold);
+	const level = handoffLevel(tokens, window, cold, limits);
 	if (level === "none" || tokens === undefined) return null;
 	const k = Math.round(tokens / 1000);
 	const pending = pendingSession === sessionId;

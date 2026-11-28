@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { mock, test } from "node:test";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
+import type { LimitsConfig } from "../limits.ts";
 
 const states: unknown[] = [];
 let cursor = 0;
@@ -62,6 +63,7 @@ function renderRing(opts: {
 	contextWindow?: number;
 	running: boolean;
 	onHandoff?: (id: SessionId) => Promise<void>;
+	config?: LimitsConfig;
 }): VNode | null {
 	cursor = 0;
 	const result = HandoffRing({
@@ -73,6 +75,8 @@ function renderRing(opts: {
 		useSession: ((selector: (session: { running: boolean }) => unknown) =>
 			selector({ running: opts.running })) as never,
 		onHandoff: opts.onHandoff ?? (async () => {}),
+		loadRoute: async () => undefined,
+		config: opts.config ?? {},
 	});
 	return result as unknown as VNode | null;
 }
@@ -206,4 +210,14 @@ test("HandoffRing scopes pending state to the clicked sessionId", async () => {
 
 	resolveHandoff();
 	await new Promise((resolve) => setImmediate(resolve));
+});
+
+test("HandoffRing honours configured limits", () => {
+	resetHooks();
+	const node = renderRing({
+		tokens: 50_000,
+		running: false,
+		config: { defaults: { warmSoft: 40_000, warmStrong: 60_000 } },
+	});
+	assert.ok(node !== null);
 });
