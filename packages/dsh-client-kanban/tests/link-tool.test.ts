@@ -15,7 +15,7 @@ import { apply, Config, type KanbanState } from "../src/index.ts";
 
 const link = { label: "Issue", url: "https://jira.example/ABC-1", priority: 0 };
 
-async function setup(config: Config = Config({})) {
+async function setup(config = Config({})) {
 	const ctx = new Context();
 	let tool: ToolDefinition | undefined;
 	let command: CommandDefinition | undefined;
@@ -165,34 +165,34 @@ test("config defaults enable the tool with the requested instructions", async ()
 	const config = Config(undefined);
 	expect(Config({})).toEqual(config);
 	expect(config).toEqual({
-		kanban_add_link_tool_enabled: true,
-		kanban_add_link_tool_instructions:
-			'Collect important links relevant to the session. Keep link labels concise and unambiguous. Give links directly related to the task negative priorities; give supporting context links zero or positive priorities. For context links, briefly explain their relevance in the label. Examples: "Task PR: jackwener/OpenCLI #32", "Task Ticket: EXAMPLE-2", "EXAMPLE-333: Acceptance criteria".',
+		linkTool: {
+			enabled: true,
+			instructions:
+				'Collect important links relevant to the session. Keep link labels concise and unambiguous. Give links directly related to the task negative priorities; give supporting context links zero or positive priorities. For context links, briefly explain their relevance in the label. Examples: "Task PR: lukstei/dsh-plugins #32", "Task Ticket: EXAMPLE-2", "EXAMPLE-333: Acceptance criteria".',
+		},
 	});
 	expect((await setup()).tool.description).toContain(
-		config.kanban_add_link_tool_instructions,
+		config.linkTool.instructions,
 	);
 	expect(() =>
 		Config({
-			kanban_add_link_tool_enabled: "true" as unknown as boolean,
+			linkTool: { enabled: "true" as unknown as boolean },
 		}),
 	).toThrow();
 	expect(() =>
 		Config({
-			kanban_add_link_tool_instructions: 42 as unknown as string,
+			linkTool: { instructions: 42 as unknown as string },
 		}),
 	).toThrow();
 });
 
 test("custom instructions replace the instruction text in tool discovery", async () => {
 	const config = Config({
-		kanban_add_link_tool_instructions: "Collect only task reviews.",
+		linkTool: { instructions: "Collect only task reviews." },
 	});
 	const { tool } = await setup(config);
-	expect(tool.description).toContain(config.kanban_add_link_tool_instructions);
-	expect(tool.description).not.toContain(
-		Config({}).kanban_add_link_tool_instructions,
-	);
+	expect(tool.description).toContain(config.linkTool.instructions);
+	expect(tool.description).not.toContain(Config({}).linkTool.instructions);
 });
 
 test("disabled link tool leaves commands and projections registered", async () => {
@@ -208,7 +208,7 @@ test("disabled link tool leaves commands and projections registered", async () =
 	ctx.provide("tools", { register: tools });
 	ctx.provide("commands", { register: commands });
 	ctx.provide("sessionProjections", { register: projections });
-	await apply(ctx, Config({ kanban_add_link_tool_enabled: false }));
+	await apply(ctx, Config({ linkTool: { enabled: false } }));
 	expect(tools).not.toHaveBeenCalled();
 	expect(commands).toHaveBeenCalledOnce();
 	expect(projections).toHaveBeenCalledOnce();

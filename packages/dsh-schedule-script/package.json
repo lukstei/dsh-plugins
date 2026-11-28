@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-schedule-script",
-	"version": "0.2.2-rc.5.12",
+	"version": "0.2.2-rc.5.13",
 	"description": "Background script executor and prompt loop for DSH",
 	"type": "module",
 	"main": "./dist/index.js",

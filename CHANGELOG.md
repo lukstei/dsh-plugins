@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.2-rc.5.13 - 2026-11-28
+
+- **@lukstei/dsh-client-kanban**
+  - Breaking: the link tool settings are nested under `linkTool`. Replace `kanban_add_link_tool_enabled` with `linkTool.enabled` and `kanban_add_link_tool_instructions` with `linkTool.instructions` in your profile's `cordis.patch.yml`.
+- **General**
+  - The README adds a Philosophy section describing the plugins' design goals and how breaking changes are handled.
+
 ## v0.2.2-rc.5.12 - 2026-11-28
 
 - **@lukstei/dsh-client-pwa**

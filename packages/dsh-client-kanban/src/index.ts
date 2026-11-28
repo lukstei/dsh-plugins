@@ -18,23 +18,36 @@ export const name = "dsh-client-kanban";
 export const inject = ["commands", "sessionProjections", "tools"] as const;
 
 const defaultConfig = {
-	kanban_add_link_tool_enabled: true,
-	kanban_add_link_tool_instructions:
-		'Collect important links relevant to the session. Keep link labels concise and unambiguous. Give links directly related to the task negative priorities; give supporting context links zero or positive priorities. For context links, briefly explain their relevance in the label. Examples: "Task PR: jackwener/OpenCLI #32", "Task Ticket: EXAMPLE-2", "EXAMPLE-333: Acceptance criteria".',
+	linkTool: {
+		enabled: true,
+		instructions:
+			'Collect important links relevant to the session. Keep link labels concise and unambiguous. Give links directly related to the task negative priorities; give supporting context links zero or positive priorities. For context links, briefly explain their relevance in the label. Examples: "Task PR: lukstei/dsh-plugins #32", "Task Ticket: EXAMPLE-2", "EXAMPLE-333: Acceptance criteria".',
+	},
 };
 
 export interface Config {
-	kanban_add_link_tool_enabled?: boolean;
-	kanban_add_link_tool_instructions?: string;
+	linkTool?: {
+		enabled?: boolean;
+		instructions?: string;
+	};
 }
 
-export const Config: Schema<Config> = Schema.object({
-	kanban_add_link_tool_enabled: Schema.boolean()
-		.default(defaultConfig.kanban_add_link_tool_enabled)
-		.description("Whether kanban_add_link tool is enabled."),
-	kanban_add_link_tool_instructions: Schema.string()
-		.default(defaultConfig.kanban_add_link_tool_instructions)
-		.description("Instructions for kanban_add_link tool."),
+interface ResolvedConfig {
+	linkTool: {
+		enabled: boolean;
+		instructions: string;
+	};
+}
+
+export const Config: Schema<Config, ResolvedConfig> = Schema.object({
+	linkTool: Schema.object({
+		enabled: Schema.boolean()
+			.default(defaultConfig.linkTool.enabled)
+			.description("Whether kanban_add_link tool is enabled."),
+		instructions: Schema.string()
+			.default(defaultConfig.linkTool.instructions)
+			.description("Instructions for kanban_add_link tool."),
+	}).description("Configuration for the kanban_add_link tool."),
 });
 
 const kanbanRecordSchema = z.object({
@@ -64,7 +77,10 @@ export type KanbanState = z.infer<typeof kanbanStateSchema>;
  * - Outputs: void; collected links persist in the caller's command events.
  * - Throws / Errors: Missing services, invalid tool input, and failed command dispatch propagate.
  */
-export async function apply(ctx: Context, config: Config): Promise<void> {
+export async function apply(
+	ctx: Context,
+	config: ResolvedConfig,
+): Promise<void> {
 	ctx.plugin(KanbanSearch);
 
 	const kanbanHandle = await ctx.sessionProjections.register<
@@ -118,11 +134,11 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
 		},
 	});
 
-	if (!config.kanban_add_link_tool_enabled) return;
+	if (!config.linkTool.enabled) return;
 	ctx.tools.register(
 		defineTool({
 			name: "kanban_add_link",
-			description: `Collect a confirmed HTTP(S) URL or DSH session link (dsh://sessions/{session-id}) for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status. ${config.kanban_add_link_tool_instructions}`,
+			description: `Collect a confirmed HTTP(S) URL or DSH session link (dsh://sessions/{session-id}) for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status. ${config.linkTool.instructions}`,
 			parameters: {
 				label: {
 					type: "string",

@@ -23,6 +23,14 @@ DeepSeek Harness (DSH) is an open-source agent harness with a web client. The st
 
 Each plugin is its own npm package. Install the full starter set below, or add standalone utilities as you need them.
 
+## Philosophy
+
+- **Minimal model impact.** Most of these plugins make you faster by changing the harness UI and leave the agent's context alone. Where I can, I avoid adding tools, prompt text, or instructions for the model. Keeping my agent's context small and free of conflicting instructions is one of my top priorities. Each plugin README has a "Model Experience" section that describes the text or UI the plugin adds for the model, along with its token and cache cost.
+- **Unopinionated.** I built these plugins for my own setup, but I keep them generic so they don't assume a particular workload and fit your workflow too.
+- **Intuitive.** If a plugin's behavior, a UI element, or a piece of text confuses you, [open an issue](https://github.com/lukstei/dsh-plugins/issues).
+- **Built on DSH core.** I reuse or extend existing DSH features wherever I can. For example, `dsh-schedule-script` hooks into the native DSH scheduler and its UI and adds only the missing parts. When a DSH release fills a gap that one of my plugins covers, I plan to retire that plugin.
+- **Breaking changes.** DeepSeek Harness is still in alpha, so a plugin release may change the UI or the config format. I try to avoid that. I don't break persisted session state unless an upstream DSH change forces it. I list breaking changes in the [release notes](https://github.com/lukstei/dsh-plugins/releases).
+
 ## Starter setup
 
 You need DSH and Node 24.9 or newer. Plugin versions follow the DSH release they target, so `0.2.3-alpha.2.1` targets DSH `0.2.3-alpha.2`. Install matching versions and upgrade both together.
@@ -46,7 +54,13 @@ Each package ships a default `cordis.patch.yml`, so `dsh plugin add` mounts it w
 ```yaml
 - id: kanban
   config:
-    kanban_add_link_tool_instructions: 'Collect task tickets and pull requests. Use concise labels.'
+    linkTool:
+      enabled: true # default
+      instructions: >- # default
+        Collect important links relevant to the session. Keep link labels concise and unambiguous.
+        Give links directly related to the task negative priorities; give supporting context links zero or positive priorities.
+        For context links, briefly explain their relevance in the label.
+        Examples: "Task PR: lukstei/dsh-plugins #32", "Task Ticket: EXAMPLE-2", "EXAMPLE-333: Acceptance criteria".
 
 - id: session-handoff
   config:

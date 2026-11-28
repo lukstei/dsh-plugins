@@ -23,16 +23,17 @@ A Kanban board for DSH sessions with four lanes: To Do, Active, Review, Done. It
     - id: kanban
       name: '@lukstei/dsh-client-kanban'
       config:
-        kanban_add_link_tool_enabled: true
-        kanban_add_link_tool_instructions: 'Collect task tickets and pull requests. Use concise labels.'
+        linkTool:
+          enabled: true
+          instructions: 'Collect task tickets and pull requests. Use concise labels.'
 ```
 
 Host entry (`inject`: `commands`, `sessionProjections`, `tools`) registers the `kanban` session projection, the `/kanban` command, the optional `kanban_add_link` tool and scoped search. The client entry (`platform: web`, `immediately: true`) needs `slots`, `uiWorkspace`, `sessions`, `workspaces`, `uiSession`, `layout`, `remote`.
 
 | Field | Default | Meaning |
 |---|---|---|
-| `kanban_add_link_tool_enabled` | `true` | Register `kanban_add_link`. `false` stops advertising it; existing links stay visible |
-| `kanban_add_link_tool_instructions` | See [Model Experience](#model-experience) | Guidance appended to the tool description |
+| `linkTool.enabled` | `true` | Register `kanban_add_link`. `false` stops advertising it; existing links stay visible |
+| `linkTool.instructions` | See [Model Experience](#model-experience) | Guidance appended to the tool description |
 
 ### Plugin dependencies
 
@@ -152,7 +153,7 @@ Tests: [tests/](tests/). Stories: `pnpm run ladle`.
 
 #### What the model sees
 
-Tool description: "Collect a confirmed HTTP(S) URL or DSH session link (dsh://sessions/{session-id}) for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status." followed by `kanban_add_link_tool_instructions`. The default instructions ask for important task-related links, concise unambiguous labels, negative priority for task links, zero or positive for context links, with examples. Parameters: `label` (required), `url` (required), `priority` (number, default 0). Result text: `Saved session link: <label> (<url>)`.
+Tool description: "Collect a confirmed HTTP(S) URL or DSH session link (dsh://sessions/{session-id}) for the current session. Reusing a URL updates its label and priority without duplicating it. Does not change Kanban status." followed by `linkTool.instructions`. The default instructions ask for important task-related links, concise unambiguous labels, negative priority for task links, zero or positive for context links, with examples. Parameters: `label` (required), `url` (required), `priority` (number, default 0). Result text: `Saved session link: <label> (<url>)`.
 
 The tool is offered only in sessions that are initialized in Kanban and not deleted.
 
