@@ -18,19 +18,17 @@ Routes Cordis logger output to stdout and/or log files, with per-logger severity
 <a id="use-this-package"></a>
 ## Use this package
 
-The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts one `stdout` output with `default: 2` (INFO). Mount with file output:
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-log`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts `id: file-log` with one `stdout` output (`default: 2`, INFO). To add file output or change levels, override `file-log` in your profile `cordis.patch.yml`:
 
 ```yaml
-- insert:
-    - id: file-log
-      name: '@lukstei/dsh-log'
-      config:
-        outputs:
-          - target: stdout
-            levels: { default: 2, jev-audit: -1 }
-          - target: file
-            filePath: ~/.dsh/cache/approvals.log
-            levels: { default: -1, jev-audit: 2 }
+- id: file-log
+  config:
+    outputs:
+      - target: stdout
+        levels: { default: 2, jev-audit: -1 }
+      - target: file
+        filePath: ~/.dsh/cache/approvals.log
+        levels: { default: -1, jev-audit: 2 }
 ```
 
 | Field | Default | Meaning |

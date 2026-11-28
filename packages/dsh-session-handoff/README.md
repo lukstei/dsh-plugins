@@ -18,27 +18,13 @@ Adds a `/handoff` command that turns a session log into a short resume brief. `/
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount through the bundle patch ([`cordis.patch.yml`](cordis.patch.yml)) and add the package to the profile:
+Install into a profile and restart the harness:
 
-```yaml
-# ~/.dsh/profiles/desktop/cordis.patch.yml
-- insert:
-    - id: session-handoff
-      name: '@lukstei/dsh-session-handoff'
-      config: {}
+```sh
+dsh plugin --profile <profile> add @lukstei/dsh-session-handoff
 ```
 
-```json
-// ~/.dsh/profiles/desktop/package.json
-{
-  "dsh": { "profile": { "bundles": ["@lukstei/dsh-session-handoff"] } },
-  "dependencies": {
-    "@lukstei/dsh-session-handoff": "^0.1.0"
-  }
-}
-```
-
-Then `pnpm install` in the profile directory and restart the harness. No config fields.
+The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts `id: session-handoff` with default thresholds (see [Configuration](#configuration) to override them in your profile `cordis.patch.yml`).
 
 Required Host services (`inject`): `commands`, `llm`, `sessionQuery`, `workingDirectory`, `sessionController`, `sessionTitle`, `workspaceRegistry`. Workspace dependency: [`@lukstei/dsh-scratch-dir`](../dsh-scratch-dir/README.md) (`scratchDirectory()`).
 
@@ -197,12 +183,13 @@ Appended message only; the prompt prefix is untouched. In a launched session thi
 The gauge ring appears when the context reaches a size bar. Bars are in tokens and differ for a warm and a cold prompt cache. Set them for every model (`defaults`), per provider id (`providers`) or per `provider/model` (`models`); the most specific entry wins, field by field.
 
 ```yaml
-config:
-  defaults: { warmSoft: 100000, warmStrong: 150000, coldSoft: 70000, coldStrong: 100000, cacheTtlMs: 300000 }
-  providers:
-    anthropic: { cacheTtlMs: 300000 }
-  models:
-    deepseek/deepseek-chat: { warmSoft: 60000, warmStrong: 90000 }
+- id: session-handoff
+  config:
+    defaults: { warmSoft: 100000, warmStrong: 150000, coldSoft: 70000, coldStrong: 100000, cacheTtlMs: 300000 }
+    providers:
+      anthropic: { cacheTtlMs: 300000 }
+    models:
+      deepseek/deepseek-chat: { warmSoft: 60000, warmStrong: 90000 }
 ```
 
 Unset fields use the values above. A model's context window still caps the bars at 60% and 80%.

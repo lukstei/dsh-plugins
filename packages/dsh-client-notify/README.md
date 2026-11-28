@@ -18,6 +18,8 @@ Alerts you when an agent stops or needs input. It shows a desktop notification, 
 <a id="use-this-package"></a>
 ## Use this package
 
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-client-notify`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
+
 ```yaml
 - insert:
     - id: client-notify

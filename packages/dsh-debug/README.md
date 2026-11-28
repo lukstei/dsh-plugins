@@ -18,7 +18,7 @@ Adds two slash commands that copy the current session's transcript or ID to the 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount through the bundle patch ([`cordis.patch.yml`](cordis.patch.yml)):
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-debug`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
 
 ```yaml
 - insert:

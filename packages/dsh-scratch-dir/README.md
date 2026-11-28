@@ -18,7 +18,7 @@ Creates a per-session scratch directory at `.agents/scratch/<sessionId>` in the 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount through the bundle patch ([`cordis.patch.yml`](cordis.patch.yml)):
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-scratch-dir`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
 
 ```yaml
 - insert:

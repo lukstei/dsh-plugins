@@ -18,6 +18,8 @@ Replaces the single-session chat view with side-by-side session panes. Each pane
 <a id="use-this-package"></a>
 ## Use this package
 
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-client-split-view`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
+
 ```yaml
 - insert:
     - id: split-view

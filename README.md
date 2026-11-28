@@ -33,7 +33,11 @@ Each plugin is its own npm package. Install the full starter set below, or add s
 
 ## Starter setup
 
-You need DSH and Node 24.9 or newer. Plugin versions follow the DSH release they target, so `0.2.3-alpha.2.1` targets DSH `0.2.3-alpha.2`. Install matching versions and upgrade both together.
+You need DSH and Node 24.9 or newer.
+
+Plugin versions follow `<dsh-version>.<n>`, where `<dsh-version>` is the DSH release they target and `<n>` counts plugin releases for that target (for example, `0.2.2-rc.5.1` targets DSH `0.2.2-rc.5`). You can update `<n>` on the same DSH version, and you should upgrade DSH and the plugins together when moving to a new DSH release.
+
+I do not support mixing plugin and harness versions across DSH releases, though most plugins still work across nearby `0.2.x` builds. DSH changes plugin APIs between releases, so a newer plugin can fail on an older harness and an older plugin can break on a newer one. These packages declare `*` peer ranges and omit `engines.dsh`, so `dsh plugin add` does not block a mismatch at install time. Pin a matching release with `@lukstei/<package>@<dsh-version>.<n>` if you hit a conflict or your DSH install is behind `latest`.
 
 **1. Install the Kanban workspace suite** into your profile (`web` or `desktop`):
 
@@ -64,8 +68,7 @@ Each package ships a default `cordis.patch.yml`, so `dsh plugin add` mounts it w
 
 - id: session-handoff
   config:
-    limits:
-      defaults: { warmSoft: 100000, warmStrong: 150000 }
+    defaults: { warmSoft: 100000, warmStrong: 150000 }
 ```
 
 To remove a plugin, run `dsh plugin --profile <web|desktop> remove <package>`. The [DSH docs](https://deepseek-harness.github.io/deepseek-harness/) cover profiles and plugins in depth.
@@ -114,7 +117,7 @@ A ring next to the send button changes color as prompt context grows; thresholds
 
 ## Standalone utilities
 
-These packages work on their own without the Kanban workspace suite. Install any of them with `dsh plugin --profile <profile> add <package>`.
+These packages work on their own without the Kanban workspace suite. Install any of them with `dsh plugin --profile <profile> add <package>`. Each package ships a default `cordis.patch.yml`, so `dsh plugin add` mounts it with working defaults; only add entries to your profile `cordis.patch.yml` when overriding config.
 
 ### YAML workflows
 
@@ -132,15 +135,6 @@ steps:
   - prompt: 'Deploy.'
 ```
 
-Sample mount (`cordis.patch.yml`, zero config required):
-
-```yaml
-- insert:
-    - id: dsh-workflow-runner
-      name: '@lukstei/dsh-yaml-workflow'
-      config: {}
-```
-
 ![Workflow card paused at a gate with Resume and Discard buttons](assets/screenshots/workflow.png)
 
 ### Scheduled background scripts
@@ -149,15 +143,6 @@ Sample mount (`cordis.patch.yml`, zero config required):
 
 Ask an agent to poll a condition on an interval (for example, checking CI every 5 minutes and reporting failures). It writes a TypeScript check that runs in the background without spending tokens; the agent wakes only when the script returns a prompt. Scripts run with your user permissions, so review one before confirming it.
 
-Sample mount (`cordis.patch.yml`, zero config required):
-
-```yaml
-- insert:
-    - id: schedule-script
-      name: '@lukstei/dsh-schedule-script'
-      config: {}
-```
-
 ![Scheduled task waking the agent after a failed CI build, with the schedule status popover](assets/screenshots/schedule.png)
 
 ### Per-session scratch folders
@@ -165,15 +150,6 @@ Sample mount (`cordis.patch.yml`, zero config required):
 **Plugin:** [`@lukstei/dsh-scratch-dir`](packages/dsh-scratch-dir/README.md)
 
 Creates `.agents/scratch/<session-id>` in the session working directory with a local `.gitignore` and adds its path to the agent system prompt. Agents write plans, notes, and throwaway scripts there instead of polluting your repository root.
-
-Sample mount (`cordis.patch.yml`, zero config required):
-
-```yaml
-- insert:
-    - id: scratch-dir
-      name: '@lukstei/dsh-scratch-dir'
-      config: {}
-```
 
 ### File and stdout logger
 
@@ -198,15 +174,6 @@ Routes Cordis logger output to stdout or log files with per-logger level thresho
 
 Adds `/copy-transcript` (JSON Lines of all snapshot events) and `/copy-session-id` to copy debugging context to your clipboard. The default writer uses `pbcopy` on macOS; programmatic setups can pass a custom `copy` handler.
 
-Sample mount (`cordis.patch.yml`, zero config required):
-
-```yaml
-- insert:
-    - id: debug
-      name: '@lukstei/dsh-debug'
-      config: {}
-```
-
 ### PWA and optional proxy login
 
 **Plugin:** [`@lukstei/dsh-client-pwa`](packages/dsh-client-pwa/README.md)
@@ -215,12 +182,7 @@ Serves a web app manifest and icons so you can install DSH as a standalone app, 
 
 **Example 1: Localhost PWA** (installable app on `localhost`, standard DSH token login):
 
-```yaml
-- insert:
-    - id: client-pwa
-      name: '@lukstei/dsh-client-pwa'
-      config: {}
-```
+No `cordis.patch.yml` entry is needed after `dsh plugin --profile web add @lukstei/dsh-client-pwa`—the shipped patch already enables the manifest and icons.
 
 **Example 2: Tailscale Serve (my own setup, optional)**
 
@@ -252,20 +214,20 @@ Tailscale terminates HTTPS at `https://dsh.<tailnet>.ts.net` and injects `tailsc
 
 ## Plugin catalog
 
-| Plugin | Use it when you want to… | Dependencies |
-| --- | --- | --- |
-| [`@lukstei/dsh-client-kanban`](packages/dsh-client-kanban/README.md) | track many sessions on a live board | • **Optional:** `dsh-client-split-view` (opens panes + pane status dots)<br>• **Optional:** `dsh-client-favicon` (review ticks in tab ring)<br>• **Optional:** `dsh-client-notify` (review count in app badge) |
-| [`@lukstei/dsh-client-split-view`](packages/dsh-client-split-view/README.md) | view sessions, files, and reviews side by side | |
-| [`@lukstei/dsh-client-review-git`](packages/dsh-client-review-git/README.md) | review git changes next to the chat | • **Required:** `git` on host<br>• **Optional:** `dsh-client-split-view` (pane-header review button + overlay) |
-| [`@lukstei/dsh-client-notify`](packages/dsh-client-notify/README.md) | get desktop alerts and a chime when an agent stops or asks | • **Optional:** `dsh-client-kanban` (includes review count in badge)<br>• **Optional:** `dsh-client-pwa` (installable app for dock/home-screen badge) |
-| [`@lukstei/dsh-client-favicon`](packages/dsh-client-favicon/README.md) | read agent status from a pinned tab | • **Optional:** `dsh-client-kanban` (orange review ticks) |
-| [`@lukstei/dsh-session-handoff`](packages/dsh-session-handoff/README.md) | continue a long session in a fresh one | • **Optional:** `dsh-client-split-view` (handoff ring, model picker UI, side-pane launch; `/handoff` works on host without it) |
-| [`@lukstei/dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md) | rerun a multi-step routine from a YAML file | |
-| [`@lukstei/dsh-schedule-script`](packages/dsh-schedule-script/README.md) | poll something in the background without spending tokens | |
-| [`@lukstei/dsh-scratch-dir`](packages/dsh-scratch-dir/README.md) | give each session a git-ignored folder for notes and scripts | |
-| [`@lukstei/dsh-log`](packages/dsh-log/README.md) | write DSH logs to stdout or files per logger | |
-| [`@lukstei/dsh-debug`](packages/dsh-debug/README.md) | copy a session transcript or id for a bug report | • **Required:** macOS (`pbcopy`) by default |
-| [`@lukstei/dsh-client-pwa`](packages/dsh-client-pwa/README.md) | install DSH as a PWA or sign in via a reverse proxy | • **Required (proxy login only):** authenticating HTTPS reverse proxy |
+| Plugin | Dependencies |
+| --- | --- |
+| [`@lukstei/dsh-client-kanban`](packages/dsh-client-kanban/README.md)<br>Track many sessions on a live board | • **Optional:** `dsh-client-split-view` (opens panes + pane status dots)<br>• **Optional:** `dsh-client-favicon` (review ticks in tab ring)<br>• **Optional:** `dsh-client-notify` (review count in app badge) |
+| [`@lukstei/dsh-client-split-view`](packages/dsh-client-split-view/README.md)<br>View sessions, files, and reviews side by side | |
+| [`@lukstei/dsh-client-review-git`](packages/dsh-client-review-git/README.md)<br>Review git changes next to the chat | • **Required:** `git` on host<br>• **Optional:** `dsh-client-split-view` (pane-header review button + overlay) |
+| [`@lukstei/dsh-client-notify`](packages/dsh-client-notify/README.md)<br>Get desktop alerts and a chime when an agent stops or asks | • **Optional:** `dsh-client-kanban` (includes review count in badge)<br>• **Optional:** `dsh-client-pwa` (installable app for dock/home-screen badge) |
+| [`@lukstei/dsh-client-favicon`](packages/dsh-client-favicon/README.md)<br>Read agent status from a pinned tab | • **Optional:** `dsh-client-kanban` (orange review ticks) |
+| [`@lukstei/dsh-session-handoff`](packages/dsh-session-handoff/README.md)<br>Continue a long session in a fresh one | • **Optional:** `dsh-client-split-view` (handoff ring, model picker UI, side-pane launch; `/handoff` works on host without it) |
+| [`@lukstei/dsh-yaml-workflow`](packages/dsh-yaml-workflow/README.md)<br>Rerun a multi-step routine from a YAML file | |
+| [`@lukstei/dsh-schedule-script`](packages/dsh-schedule-script/README.md)<br>Poll something in the background without spending tokens | |
+| [`@lukstei/dsh-scratch-dir`](packages/dsh-scratch-dir/README.md)<br>Give each session a git-ignored folder for notes and scripts | |
+| [`@lukstei/dsh-log`](packages/dsh-log/README.md)<br>Write DSH logs to stdout or files per logger | |
+| [`@lukstei/dsh-debug`](packages/dsh-debug/README.md)<br>Copy a session transcript or id for a bug report | • **Required:** macOS (`pbcopy`) by default |
+| [`@lukstei/dsh-client-pwa`](packages/dsh-client-pwa/README.md)<br>Install DSH as a PWA or sign in via a reverse proxy | • **Required (proxy login only):** authenticating HTTPS reverse proxy |
 
 Each package README covers its config fields and service contracts.
 

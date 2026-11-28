@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.2-rc.5.14 - 2026-11-28
+
+- **General**
+  - The README is reworked around installing with `dsh plugin add`. Each package ships a default `cordis.patch.yml`, so installing mounts it with working defaults. Add entries to your profile's `cordis.patch.yml` only to override config. The per-package install sections now show the same `dsh plugin add` step.
+  - The README explains plugin versioning. Plugin versions follow `<dsh-version>.<n>`, so `0.2.2-rc.5.1` targets DSH `0.2.2-rc.5`. Upgrade DSH and the plugins together across DSH releases. Mixing versions across releases is not supported.
+  - The PWA example for localhost no longer needs a `cordis.patch.yml` entry after install.
+
 ## v0.2.2-rc.5.13 - 2026-11-28
 
 - **@lukstei/dsh-client-kanban**

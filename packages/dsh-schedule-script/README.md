@@ -18,12 +18,13 @@ Runs recurring TypeScript scripts in the background without calling the model. A
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it in the agent's Cordis composition (also shipped as `cordis.patch.yml`):
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-schedule-script`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
 
 ```yaml
-- id: schedule-script
-  name: '@lukstei/dsh-schedule-script'
-  config: {}
+- insert:
+    - id: schedule-script
+      name: '@lukstei/dsh-schedule-script'
+      config: {}
 ```
 
 The plugin has no config fields. Required services (`inject`): `commands`, `sessionProjections`, `tools`, `skills`, `schedule`. The web client bundle (`./client`) needs `slots`, `remote`, `remote.schedule`.

@@ -18,7 +18,7 @@ Draws the browser tab favicon as an eight-tick status ring. Green ticks show run
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it in the bundle patch ([cordis.patch.yml](cordis.patch.yml)):
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-client-favicon`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
 
 ```yaml
 - insert:

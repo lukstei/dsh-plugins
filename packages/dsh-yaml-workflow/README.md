@@ -18,12 +18,13 @@ Runs multi-step prompt workflows defined in YAML files. Users start them with `/
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount in the agent's Cordis composition (also shipped as `cordis.patch.yml`):
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-yaml-workflow`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
 
 ```yaml
-- id: dsh-workflow-runner
-  name: '@lukstei/dsh-yaml-workflow'
-  config: {}
+- insert:
+    - id: dsh-workflow-runner
+      name: '@lukstei/dsh-yaml-workflow'
+      config: {}
 ```
 
 No config fields. Required services (`inject`): `commands`, `sessionProjections`, `subagents`, `tools`, `skills`. The web client bundle (`./client`) renders the workflow card, step, print, error, and list nodes in the chat.

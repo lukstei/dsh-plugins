@@ -18,14 +18,14 @@ A Kanban board for DSH sessions with four lanes: To Do, Active, Review, Done. It
 <a id="use-this-package"></a>
 ## Use this package
 
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-client-kanban`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts `id: kanban` with defaults; to customize `linkTool`, override `kanban` in your profile `cordis.patch.yml`:
+
 ```yaml
-- insert:
-    - id: kanban
-      name: '@lukstei/dsh-client-kanban'
-      config:
-        linkTool:
-          enabled: true
-          instructions: 'Collect task tickets and pull requests. Use concise labels.'
+- id: kanban
+  config:
+    linkTool:
+      enabled: true
+      instructions: 'Collect task tickets and pull requests. Use concise labels.'
 ```
 
 Host entry (`inject`: `commands`, `sessionProjections`, `tools`) registers the `kanban` session projection, the `/kanban` command, the optional `kanban_add_link` tool and scoped search. The client entry (`platform: web`, `immediately: true`) needs `slots`, `uiWorkspace`, `sessions`, `workspaces`, `uiSession`, `layout`, `remote`.

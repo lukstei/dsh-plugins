@@ -18,6 +18,8 @@ Read-only Git review for DSH sessions. A Workspace Review sidebar tab and a spli
 <a id="use-this-package"></a>
 ## Use this package
 
+Install with `dsh plugin --profile <profile> add @lukstei/dsh-client-review-git`. The shipped [`cordis.patch.yml`](cordis.patch.yml) mounts:
+
 ```yaml
 - insert:
     - id: dsh-client-git-diff
