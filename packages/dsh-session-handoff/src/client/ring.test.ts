@@ -4,6 +4,7 @@ import type { SessionId } from "@deepseek-ai/dsh-session/types";
 import type { LimitsConfig } from "../limits.ts";
 
 const states: unknown[] = [];
+const effects: (() => unknown)[] = [];
 let cursor = 0;
 
 interface VNode {
@@ -27,7 +28,9 @@ mock.module("react", {
 			};
 			return [states[idx] as T, setState];
 		},
-		useEffect: (): void => {},
+		useEffect: (fn: () => unknown): void => {
+			effects.push(fn);
+		},
 		useSyncExternalStore: <T>(
 			_subscribe: (listener: () => void) => () => void,
 			getSnapshot: () => T,
@@ -54,6 +57,7 @@ const SESSION_B = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee" as SessionId;
 
 function resetHooks(): void {
 	states.length = 0;
+	effects.length = 0;
 	cursor = 0;
 }
 
@@ -63,6 +67,7 @@ function renderRing(opts: {
 	contextWindow?: number;
 	running: boolean;
 	onHandoff?: (id: SessionId) => Promise<void>;
+	loadRoute?: () => Promise<{ provider: string; model: string } | undefined>;
 	config?: LimitsConfig;
 }): VNode | null {
 	cursor = 0;
@@ -75,7 +80,7 @@ function renderRing(opts: {
 		useSession: ((selector: (session: { running: boolean }) => unknown) =>
 			selector({ running: opts.running })) as never,
 		onHandoff: opts.onHandoff ?? (async () => {}),
-		loadRoute: async () => undefined,
+		loadRoute: opts.loadRoute ?? (async () => undefined),
 		config: opts.config ?? {},
 	});
 	return result as unknown as VNode | null;
@@ -220,4 +225,33 @@ test("HandoffRing honours configured limits", () => {
 		config: { defaults: { warmSoft: 40_000, warmStrong: 60_000 } },
 	});
 	assert.ok(node !== null);
+});
+
+test("HandoffRing absorbs a rejected loadRoute without an unhandled rejection", async () => {
+	resetHooks();
+	let unhandled = false;
+	const onUnhandled = () => {
+		unhandled = true;
+	};
+	process.on("unhandledRejection", onUnhandled);
+	try {
+		const node = renderRing({
+			tokens: 120_000,
+			running: false,
+			loadRoute: async () => {
+				throw new Error("subagent unavailable");
+			},
+		});
+		assert.ok(node !== null);
+		const cleanups: (() => void)[] = [];
+		for (const fn of effects) {
+			const cleanup = fn();
+			if (typeof cleanup === "function") cleanups.push(cleanup as () => void);
+		}
+		await new Promise((resolve) => setImmediate(resolve));
+		for (const cleanup of cleanups) cleanup();
+		assert.equal(unhandled, false);
+	} finally {
+		process.off("unhandledRejection", onUnhandled);
+	}
 });

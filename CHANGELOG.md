@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.2-rc.5.15 - 2026-11-28
+
+- **@lukstei/dsh-session-handoff**
+  - The plugin no longer requires the web server service, so it loads in shells that do not provide one.
+  - The handoff ring falls back to the built-in limits when its configuration is not injected, such as after a hot reload, instead of failing.
+  - The ring keeps the built-in limits when its model lookup fails, for example for subagent sessions.
+- **@lukstei/dsh-yaml-workflow**
+  - Ships three example workflows in `examples/`: `review` (unified code review with an optional gate and either fixes or proposed PR comments), `socratic` (a context-free review that asks up to six questions) and `write` (technical prose drafting with substance and style audits).
+- **General**
+  - The README lists the example workflows, the command for each and what it does.
+
 ## v0.2.2-rc.5.14 - 2026-11-28
 
 - **General**

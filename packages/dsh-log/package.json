@@ -1,6 +1,6 @@
 {
 	"name": "@lukstei/dsh-log",
-	"version": "0.2.2-rc.5.14",
+	"version": "0.2.2-rc.5.15",
 	"description": "File logging exporter for DSH",
 	"type": "module",
 	"main": "./dist/index.js",

@@ -38,7 +38,6 @@ export const inject = [
 	"sessionTitle",
 	"workspaceRegistry",
 	"llm",
-	"webServer",
 ];
 
 const HANDOFF_FILE = "HANDOFF.md";

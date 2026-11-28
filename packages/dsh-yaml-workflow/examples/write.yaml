@@ -1,0 +1,137 @@
+name: "Write Technical Prose"
+description: "Separates grounded drafting from adversarial substance and slop/cadence scans, full-context triage, and surgical editorial rewrite."
+
+args:
+  instructions:
+    type: string
+    description: "Topic/thesis or existing draft to edit, optional target format (article vs. comment), parent comment being replied to, and any notes, snippets, commits, or file paths"
+  model:
+    type: string
+    default: "inherit"
+    required: false
+    description: "Subagent model for audit and slop scans"
+
+steps:
+  - name: "Define Brief & Sources"
+    prompt: |
+      Produce a concise writing brief without filler:
+      - Language: Target output language (match the language of the user's draft/notes unless explicitly instructed otherwise).
+      - Format: Infer 'comment' (PR review, issue, HN/Reddit reply) or 'article' (engineering blog, RFC). Default to 'article' if ambiguous.
+      - Path:
+        - 'B' ONLY if the user provides their own existing draft already in the target Format to polish/de-slop.
+        - 'A' if drafting from notes/topic, replying to an external comment, OR converting/compressing long notes/articles into a short comment.
+      - Status: If Path == A and instructions lack any technical claim, mechanism, or source, write "Status: STOP" and list 2-3 specific technical questions needed. Otherwise "Status: READY".
+      - Input Separation & Grounding:
+        - Distinguish (1) external parent comments/threads being replied to (background context only—never parrot or summarize back), (2) user notes/drafts, and (3) referenced local files, diffs, commits, or snippets.
+        - Inspect any referenced local files or run read-only `git show`/`git diff` commands now. Embed exact paths/line ranges plus all relevant verbatim snippets (<=60 lines) in this brief so downstream subagents have full source truth without needing disk/shell access.
+        - List concrete anchors (metrics, components, failure modes) and any explicit additions requested in the user's prompt framing. Mark if no benchmarks exist—never invent numbers.
+      - Voice & Audience: Senior engineers (don't define basic terms). For Path B, note the author's pronouns, bluntness, and cadence to preserve.
+      - Format Rules:
+        - comment: Plain prose only, 1-2 short paragraphs max (2-6 sentences unless multi-point review is requested). No title, headers, lists, bold lead-ins, or closing summary. Start with the technical delta or edge case in sentence 1.
+        - article: Start with a plain `# Title` (no colon-split clickbait). Open paragraph 1 with a concrete symptom, bug, or constraint. Selective H2/H3 headers and code blocks allowed; narrative prose over lists. Stop immediately after the last technical point.
+
+      User instructions:
+      {{args.instructions}}
+    outputs:
+      writing_brief:
+        type: string
+        description: "Language, format, path, status, separated sources, grounded anchors, and format rules"
+
+  - name: "Substance Draft"
+    prompt: |
+      <writing-brief>
+      {{outputs.writing_brief}}
+      </writing-brief>
+
+      User instructions:
+      {{args.instructions}}
+
+      - If `Status: STOP`: Output ONLY the clarifying questions from `<writing-brief>`.
+      - If `Path: B`: Extract and output ONLY the user's existing draft text verbatim (strip outer prompt framing and any quoted external parent comment; do not paraphrase the draft yet).
+      - If `Path: A`: Write a complete, grounded draft in the brief's target Language obeying `<writing-brief>`. Prioritize causal mechanisms and specific bottlenecks (lock contention, tail latency, memory pressure) over style rules. Do not apply negative word bans yet.
+    outputs:
+      raw_draft:
+        type: string
+        description: "Grounded draft (Path A), extracted verbatim input (Path B), or clarifying questions (STOP)"
+
+  - name: "Substance Audit"
+    subagent: "{{args.model}}"
+    output: substance_findings
+    prompt: |
+      If `<writing-brief>` has `Status: STOP`, output "Skipped." and stop.
+      Read-only Principal Engineer audit of `<draft>` against `<writing-brief>` (use embedded source snippets in `<writing-brief>`, or inspect listed file paths read-only if file tools are available). Do not rewrite or modify files.
+
+      <writing-brief>{{outputs.writing_brief}}</writing-brief>
+      <draft>{{outputs.raw_draft}}</draft>
+
+      Flag only:
+      1. Missing Requested Points (any explicit angle, addition, or constraint in `<writing-brief>` omitted from `<draft>`).
+      2. RLHF Hedging / False Balance ("it depends" instead of naming exact failure thresholds).
+      3. Unanchored Abstractions ("complex/performant/fragile" without naming the mechanism or resource constraint).
+      4. Hallucinated Specifics (metrics or incidents not in `<writing-brief>` or source files).
+      5. Textbook Padding & Reply Parroting (explaining basics senior engineers know, or summarizing back the parent comment being replied to).
+      6. Throat-Clearing / Wrap-up Fluff (zero-information openers or summary endings).
+
+      Output numbered findings `C1, C2...`: title, severity (`major | minor`), exact 1-2 sentence quote (or section reference for macro flow), why it weakens credibility, and fix direction.
+
+  - name: "Slop & Cadence Scan"
+    subagent: "{{args.model}}"
+    output: slop_findings
+    prompt: |
+      If `<writing-brief>` has `Status: STOP`, output "Skipped." and stop.
+      Read-only scan of `<draft>` for AI writing patterns in technical prose. Ignore fenced code blocks, inline backticks, identifiers, and verbatim external quotes unless noted.
+
+      <writing-brief>{{outputs.writing_brief}}</writing-brief>
+      <draft>{{outputs.raw_draft}}</draft>
+
+      Rules:
+      - **TS1 Binary contrasts & negative listings:** Cut negation setups ("Not X, it's Y", "isn't X, it's Y") and multi-step negative runways ("It wasn't X. It wasn't Y. It was Z."). State the real mechanism directly. *Exception:* genuine technical disambiguation between two confused mechanisms.
+      - **TS2 Throat-clearing:** Cut announcement openers ("Here's the thing", "It turns out", "It's worth noting", "In this section") and colon-split clickbait titles.
+      - **TS3 Participial tail-padding:** Cut trailing `-ing` aspiration clauses (", ensuring seamless scalability", ", paving the way for"). *Exception:* concrete causal steps (", preventing orphaned locks").
+      - **TS4 Rhetorical theatrics & vague declaratives:** Cut Socratic questions ("What if...?"), staccato fragments ("Fast. Simple. Done."), pull-quote aphorisms, and empty significance claims ("The implications are significant", "The reasons are structural"—name the specific consequence instead).
+      - **TS5 RLHF buzzwords:** Replace abstract corporate/AI words in prose (*delve, tapestry, pivotal, foster, crucial, paramount, testament, landscape, leverage, streamline, robust, seamless, unpack, navigate, game-changer*) with concrete engineering terms.
+      - **TS6 Filler adverbs & lazy extremes:** Strip non-semantic adverbs (*really, just, literally, genuinely, simply, actually, fundamentally, inherently, inevitably, importantly*) and unverified sweeping quantifiers (*every, always, never, everyone, nobody*). *Exception:* precise technical adverbs (*atomically, monotonically, eventually, idempotently, deterministically*) or true protocol/mathematical invariants.
+      - **TS7 False agency & lecturer distance:** Use human actors or direct `"you"` for human decisions and actions ("You have to configure X", not "The architecture demands" or "Developers often forget"). *Exception:* system components executing runtime behavior ("The kernel drops the packet").
+      - **TS8 Punctuation & cadence:** Zero em-dashes (`—`) in prose; split into separate sentences with periods rather than substituting semicolons or parenthetical clutter. Break up 3+ consecutive sentences of matching length or identical openers.
+      - **TS9 Comment leak:** When `Format: comment`, ban titles, headers, lists, bold lead-ins, summary endings, and multi-paragraph bloat.
+      - **TS10 Article list bloat:** When `Format: article`, flag symmetrical bold-lead-in bullet triplets or multi-section bullet dumps where narrative prose should carry the explanation. *Exception:* non-sequential specs, CLI flags, or config matrices.
+
+      Output a 1-10 score table (Directness, Cadence Variance, Peer Trust, Technical Specificity, Information Density; total /50), followed by `S1, S2...` with rule ID, exact 1-2 sentence quote, and fix direction.
+
+  - name: "Editorial Triage"
+    prompt: |
+      If `<writing-brief>` has `Status: STOP`, output "None" and stop.
+
+      Triage `C<n>` and `S<n>` against `<writing-brief>` and `<raw-draft>`:
+      - Reject false positives where style edits would reduce technical precision, touch verbatim source quotes/identifiers, or alter the author's Path B voice without fixing a real defect.
+      - Merge overlapping `C<n>` and `S<n>` findings on the same passage into one unified edit (technical precision wins).
+      - If structural ordering is inverted (e.g., background buries the main point), emit `E0 (Macro)` and fold any sentence-level edits affecting those reordered paragraphs directly into `E0` so quote anchors never collide.
+
+      <writing-brief>{{outputs.writing_brief}}</writing-brief>
+      <raw-draft>{{outputs.raw_draft}}</raw-draft>
+      <substance-findings>{{outputs.substance_findings}}</substance-findings>
+      <slop-findings>{{outputs.slop_findings}}</slop-findings>
+
+      Output:
+      ## Score: <X>/50 (Target >= 42)
+      ## Accepted Edits
+      - **E0** (<IDs>, optional): [Macro] <section/paragraph reordering and integrated rewrite instruction>
+      - **E1** (<IDs>): "<exact 1-2 sentence quote>" -> <concrete edit instruction>
+      (Write "None" if no edits are needed.)
+      ## Rejected
+      - **X1** (<ID>): <one-line reason>
+    outputs:
+      accepted_edits:
+        type: string
+        description: "Accepted edits list or 'None'"
+
+  - name: "Final Rewrite"
+    prompt: |
+      <writing-brief>{{outputs.writing_brief}}</writing-brief>
+      <raw-draft>{{outputs.raw_draft}}</raw-draft>
+      <accepted-edits>{{outputs.accepted_edits}}</accepted-edits>
+
+      - If `Status: STOP` or `accepted_edits` has no `E<n>` items ("None"): output `<raw-draft>` verbatim.
+      - Otherwise, apply `E0` (if present) followed by every `E<n>` edit cleanly in the brief's target Language while preserving all grounded facts, code, and Path B authorial voice on untouched text. Never alter characters inside fenced code blocks or inline backticks.
+      - Final check: verify prose contains zero em-dashes (`—`), no semicolon/parenthetical crutches, no AI buzzwords (*delve, crucial, robust, seamless, leverage, landscape, streamline, foster, pivotal*), no throat-clearing openers, and no wrap-up summary sentence.
+      - Output ONLY the final prose (no meta-commentary or score).

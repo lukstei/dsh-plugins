@@ -70,9 +70,13 @@ export function HandoffRing({
 	useEffect(() => {
 		if (running) return;
 		let live = true;
-		void loadRoute(sessionId).then((current) => {
-			if (live) setRoute(current);
-		});
+		void loadRoute(sessionId)
+			.then((current) => {
+				if (live) setRoute(current);
+			})
+			.catch(() => {
+				// edge case: addressed subagent sessions or transient catalog errors keep built-in limits.
+			});
 		return () => {
 			live = false;
 		};

@@ -1,0 +1,215 @@
+name: "Socratic Review {{args.instructions}}"
+description: "A senior developer without full context reviews the changes by asking questions only. Default scope: everything changed in this session; instructions may name a folder/package, commit, range, or PR instead. The author (this agent) answers each question and decides whether anything needs to change. fix=true applies the needed changes; fix=false only reports."
+
+args:
+  wait:
+    type: bool
+    default: true
+    description: "Wait after triage"
+  model:
+    type: string
+    default: ":high"
+    required: false
+    description: "Subagent model"
+  instructions:
+    type: string
+    default: None
+    required: false
+    description: "Optional scope (a folder/package, commit, range, or PR; default: all changes made in this session) and/or focus areas"
+  fix:
+    type: bool
+    default: true
+    description: "Apply and verify the changes the triage decides are needed; false only reports answers and proposed changes without changing code"
+
+steps:
+  - name: "Define Scope"
+    prompt: |
+      Prepare a minimal brief that only tells a reviewer how to access the code. Do NOT include the user's goal, acceptance criteria, design rationale, or any explanation of the change; the reviewer must come to the code without that context.
+      - Repository path and the scope, determined from the user instructions below:
+        1. If they name a folder or package, use FOLDER mode: write "Mode: folder", give the folder or package path, and do NOT include any git command. The reviewer reads the code in that folder as it is now. Confirm the scope by listing the folder.
+        2. Else if they name a specific commit, commit range, or PR, use EXPLICIT mode: write "Mode: explicit" and give exactly one of:
+           - a single commit hash (`git show --no-ext-diff --unified=5 <commit>`)
+           - two commit hashes `<start>` and `<end>` (both inclusive, reviewed via `git diff --no-ext-diff --unified=5 <start>^ <end>`)
+           - the exact command for a remote diff (e.g. `gh` or `glab`) if the changes are in a PR.
+           Confirm the scope by running the command.
+        3. Else (including "None") use SESSION mode, the default: write "Mode: session". Scope is everything changed in this session. Include whichever of these apply:
+           - Commits made in this session: `git diff --no-ext-diff --unified=5 <first>^ <last>`, where <first> and <last> are the first and last commit hashes made in this session (a single commit: `git show --no-ext-diff --unified=5 <commit>`).
+           - Uncommitted changes: `git diff --no-ext-diff --unified=5 HEAD`.
+           - Untracked files: `git ls-files --others --exclude-standard` (the reviewer reads these files directly).
+           Confirm the scope by running each command. If nothing was changed in this session, say so and stop, so the user can pass a scope in the instructions.
+      Always include `--no-ext-diff --unified=5` in `git diff` / `git show` commands.
+
+      User instructions: {{args.instructions}}
+
+      Also write the focus: the instructions with every part that only defines the scope removed. Keep only extra areas to look at. Write "None" if nothing is left.
+    outputs:
+      scope_brief:
+        type: string
+        description: "Mode, repository path, and diff commands or folder path only"
+      focus:
+        type: string
+        description: "Instructions without the scope part, or 'None'"
+
+  - name: "Socratic Review"
+    subagent: "{{args.model}}"
+    output: questions
+    prompt: |
+      You are a senior engineer doing a quick review. You have no background on the task, so you only know what the code and its surroundings show you. Read the code first, then ask the author questions, the way a curious colleague would in a review.
+
+      Follow the scope brief:
+      - Mode session or explicit: run every provided command exactly (read untracked files directly). If a command fails, report the exact error. Read surrounding code and callers to understand the change, but ask only about things introduced or newly exposed by the change, not about existing debt in a changed file. Exception: if the operator focus is about structure, refactoring, or design, you may also ask about existing code inside the functions and files the change touches.
+      - Mode folder: there is no diff. Read the code in the given folder as it is now, plus callers and tests as needed. Everything in the folder is in scope, so ask about the code as it stands, not about what changed.
+      Do not modify code or write files.
+
+      <scope-brief>
+      {{outputs.scope_brief}}
+      </scope-brief>
+
+      Optional focus areas from the operator (extra areas to look at, not context about intent; may be "None"):
+      {{outputs.focus}}
+
+      <rules>
+      - Ask at most 6 questions. Fewer is fine. If nothing is worth asking, say so.
+      - Only ask questions. Never issue a directive, never state that something is wrong, and never assert that an option is better. You may name a concrete structural option inside a question, provided the question is genuinely open: point at the specific code, describe the option in one phrase, and ask whether it fits or what speaks against it (for example whether it needs the surrounding state, or what would break). Banned: rhetorical or leading forms ("why not X?", "shouldn't this be X?", "have you considered X?"), and prescribing how (names, signatures, code).
+      - You don't know the context, so ask instead of judging.
+      - Every question must include a "Why I'm asking" line (1-2 sentences) describing what you noticed and why it caught your attention.
+      - Anchor each question to a file and line (or line range). For repeated code, anchor to one location and name the others in the "Why I'm asking" line.
+      - Skip style, formatting, and anything a linter would catch.
+      - Prefer one strong question over several weak ones. Merge related observations into a single question.
+      - Only ask about things you can point to in the code. Do not speculate.
+      </rules>
+
+      <prioritization>
+      - Operator focus comes first. If focus areas are given (not "None"), at least half of your questions (rounded up) must be about them, even when other candidates would rank higher. A focus on structure or refactoring also allows questions about existing code in the functions the scope touches, not only about lines the change added.
+      - You will usually find more than 6 candidates. Choose the ones where a good answer would change the design or reveal a bug over ones where the answer would only clarify intent.
+      - Rank by that: potential bugs, data loss, and security first, then design questions (state shape, coupling, side effects), then clarity questions (naming, duplication, complexity).
+      - If the scope is small, ask fewer questions. Don't pad to reach 6.
+      - If several candidates share a root cause, ask one question about the root cause rather than one per symptom.
+      </prioritization>
+
+      <what-to-look-for>
+      Ask only if you actually see it in the code.
+
+      1. Redundant state: a stored value that looks derivable from other values already present. Ask what the stored version covers that the existing values don't.
+      2. Defensive code: optional types, null checks, try/catch, or fallbacks scattered through the code for situations that seem unreachable, or where the same assumption is re-checked in several places. Ask when that case can actually occur, and where it's established that the value is valid.
+      3. Loose typing: duck typing, structural checks, or "has property X" branching instead of a clear contract. Ask what guarantees the shape of the value at this point.
+      4. Edge cases: empty input, missing data, errors, ordering, concurrency, partial failure. Ask what happens in the case that looks unhandled.
+      5. Compatibility: support for old formats, deprecated paths, or legacy callers. Ask who or what still depends on it.
+      6. Complexity: long functions, deep nesting, many branches, or heavy indirection. Ask what part of the problem requires this much code, or whether a specific part could stand on its own.
+      7. Muddled state shape: one object where many fields are optional or only valid in certain combinations. Ask which combinations of fields are actually possible, and what stops the impossible ones.
+      8. Mixed concerns: one unit doing several unrelated jobs (e.g. fetching, deciding, formatting, and persisting together). Ask where the boundary of this unit's responsibility is, or whether a named part of it could live separately, and what it would need from the rest.
+      9. Decisions entangled with side effects: business rules interleaved with I/O, network, DB, file, time, randomness, logging, or UI calls, or side effects happening deep inside call chains rather than at the entry points. Ask whether the decision (what to do with a result) could be separated from the effect (recording, deleting, sending), how the decision would be verified without running the effects, and why the effect lives at this depth.
+      10. Repetition and missed commonality: similar logic, near-identical blocks, parallel branches, or the same sequence of steps appearing in several places, within the scope or between the scope and existing code. Also: several call sites each doing the same setup or wrapping by hand. Ask whether the similar pieces are meant to change together or independently, and what would have to be touched if the shared behavior changed. Also consider the reverse: a new indirection that has only one user. Ask what other cases it is meant to serve.
+      11. Tests: tests that mirror the implementation line by line, heavy mocking of the thing under test, assertions that can't fail, or new branches and error paths with no test. Ask what would fail if the logic were wrong, and what the test would catch that the mocks don't already guarantee.
+      12. Hidden coupling and shared state: globals, singletons, mutable objects shared between callers, module-level state, or code that only works if called in a certain order. Ask what a caller has to know or do first, and what else can change this value in the meantime.
+      13. Stringly-typed and primitive values: raw strings or numbers standing in for states, IDs, units, or kinds of thing. Ask what stops two different kinds of value from being mixed up, and where the set of valid values is defined.
+      14. Flag parameters: booleans or mode arguments that switch a function between different behaviors. Ask how the author thinks about the call sites that pass one value versus the other, and whether the two modes share most of their logic.
+      15. Misleading names: a name that doesn't match what the code does (a getter that mutates, a "validate" that also transforms, a boolean whose name reads opposite to its use). Only when the mismatch could cause a wrong assumption. Ask what the name is meant to convey.
+      16. Data and rollout safety: schema or migration changes, serialized formats, cache keys, queue messages, or behavior changes that interact with already-stored data or with old and new versions running at the same time. Ask what happens to existing data, during deploy, and on rollback. This differs from item 5, which is about code supporting old callers.
+      17. Trust boundaries: input from users, the network, files, or other services used without visible validation, or new permission and authorization logic. Ask where the value comes from, who controls it, and what happens if it is not what the code expects.
+      18. Hacky heuristics: behavior decided by string matching, regexes, substring checks, magic numbers, or inferring a fact from indirect signals (a name, a format, a message text) when the fact seems to be available more directly. Ask what makes the match reliable, what happens when the text or format changes, and where the information being guessed at is known for certain.
+      </what-to-look-for>
+
+      <output-rules>
+      - Write the questions directly in the output; do not write a separate file.
+      - Number them Q1, Q2, ... in priority order.
+      - Format per question:
+
+        **Q<n>** `path/to/file:LINE`
+        Question: <one genuine, open question>
+        Why I'm asking: <what you noticed and why it caught your attention>
+
+      - If you have no questions, write "No questions." and nothing else.
+      </output-rules>
+
+  - name: "Triage"
+    prompt: |
+      A senior developer without full context reviewed the code described in the scope brief and asked the questions below. You are the author, or in folder mode possibly the maintainer, and you decide what happens next.
+
+      <questions>
+      {{outputs.questions}}
+      </questions>
+
+      <scope-brief>
+      {{outputs.scope_brief}}
+      </scope-brief>
+
+      How to treat the questions:
+      - They are questions, not instructions. They come from someone who does not know the task, the constraints, or the earlier decisions. A question being asked does not mean something is wrong, and a question that names a structural option does not mean that option is right. Evaluate the option on its merits.
+      - The decision whether anything changes lies with you as the author, not with the reviewer. Change something only if answering the question honestly shows a real problem or an unjustified choice. Do not change code just to make a question go away.
+      - Answer each question from the actual code and your knowledge of the task. Verify claims against the code (callers, types, tests, data) before answering; do not answer from memory or assumption.
+      - In session or explicit mode you have the task context from this session. In folder mode the code may predate this session and you may not know the intent: answer from the code, tests, comments, and git history (`git log`, `git blame`), and use "Unclear, needs author decision" when the intent cannot be established.
+      - If the honest answer is "no good reason" or "this is an oversight", say so and list a change. If the answer is a sound reason, state it concisely and list no change. If you can't answer with confidence even after checking the code, say so and mark it "Unclear, needs author decision".
+      - In session or explicit mode, a change should stay limited to what the change introduced or newly exposed, unless the operator focus is about structure, refactoring, or design, in which case changes to the touched functions are in scope. In folder mode anything in the folder is in scope.
+      - Rate complexity by the total change, including all callers, call sites, and tests that must be updated.
+      - Every question (Q<n>) must appear in exactly one entry under "Answers". Never omit any.
+      - If there were no questions, write "No questions were asked." in the Answers section and "None." in the Changes needed section.
+
+      Output format:
+
+      ## Answers
+      - **Q1** `<file>:<line>` - <short title>
+        - Question: <the reviewer's question, verbatim>
+        - Answer: <your answer, grounded in the code and the task>
+        - Verdict: <No change needed | Change needed | Unclear, needs author decision>
+
+      ## Changes needed
+      - **C1** (<Q IDs>): <short title> - severity: <critical | major | minor>, complexity: <low | medium | high>
+        - Problem: <what the answer revealed>
+        - Change: <planned change, including affected callers, call sites, and tests>
+      (Write "None." if no change is needed.)
+    outputs:
+      answers:
+        type: string
+        description: "The 'Answers' section, including each question"
+      changes:
+        type: string
+        description: "The 'Changes needed' section"
+
+  - name: "Answers"
+    print: |
+      {{outputs.answers}}
+
+  - name: "Changes needed"
+    print: |
+      {{outputs.changes}}
+
+  - gate: "{{args.wait}}"
+
+  - name: "Apply & Verify"
+    if: "{{args.fix}}"
+    prompt: |
+      Implement the changes decided in the triage with complexity low or medium:
+      {{outputs.changes}}
+
+      If the section says "None.", do nothing and write "No changes needed."
+
+      Do not implement high-complexity changes. Instead, list them as skipped.
+      Do not make changes for questions with the verdict "No change needed" or "Unclear, needs author decision".
+
+      Guidelines:
+      - Fix the underlying code rather than adding comments that explain it away.
+      - Update all affected callers and tests. Do not add casts or `any` to make it compile.
+      - Keep track of anything new you introduce (files, types, functions, dependencies) so you can report it.
+
+      After the changes, run the relevant tests, linter and typecheck/build, and report the results honestly. If something fails, fix it or report it clearly.
+
+      Finish with a summary in this format:
+
+      ## Applied
+      - <C ID>: <what was changed>
+
+      ## Skipped (high complexity)
+      - <C ID>: <problem, severity, why skipped, suggested approach>
+      Flag any critical or major items here prominently with "⚠️ NEEDS DECISION".
+
+      ## Needs author decision
+      - <Q ID>: <one line on what is unclear>
+      (Write "None." if there are none.)
+
+      ## New additions
+      List only genuinely new things introduced by the changes that are worth the user's attention. Write "None" if there are none.
+      - **Files**: <path> - <purpose>
+      - **Types / functions**: <name> (<file>) - <what it does and why it was needed>
+      - **Dependencies**: <package@version> - <why added, and whether it is runtime or dev>
+      (Omit any sub-category that has no entries.)

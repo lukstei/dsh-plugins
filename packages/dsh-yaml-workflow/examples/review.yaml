@@ -1,0 +1,388 @@
+name: "Review {{args.instructions}}"
+description: "Unified review workflow combining correctness review and technical antipattern scanning, followed by consolidated triage and either verified fixes (fix=true, default) or a proposed PR comment file (fix=false)."
+
+args:
+  wait:
+    type: bool
+    default: false
+    description: "Wait after triage"
+  model:
+    type: string
+    default: "inherit"
+    required: false
+    description: "Subagent model"
+  instructions:
+    type: string
+    default: None
+    required: false
+    description: "Optional scope (a folder/package, commit, range, or PR; default: all changes made in this session) and/or ad-hoc operator instructions or focus areas"
+  review:
+    type: bool
+    default: true
+    description: "Run correctness, edge cases, and maintainability review"
+  smells:
+    type: bool
+    default: true
+    description: "Run technical antipattern and code smell scan"
+  fix:
+    type: bool
+    default: true
+    description: "Apply and verify accepted fixes; false writes and presents proposed PR comments without changing code"
+
+steps:
+  - name: "Define Scope & Brief"
+    prompt: |
+      Prepare a short brief for reviewers without conversation history:
+      - User request and acceptance criteria, if known.
+      - Relevant constraints and intentional exclusions, if known.
+      - Verification commands, if known.
+      - Repository path and the scope, determined from the user instructions below:
+        1. If they name a folder or package, use FOLDER mode: write "Mode: folder", give the folder or package path, and do NOT include any git command. Reviewers read the code in that folder as it is now. Confirm the scope by listing the folder.
+        2. Else if they name a specific commit, commit range, or PR, use EXPLICIT mode: write "Mode: explicit" and give exactly one of:
+           - a single commit hash (`git show --no-ext-diff --unified=5 <commit>`)
+           - two commit hashes `<start>` and `<end>` (both inclusive, reviewed via `git diff --no-ext-diff --unified=5 <start>^ <end>`)
+           - the exact command for a remote diff (e.g. `gh` or `glab`) if the changes are in a PR.
+           Confirm the scope by running the command.
+        3. Else (including "None") use SESSION mode, the default: write "Mode: session". Scope is everything changed in this session. Include whichever of these apply:
+           - Commits made in this session: `git diff --no-ext-diff --unified=5 <first>^ <last>`, where <first> and <last> are the first and last commit hashes made in this session (a single commit: `git show --no-ext-diff --unified=5 <commit>`).
+           Confirm the scope by running each command. If nothing was changed in this session, say so and stop, so the user can pass a scope in the instructions.
+      Always include `--no-ext-diff --unified=5` in `git diff` / `git show` commands so subagents get consistent context lines around each hunk.
+
+      User instructions: {{args.instructions}}
+    outputs:
+      scope_brief:
+        type: string
+        description: "User intent, repository path, scope (mode plus diff commands or folder path), and relevant constraints"
+
+  - name: "Correctness Review"
+    if: "{{args.review}}"
+    subagent: "{{args.model}}"
+    output: review_findings
+    prompt: |
+      Perform a read-only review for correctness, edge cases, potential bugs, overengineering, and maintainability.
+
+      Use the ponytail skill.
+
+      Priorities: correctness bugs and unhandled edge cases first, then maintainability and overengineering (take into account the original users intention, not only the proposed solution).
+      Review the actual code against the scope brief below. The design decisions and assumptions in the brief may be wrong, but only challenge them if they cause concrete problems (bugs, fragility, requirement violations), not for stylistic preference. 
+      Do not modify code, write files, judge requirements or architecture, or report anything outside the rules.
+      Follow the scope brief. In mode session or explicit, run every provided command exactly (read untracked files directly); if a command fails, report the exact error. In mode folder there is no diff: read the code in the given folder as it is now.
+      Read surrounding code and callers to understand the code. In mode session or explicit, report only issues introduced or newly exposed by the change, explaining the triggering input or execution path and the before/after behavior, and do not report existing debt merely because it is in a changed file or perform a whole-file audit. In mode folder, everything in the folder is in scope: report issues in the code as it stands, explaining the triggering input or execution path and the actual behavior.
+
+      <scope-brief>
+      {{outputs.scope_brief}}
+      </scope-brief>
+
+      <output-rules>
+      - Write findings directly in the output; do not write a separate file.
+      - Number every finding (R1, R2, ...).
+      - For each finding give: title, severity (critical | major | minor), location (file:line), description, and a suggested fix.
+      - Only report issues you can point to in the code. Do not speculate.
+      </output-rules>
+
+  - name: "Antipattern Scan"
+    if: "{{args.smells}}"
+    subagent: "{{args.model}}"
+    output: smell_findings
+    prompt: |
+      Perform a technical, read-only scan of the changes identified in the brief for the antipatterns listed.
+      Do not modify code, write files, judge requirements or architecture, or report anything outside the rules.
+      Follow the scope brief. In mode session or explicit, run every provided command exactly (read untracked files directly); if a command fails, report the exact error. In mode folder there is no diff: read the code in the given folder as it is now.
+      Read surrounding code and callers as evidence. In mode session or explicit, report only violations introduced or newly exposed by the change; existing debt in a changed file is not a finding. In mode folder, everything in the folder is in scope: report violations in the code as it stands, and for "Change relevance" write "folder scope" plus the current behavior.
+      Skip non-source files. First priority non-test code, second priority test code.
+
+      <scope-brief>
+      {{outputs.scope_brief}}
+      </scope-brief>
+
+      Each rule has a Test question. A matching pattern is a candidate, not a finding.
+      Report only a verified violation with a concrete failure or maintenance consequence, or an explicit applicable project-rule violation introduced by the diff.
+      Check the project's architecture, persisted contracts, and documented exceptions before applying a rule. A preferred representation or missing comment alone does not establish a defect.
+      Examples are illustrative, not exhaustive.
+
+      ## State & derivation
+
+      AP1 Derivable state
+      Rule: Do not store a value that can be computed from other state or props.
+      Test: Can it be recomputed from data available at the point of use?
+      Flag: const [fullName, setFullName] = useState(...); useEffect(() => setFullName(`${first} ${last}`), [first, last]);
+      OK: const fullName = `${first} ${last}`;
+      Exception: expensive values that are memoized; state initialized from props/inputs that is intended to diverge as an editable draft before being committed.
+
+      ## Compatibility
+
+      AP2 Speculative backwards compatibility
+      Rule: Do not add parameters, union branches, or adapters for hypothetical future callers or old versions that no longer exist in this repository.
+      Test: Does every code path or parameter branch have an active caller in the current repository?
+      Flag: function load(opts: Options | string) { ... } when no caller passes a string.
+      OK: a migration for a persisted format that exists in production, documented with `// edge case:`.
+
+      ## Type safety
+
+      AP3 `any` / misplaced `unknown`
+      Rule: Never `any`. `unknown` only at I/O boundaries (network, file, storage, parsed JSON, `catch`), narrowed before property access or domain use.
+      Test: Does the value come from outside the typed program, and is it narrowed before being used in domain logic?
+      Flag: function merge(a: any, b: any); function process(data: unknown) { return (data as User).name; }
+      OK: const raw: unknown = JSON.parse(text); const user = parseUser(raw);
+      Exception: generic pass-through plumbing (e.g. loggers, telemetry wrappers, error boundaries) that forwards `unknown` without inspecting it.
+
+      AP4 Unjustified casts
+      Rule: Avoid casts (`as T`, `as unknown as T`, `!`). A necessary cast requires a `// type-safe: <reason>` comment explaining why the types cannot express the invariant.
+      Test: Does the changed cast bypass a real type invariant, or violate an explicit applicable project rule? Could narrowing or a better type remove it? Missing comment syntax alone is not sufficient.
+      Flag: const el = document.getElementById('x') as HTMLInputElement;
+      OK: the same line preceded by `// type-safe: #x is guaranteed to be an input by the static template` (only when narrowing is genuinely impractical).
+      Exception: `as const`, `satisfies`.
+
+      AP5 Duck-typed multi-case types
+      Rule: Mutually exclusive domain states owned by this codebase are modeled as discriminated unions with a literal tag.
+      Test: Does code decide between mutually exclusive cases by checking whether a field exists or is truthy?
+      Flag: type Result = { data?: Data; error?: string }; if (result.error) { ... }
+      OK: type Result = { status: 'ok'; data: Data } | { status: 'error'; error: string };
+      Exception: external API DTOs before mapping to domain types; non-exclusive configuration/options objects where multiple fields can be set simultaneously; established persisted representations explicitly required by the project's architecture, unless the change introduces a concrete invalid-state failure.
+
+      ## Optionality & defaults
+
+      AP6 Leaked optionality
+      Rule: Optional or nullable only if absence is a real domain state. The caller resolves "might be missing" before calling.
+      Test: Do all call sites already know the value exists? Is the nullable return ever actually null?
+      Flag: function render(user?: User) { if (!user) return null; ... } when all callers already have a non-null `User`.
+      OK: function render(user: User); caller: if (user) render(user).
+      Exception: idiomatic UI component props where optionality simplifies parent composition.
+
+      AP7 Speculative defaults & silent fallbacks
+      Rule: Do not mask missing required domain data with invented fallbacks (`??`, `||`, default params). Do not hardcode defaults for business decisions the caller must make explicitly.
+      Test: Does the fallback silently hide missing/corrupted data, or make an implicit business decision on behalf of the caller?
+      Flag: user.name ?? 'Unknown' when name is required; function charge(amount: number, currency = 'USD').
+      OK: a documented domain constant; sensible technical defaults on optional configuration (e.g. pagination page size, retry backoff) where overriding is optional.
+
+      ## Defensive logic
+
+      AP8 Defensive type checks
+      Rule: Do not re-check at runtime what the static types already guarantee. Use runtime assertions only for domain invariants the type system cannot express.
+      Test: Would the check ever trigger if all callers respect the TypeScript signature?
+      Flag: if (!Array.isArray(items)) throw ...; if (!items) return 0; on a non-nullable `Item[]` parameter.
+      OK: if (items.length === 0) return 0; assert(items.length <= MAX_BATCH, 'exceeds provider limit');
+      Exception: validation of external/untrusted input at an I/O boundary.
+
+      AP9 Speculative heuristics
+      Rule: Conditions use a definitive discriminator, not guesses inferred from indirect signals or substrings.
+      Test: Does the condition infer a state ("probably X because Y") instead of reading an explicit field or code?
+      Flag: user.email.endsWith('@company.com') as admin check; response.message.includes('not found').
+      OK: user.role === 'admin'; error.code === 'NOT_FOUND'.
+      Exception: third-party SDK/runtime errors that expose no structured code, provided the check is isolated at the adapter boundary and marked with `// edge case:`.
+
+      ## Documentation
+
+      AP10 Undocumented non-intuitive branches
+      Rule: Branches or workarounds that contradict normal domain expectations need `// smell: <reason>` (internal debt) or `// edge case: <reason>` (domain or external quirk).
+      Test: Does the branch look contradictory or like a bug to a competent reader, and does it lack a prefixed comment explaining why?
+      Flag: if (order.total === 0 && order.items.length > 0) return; // no comment
+      OK: the same line with `// edge case: promo orders are billed 0 and must not reach the payment provider`.
+      Exception: standard guard clauses (e.g. early return on empty array) whose purpose is self-evident.
+
+      ## Duplication & encapsulation
+
+      AP11 Business logic duplication
+      Rule: The same business concern (calculation, validation, classification, mapping) lives in one place.
+      Test: If this business rule changed tomorrow, would you have to update more than one place in sync?
+      Flag: the same `items.reduce(...) * 1.2` in cart.ts and invoice.ts.
+      OK: one `totalWithTax()` used by both.
+      Exception: superficially similar code for concerns that evolve independently; trivial one-liners; tests; generated code.
+
+      AP12 Encapsulation violation
+      Rule: Keep internal module details internal. Export only what another module imports or what is part of a declared public API.
+      Test: Is the exported symbol unused outside its own module and not part of a public entry point?
+      Flag: `export const TAX_FACTOR = 1.2;` used only inside its own file.
+      OK: not exported.
+      Exception: public package entry points; exports required by a framework convention; types needed by exported signatures; pure helpers explicitly marked `/** @internal */` for direct unit testing.
+
+      AP14 Structural & type-shape duplication
+      Rule: Do not copy-paste multi-step orchestration flows (e.g., validate -> transform -> persist -> map error), adapter boilerplate, or near-identical type/schema declarations when a shared helper, higher-order wrapper, or type composition (`Pick`, `Omit`, shared base type) can express the common structure.
+      Test: Do two or more routines or types in the diff (or newly duplicated from an existing module) share the same multi-step skeleton or field definitions, differing only in 1-2 values, types, or a single callback?
+      Flag: Two API handlers repeating the exact same 15-line auth, parsing, telemetry, and error-mapping sequence around a 1-line service call; redefining `type CreateUserInput = { name: string; email: string; ... }` with 6 identical fields already on `User`.
+      OK: `withApiHandler(schema, async (req, ctx) => service.call(req))`; `type CreateUserInput = Pick<User, 'name' | 'email' | ...>`.
+      Exception: 2-3 line idioms where indirection hurts readability more than repetition; flows that look similar today but belong to decoupled domain boundaries expected to diverge; test setup blocks where explicit inline data is clearer than shared fixtures.
+
+      ## Error handling & async
+
+      AP13 Swallowed or degraded errors
+      Rule: Do not catch errors only to log and return a fake success/empty value, or rethrow a new `Error(e.message)` without preserving `{ cause: e }`.
+      Test: Does the `catch` block discard the stack trace/cause, or silently hide an unexpected failure from the caller?
+      Flag: catch (e) { console.error(e); return []; } or catch (e) { throw new Error(`Failed: ${e.message}`); }
+      OK: catch (e) { throw new DomainError('Failed to load', { cause: e }); }
+      Exception: intentional fault-isolation boundaries (e.g. optional preference/cache reads) established by documented contracts or clear local behavior. Missing `// edge case:` syntax alone is not a finding; identify an unexpected failure or an explicit project-rule violation introduced by the diff.
+
+      Guidance:
+      - Only report what you can point to in the code. Do not speculate.
+      - Do not flag anything that matches a rule's OK pattern or Exception.
+      - Report each spot once, under the most specific rule.
+      - Mode session or explicit: apply every rule to the changed hunks and newly affected behavior, not to every line in changed files. Mode folder: apply every rule to the code in the folder.
+      - For rules that depend on callers or external files (AP2, AP6, AP11, AP12, AP14), search outside the diff to verify them. If evidence is unavailable, record the verification limitation without reporting an unverified candidate as a finding.
+      - For duplication rules (AP11, AP14), when a new calculation, validation, type shape, or multi-step helper is added in the diff, grep the codebase for similar function names, domain terms, field lists, or error messages to check if it duplicates an existing implementation outside the diff.
+      - Do not report unrelated cleanup or an optional backlog of existing debt.
+
+      <output-rules>
+      - Write findings directly in the output; do not write a separate file.
+      - Number findings S1, S2, ...
+      - Format per finding:
+        - **S<n>** [AP<id>] `<file>:<line>` - <short title>
+          - Also at: <other locations, only if the rule spans several>
+          - Code: <minimal snippet>
+          - Why: <verified violation and concrete consequence, or explicit applicable project rule>
+          - Change relevance: <changed hunk or newly exposed path, including before/after behavior>
+          - Suggested fix: <concise direction>
+      - Group findings by rule ID.
+      </output-rules>
+
+  - name: "Consolidated Triage"
+    prompt: |
+      Triage all findings from the Review and Antipattern Scan subagents. The subagents lack full conversational context, so some findings will be false positives.
+
+      <enabled-scans>
+      review: {{args.review}}
+      smells: {{args.smells}}
+      </enabled-scans>
+
+      <review-findings>
+      {{outputs.review_findings}}
+      </review-findings>
+
+      <smell-findings>
+      {{outputs.smell_findings}}
+      </smell-findings>
+
+      <scope-brief>
+      {{outputs.scope_brief}}
+      </scope-brief>
+
+      Rules:
+      - Distinguish a user-disabled analysis (see `<enabled-scans>`) from a completed review with no findings or a review blocked by missing diff/evidence; do not label all empty results as skipped.
+      - Verify findings using the brief.
+      - Mode session or explicit: pre-existing code is not automatically out of scope. If the change newly enables a failing input or execution path, accept the concrete regression as in scope, and keep the planned fix limited to that failure and its required callers/tests. Mode folder: everything in the folder is in scope; use "Out of scope" only for valid findings outside the folder or unrelated to the review focus.
+      - Every reported finding (R<n>, S<n>) must appear in exactly one section below. Never omit any. Reference the original ID.
+      - Reject false positives and legitimate exceptions, one-line reason each.
+      - Valid findings unrelated to the original task or not introduced/exposed by the change go under "Out of scope", not "Rejected". This section accounts for already reported findings; do not expand it into an audit.
+      - Reject mechanical rule matches without evidence, unsupported claims, and legitimate architectural/contract exceptions. Missing comment syntax alone does not establish a defect.
+      - Rate complexity by the total change including all callers, call sites, and tests that must be updated, not by the single line.
+      - You may group related or minor findings together.
+      - Verify claims against the code before accepting or rejecting.
+
+      Output format:
+
+      ## Accepted to be fixed
+      - **A1** (<original ID>): <finding name> - severity: <critical | major | minor>, complexity: <low | medium | high>
+        - Finding: <Comprehensive description of the finding>
+        - Fix: <Description of the planned fix, including affected callers and target module if extracting shared code>
+
+      ## Out of scope (valid, needs attention)
+      - **O1** (<original ID>): <finding name> - severity: <critical | major | minor>
+        - Finding: <Comprehensive description of the finding>
+        - Why out of scope: <Reason>
+
+      ## Rejected
+      - **X1** (<original ID>): <finding name> - <false positive | legitimate exception>
+        - Finding: <Comprehensive description of the finding>
+        - Reason: <Description of the reason for rejection>
+
+      ## Remarks
+      - **M1**: <Any additional noteworthy remarks or context for the findings and fixes>
+    outputs:
+      accepted:
+        type: string
+        description: "The 'Accepted to be fixed' section, with planned fixes"
+      out_of_scope:
+        type: string
+        description: "The 'Out of scope' section"
+
+  - name: "Accepted"
+    print: |
+      {{outputs.accepted}}
+
+  - name: "Out of scope"
+    print: |
+      {{outputs.out_of_scope}}
+
+  - gate: "{{args.wait}}"
+
+  - name: "Propose PR Comments"
+    if: "!{{args.fix}}"
+    prompt: |
+      Write proposed PR comments for the accepted findings below, including high-complexity findings:
+      {{outputs.accepted}}
+
+      Load the no-ai-slop skill before drafting the comments.
+      Do not modify source files, apply fixes, create commits, or publish PR comments. Write only the report requested here.
+
+      Write proposed-pr-comments.md in the session artifact directory as a numbered Markdown list, one entry per accepted finding:
+      1. <Short problem title>
+         - Finding: <accepted ID and original review/scan IDs>
+         - Location: <linked file and line>
+         - Severity: <critical | major | minor>
+         - Problem: <incorrect assumption or behavior>
+         - Context: <verified behavior or API semantic and supporting evidence>
+         - Impact: <concrete consequence>
+         - Proposed comment:
+           > <concise comment ready to paste into the PR>
+
+      Comment rules:
+      - Start directly, for example "Can you check this" or "This looks wrong to me:".
+      - Explain the incorrect assumption or behavior in plain language.
+      - State the actual behavior or API semantic that makes it a bug.
+      - End with the concrete impact, such as redelivery, regression, data loss, or unnecessary throttling.
+      - Be very concise. Include only technical details needed to understand the problem.
+      - Do not invent API semantics or consequences. For maintainability findings, describe the verified rule violation and its concrete maintenance impact without claiming a runtime bug.
+
+      Exclude rejected findings. Keep these out-of-scope findings as separate context after the list, without drafting comments for them:
+      {{outputs.out_of_scope}}
+
+      If there are no accepted findings, write "No proposed PR comments." instead of the numbered list.
+      Call present with the completed report path so the user can open the file.
+
+  - name: "Fix & Verify"
+    if: "{{args.fix}}"
+    prompt: |
+      Implement the accepted fixes with complexity low or medium:
+      {{outputs.accepted}}
+
+      Do not implement high-complexity fixes. Instead, list them as skipped.
+
+      Guidelines:
+      - Fix the underlying code rather than silencing rules with comments. Use `// type-safe:`, `// smell:`, or `// edge case:` ONLY when refactoring the types or control flow is genuinely impossible or out of scope.
+      - Update all affected callers and tests. Do not add casts or `any` to make it compile, and do not introduce new antipatterns from the list.
+      - Duplication (AP11, AP14): extract one function, wrapper, or shared type named after the business/domain concept into an appropriate shared domain/utility module (avoid introducing circular imports) and migrate all in-scope call sites. No boolean flag or option parameters to force diverging cases together; report those instead.
+      - Unnecessary export (AP12): remove the `export` keyword (and any barrel re-export). Delete the symbol entirely if it is unused everywhere.
+      - Keep track of anything new you introduce (files, types, functions, dependencies) so you can report it in the summary.
+
+      After the changes, run the relevant tests, linter and typecheck/build, and report the results honestly. If something fails, fix it or report it clearly.
+
+      Finish with a summary in this format:
+
+      ## Fixed
+      - <ID>: <what was changed>
+
+      ## Skipped (high complexity)
+      - <ID>: <finding, severity, why skipped, suggested approach>
+      Flag any critical or major items here prominently with "⚠️ NEEDS DECISION".
+
+      ## Out of scope, needs attention
+      {{outputs.out_of_scope}}
+      (Condense to one line per item.)
+
+      ## New additions
+      List only genuinely new things introduced by the fixes that are worth the user's attention. Omit trivial or incidental changes, and write "None" if there are none.
+      - **Files**: <path> - <purpose>
+      - **Types / functions**: <name> (<file>) - <what it does and why it was needed>
+      - **Dependencies**: <package@version> - <why added, and whether it is runtime or dev>
+      (Omit any sub-category that has no entries.)
+
+      ### Reviewer Flags
+      Write as the reviewer's skeptic, not a changelog. Include every item a reviewer could reasonably challenge, nothing else. Most likely objection first. Trivial or uncontroversial change: "No concerns."
+
+      Per item, plain language, assuming I haven't seen the code:
+
+      **[path:line](path#Lline) · <what, 5-10 words>**
+      - Why you might object: <concrete concern>
+      - Why I did it: <reason, or "spec unclear" + alternative>
+      - Cost to change: low | med | high
+
+      Then one line each: ⚠️ guesses <80% sure, and anything unverified.

@@ -3,6 +3,7 @@ import { mock, test } from "node:test";
 import { Context } from "@deepseek-ai/cordis";
 import type { SessionEvent } from "@deepseek-ai/dsh-session";
 import type { SessionId } from "@deepseek-ai/dsh-session/types";
+import { BUILTIN_LIMITS, CONFIG_GLOBAL, resolveLimits } from "../limits.ts";
 
 // smell: the real primitives package imports `.css`, which Node's loader rejects
 mock.module("@deepseek-ai/dsh-client-ui-primitives", {
@@ -35,6 +36,7 @@ interface Harness {
 	readonly release: (id: string) => void;
 	readonly emit: (id: string, event: SessionEvent) => void;
 	/** Decorations hung on host commands through `commandUi.decorate`. */
+	readonly ringInjects: (() => Record<string, unknown>)[];
 	readonly decorations: {
 		name: string;
 		ui: {
@@ -57,6 +59,7 @@ function setup(
 	const listListeners = new Set<Listener>();
 	let ids: string[] = [];
 
+	const ringInjects: (() => Record<string, unknown>)[] = [];
 	const decorations: Harness["decorations"] = [];
 
 	const ctx = new Context();
@@ -86,8 +89,11 @@ function setup(
 		}),
 	});
 	ctx.provide("slots", {
-		inject: () => () => {},
-		register: () => () => {},
+		inject: (_slot: string, factory: () => () => void) => factory(),
+		register: (spec: { inject?: () => Record<string, unknown> }) => {
+			if (spec.inject !== undefined) ringInjects.push(spec.inject);
+			return () => {};
+		},
 	});
 	ctx.provide("splitView", {
 		replaceSession: (oldId: SessionId, newId: SessionId) => {
@@ -166,7 +172,15 @@ function setup(
 		for (const listener of set) listener();
 	};
 
-	return { replaced, commands, retain, release, emit, decorations };
+	return {
+		replaced,
+		commands,
+		retain,
+		release,
+		emit,
+		ringInjects,
+		decorations,
+	};
 }
 
 const launchedEvent = (id: string): SessionEvent =>
@@ -267,4 +281,39 @@ test("without a current model no picker row is marked active", async () => {
 	const options = await decoration.ui.options({ sessionId: SOURCE });
 
 	assert.equal(JSON.stringify(options).includes("active"), false);
+});
+
+test("handoff ring falls back to empty config when the page global is absent", () => {
+	const store = globalThis as unknown as Record<string, unknown>;
+	const had = Object.hasOwn(store, CONFIG_GLOBAL);
+	const prev = store[CONFIG_GLOBAL];
+	delete store[CONFIG_GLOBAL];
+	try {
+		const harness = setup();
+		assert.equal(harness.ringInjects.length, 1);
+		const injected = harness.ringInjects[0]();
+		assert.deepEqual(injected.config, {});
+		assert.deepEqual(
+			resolveLimits(injected.config as never, undefined),
+			BUILTIN_LIMITS,
+		);
+	} finally {
+		if (had) store[CONFIG_GLOBAL] = prev;
+		else delete store[CONFIG_GLOBAL];
+	}
+});
+
+test("handoff ring forwards the injected page global when present", () => {
+	const store = globalThis as unknown as Record<string, unknown>;
+	const had = Object.hasOwn(store, CONFIG_GLOBAL);
+	const prev = store[CONFIG_GLOBAL];
+	const configured = { defaults: { warmSoft: 50_000 } };
+	store[CONFIG_GLOBAL] = configured;
+	try {
+		const harness = setup();
+		assert.deepEqual(harness.ringInjects[0]().config, configured);
+	} finally {
+		if (had) store[CONFIG_GLOBAL] = prev;
+		else delete store[CONFIG_GLOBAL];
+	}
 });

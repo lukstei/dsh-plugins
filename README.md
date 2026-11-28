@@ -137,6 +137,14 @@ steps:
 
 ![Workflow card paused at a gate with Resume and Discard buttons](assets/screenshots/workflow.png)
 
+**Examples (from my own `~/.agents/wf` setup, optional)**
+
+Copy any of these into `~/.agents/wf/` (or `.agents/wf/` in a project) and run them with `/wf <name>`:
+
+- **[`review.yaml`](packages/dsh-yaml-workflow/examples/review.yaml)** (`/wf review`, `/wf review fix=false <scope>`): Unified code review. Scopes the diff or folder, delegates a correctness review and an AP1-AP14 antipattern scan to subagents, triages findings, optionally pauses at a gate (`wait=true`), and either applies verified fixes (`fix=true`, default) or writes proposed PR comments (`fix=false`). *(Prompts reference optional `ponytail` and `no-ai-slop` skills.)*
+- **[`socratic.yaml`](packages/dsh-yaml-workflow/examples/socratic.yaml)** (`/wf socratic`, `/wf socratic packages/foo`): Context-free Socratic review. A subagent reads only the code or diff and asks up to 6 open questions (`Q1-Q6`), the parent agent answers from code and history to decide verdicts, pauses at a gate (`wait=true`, default), and applies accepted changes (`fix=true`).
+- **[`write.yaml`](packages/dsh-yaml-workflow/examples/write.yaml)** (`/wf write <notes or draft>`): Technical prose workflow. Builds a grounded brief, drafts or extracts text, runs subagent substance and slop/cadence audits (`TS1-TS10`), triages edits, and writes the final prose.
+
 ### Scheduled background scripts
 
 **Plugin:** [`@lukstei/dsh-schedule-script`](packages/dsh-schedule-script/README.md)

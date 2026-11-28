@@ -55,10 +55,12 @@ export function apply(ctx: Context): void {
 			}
 		});
 	};
-	// Safe: the Host validated this value against its Config schema before injecting it.
-	const config = (globalThis as unknown as Record<string, LimitsConfig>)[
-		CONFIG_GLOBAL
-	];
+	// edge case: HMR updates or shells without webserver/index-inject leave the global unset.
+	const injectedConfig = (
+		globalThis as unknown as Record<string, LimitsConfig | undefined>
+	)[CONFIG_GLOBAL];
+	const config: LimitsConfig =
+		injectedConfig === undefined ? {} : injectedConfig;
 	const loadRoute = async (
 		id: SessionId,
 	): Promise<{ provider: string; model: string } | undefined> => {

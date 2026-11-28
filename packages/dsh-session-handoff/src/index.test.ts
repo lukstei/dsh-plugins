@@ -289,7 +289,6 @@ async function setup(
 					: { error: { message: options.resolveError } },
 			),
 	});
-	ctx.provide("webServer", {});
 	plugin.apply(ctx, {});
 	return {
 		definition: definition[0],
@@ -1066,4 +1065,51 @@ test("a blank or whitespace-only line keeps the source model and never asks llm"
 
 	assert.deepEqual(harness.selections, [MODEL, MODEL]);
 	assert.deepEqual(harness.llmCalls, []);
+});
+
+test("host plugin activates without webServer and injects config on webserver/index-inject", async () => {
+	assert.equal(plugin.inject.includes("webServer"), false);
+	const ctx = new Context();
+	const registered: string[] = [];
+	ctx.provide("commands", {
+		register: (def: CommandDefinition) => {
+			registered.push(def.name);
+			return () => {};
+		},
+		execute: async () => undefined,
+	});
+	ctx.provide("sessionQuery", {
+		listSessions: async () => [],
+		readSession: async () => snapshot,
+	});
+	ctx.provide("workingDirectory", { get: () => "/repo" });
+	ctx.provide("sessionController", {
+		create: async () => ({ sessionId: LAUNCHED_ID, agentPreset: "code" }),
+		resolveAgent: async () => ({ error: { message: "unused" } }),
+	});
+	ctx.provide("sessionTitle", {
+		get: () => undefined,
+		rename: () => undefined,
+	});
+	ctx.provide("workspaceRegistry", { list: () => [] });
+	ctx.provide("llm", {
+		listProviders: () => [],
+		resolveCallConfig: async () => undefined,
+	});
+	const config = { defaults: { warmSoft: 42_000 } };
+	const fiber = ctx.plugin(plugin, config);
+	await fiber.await();
+	assert.equal(fiber.state, 2);
+	assert.deepEqual(registered, ["handoff"]);
+
+	const table: unknown[] = [];
+	ctx.emit("webserver/index-inject" as never, table);
+	assert.deepEqual(table, [
+		{
+			kind: "global",
+			name: "__DSH_SESSION_HANDOFF_CONFIG__",
+			value: { defaults: { warmSoft: 42_000 }, providers: {}, models: {} },
+		},
+	]);
+	await fiber.dispose();
 });

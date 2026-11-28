@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, it } from "vitest";
+import { parseWorkflowDocument } from "./parser.ts";
 import {
 	formatValidationErrors,
 	ruleChoiceMapping,
@@ -1064,5 +1067,25 @@ describe("rules", () => {
 			assert.equal(errors[0].rule, "choice-mapping-empty");
 			assert.match(errors[0].message, /mapping for 'derived' cannot be empty/);
 		});
+	});
+
+	describe("example workflows", () => {
+		const examplesDir = resolve(import.meta.dirname, "../examples");
+		const exampleFiles = readdirSync(examplesDir)
+			.filter((name) => name.endsWith(".yaml") || name.endsWith(".yml"))
+			.sort();
+
+		it("discovers example workflow files", () => {
+			assert.ok(exampleFiles.length > 0);
+		});
+
+		for (const file of exampleFiles) {
+			it(`validates ${file}`, () => {
+				const content = readFileSync(resolve(examplesDir, file), "utf8");
+				const doc = parseWorkflowDocument(content);
+				const errors = validateWorkflow({ doc });
+				assert.deepEqual(errors, []);
+			});
+		}
 	});
 });
